@@ -1,0 +1,95 @@
+[gd_scene load_steps=2 format=3 uid="uid://event_scene_v2"]
+
+[ext_resource type="Script" path="res://scripts/event/EventScene.gd" id="1_event"]
+
+[node name="EventScene" type="Node2D"]
+script = ExtResource("1_event")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.04, 0.02, 0.02, 1)
+
+[node name="AtmosphereParticles" type="CPUParticles2D" parent="."]
+amount = 30
+lifetime = 5.0
+direction = Vector2(0, -1)
+gravity = Vector2(0, -20)
+initial_velocity_min = 10.0
+initial_velocity_max = 30.0
+color = Color(0.7, 0.6, 0.3, 0.3)
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="EventPanel" type="PanelContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+offset_left = -380.0
+offset_top = -270.0
+offset_right = 380.0
+offset_bottom = 270.0
+
+[node name="VBox" type="VBoxContainer" parent="UI/EventPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="EventTitle" type="Label" parent="UI/EventPanel/VBox"]
+text = "民俗事件"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 20
+
+[node name="Divider" type="HSeparator" parent="UI/EventPanel/VBox"]
+
+[node name="EventDesc" type="RichTextLabel" parent="UI/EventPanel/VBox"]
+custom_minimum_size = Vector2(0, 160)
+bbcode_enabled = true
+text = "事件描述..."
+size_flags_vertical = 3
+
+[node name="Divider2" type="HSeparator" parent="UI/EventPanel/VBox"]
+
+[node name="ChoicesContainer" type="VBoxContainer" parent="UI/EventPanel/VBox"]
+custom_minimum_size = Vector2(0, 120)
+
+; --- 结果面板 ---
+[node name="ResultPanel" type="Panel" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+offset_left = -300.0
+offset_top = -180.0
+offset_right = 300.0
+offset_bottom = 180.0
+visible = false
+
+[node name="ResultText" type="RichTextLabel" parent="UI/ResultPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 0.75
+offset_top = 20.0
+offset_left = 15.0
+offset_right = -15.0
+bbcode_enabled = true
+text = ""
+
+[node name="ContinueBtn" type="Button" parent="UI/ResultPanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -50.0
+offset_right = 80.0
+offset_bottom = -10.0
+text = "继续前行"

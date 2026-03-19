@@ -1,0 +1,188 @@
+{
+  "events": [
+    {
+      "id": "songpo_laoren",
+      "title": "送魄老人",
+      "layer": 1,
+      "description": "路边有个老人坐在棺材旁，神色平静。他一辈子都在替别人送终，如今却没有人来送他。他看着你，说：「渡魂人，你能替我做一件事吗？」",
+      "choices": [
+        {
+          "text": "「我愿意听你说完。」",
+          "result": {
+            "type": "card_reward",
+            "card_id": "ci_bei_gan_hua",
+            "description": "老人将一张牌递给你，那是他一生的慈悲。获得「慈悲感化」牌卡"
+          }
+        },
+        {
+          "text": "「我会替你找一个送行的人。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "gold", "value": 30},
+              {"type": "emotion_gain", "emotion": "grief", "value": 1}
+            ],
+            "description": "你找来了村里最后一个认识他的人。获得30金币，+悲1"
+          }
+        },
+        {
+          "text": "「抱歉，我还有要紧的事。」",
+          "result": {
+            "type": "emotion_gain",
+            "emotion": "calm",
+            "value": 1,
+            "description": "你学会了有时候放手也是一种渡化。+定1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "jie_shi_huan_hun",
+      "title": "借尸还魂",
+      "layer": 1,
+      "description": "你遇到一个行为奇怪的年轻人——他用陌生的方式说话，用陌生的方式走路。他的家人拦住你：「渡魂人，这是我的儿子，不是什么鬼！」但你能看出来，占用这具身体的亡魂，其实只想说一声道别。",
+      "choices": [
+        {
+          "text": "「让他说完。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "card_reward", "card_id": "du_hua_yin"},
+              {"type": "relic_reward", "relic_id": "tong_jing_sui"},
+              {"type": "narrative", "text": "亡魂说完了他未尽的话，平静地离开了借用的身体。他的家人泣不成声，但终于明白了。"}
+            ],
+            "description": "亡魂离去，留下渡化碎片。获得「渡化引」牌卡和铜镜碎片线索"
+          }
+        },
+        {
+          "text": "「强行驱魂。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "gold", "value": 50},
+              {"type": "emotion_gain", "emotion": "rage", "value": 2},
+              {"type": "hp_loss", "value": 10}
+            ],
+            "description": "强行驱逐，年轻人恢复了，但你受到了反噬。获得50金币，-10HP，+怒2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nianhua_shen",
+      "title": "年画神",
+      "layer": 2,
+      "description": "一张被贴了一百年的门神年画，见证了这家人的百年悲欢，情绪积累到无法承受。年画上的神明已经开始流泪，墙上的颜色在渗血。",
+      "choices": [
+        {
+          "text": "「让我听你说说这一百年。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "card_upgrade", "description": "随机升级一张牌"},
+              {"type": "emotion_gain", "emotion": "grief", "value": 1},
+              {"type": "emotion_gain", "emotion": "joy", "value": 1}
+            ],
+            "description": "你倾听了百年的悲喜。随机升级一张牌，+悲1+喜1"
+          }
+        },
+        {
+          "text": "「将你请下来，送你离开。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "relic_reward", "relic_id": "nianhua_yan"},
+              {"type": "hp_loss", "value": 5}
+            ],
+            "description": "年画神离去，留下一枚法器。获得「年画眼」遗物，-5HP"
+          }
+        },
+        {
+          "text": "「烧掉这张年画。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "gold", "value": 0},
+              {"type": "curse_card", "card_id": "fen_nu_bao"},
+              {"type": "emotion_gain", "emotion": "rage", "value": 2}
+            ],
+            "description": "年画神愤怒地消散，一张诅咒牌进入你的牌库。获得「愤怒爆发」（诅咒牌），+怒2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "huli_yue_ding",
+      "title": "狐仙约定",
+      "layer": 2,
+      "description": "一只老狐狸出现在路上，她说她等了一个人整整一百年，但那个人的后代也来找她了，带来了承诺的另一半。她问你：「渡魂人，你觉得时间会改变承诺的重量吗？」",
+      "choices": [
+        {
+          "text": "「不会。真正的承诺跨越时间。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "card_reward", "card_id": "wan_gui_chao_zong"},
+              {"type": "emotion_gain", "emotion": "joy", "value": 2}
+            ],
+            "description": "狐仙点头，赠你一张传说牌。获得「万鬼朝宗」，+喜2"
+          }
+        },
+        {
+          "text": "「会。但承诺的意义不在于实现，在于曾经许下。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "hp_gain", "value": 20},
+              {"type": "emotion_gain", "emotion": "calm", "value": 1}
+            ],
+            "description": "狐仙沉默片刻，给你留下了祝福。回复20HP，+定1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "zui_qian_de_ren",
+      "title": "最牵挂的人",
+      "layer": 3,
+      "description": "你在幽冥渡口遇到一个正在等待的亡魂——他不知道自己已死，还在等他最放心不下的那个人。你知道那个人还活着，在阳间好好的。",
+      "choices": [
+        {
+          "text": "「她很好，你可以放心了。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "card_reward", "card_id": "wangxiangqi"},
+              {"type": "emotion_gain", "emotion": "grief", "value": 2},
+              {"type": "narrative", "text": "他笑了，是那种终于可以放下的笑。他消散前说：「谢谢你。」"}
+            ],
+            "description": "亡魂安心离去。获得「望乡泣」升级版，+悲2"
+          }
+        },
+        {
+          "text": "「我无法替你传话，但我会记得你。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "max_hp_gain", "value": 10},
+              {"type": "emotion_gain", "emotion": "calm", "value": 2}
+            ],
+            "description": "你默默记下了他的名字，写进渡魂册。最大HP+10，+定2"
+          }
+        },
+        {
+          "text": "「你应该去找她，而不是等她来找你。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "hp_loss", "value": 15},
+              {"type": "emotion_gain", "emotion": "rage", "value": 1},
+              {"type": "narrative", "text": "他愤怒了——「我不能去阳间！」随后消散在愤怒里，没有渡化。"}
+            ],
+            "description": "亡魂在愤怒中消散，未被渡化。-15HP，+怒1"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://card_ui_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/CardUINode.gd" id="1_card"]
+
+; 单张牌卡场景（由 BattleScene 动态实例化）
+[node name="CardUI" type="Control"]
+custom_minimum_size = Vector2(90, 130)
+script = ExtResource("1_card")

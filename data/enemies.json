@@ -1,0 +1,149 @@
+{
+  "enemies": [
+    {
+      "id": "gu_hun_you_ling",
+      "name": "孤魂游灵",
+      "type": "normal",
+      "layer": 1,
+      "hp": 30,
+      "emotion_pressure": [{"emotion": "fear", "value": 1}],
+      "actions": [
+        {"type": "attack", "value": 6, "weight": 60},
+        {"type": "emotion_push", "emotion": "fear", "value": 1, "weight": 40}
+      ],
+      "du_hua_condition": null,
+      "description": "无家可归的弱小亡魂，游荡于幽夹之间"
+    },
+    {
+      "id": "yuan_gui",
+      "name": "怨鬼",
+      "type": "normal",
+      "layer": 1,
+      "hp": 40,
+      "emotion_pressure": [{"emotion": "grief", "value": 1}, {"emotion": "rage", "value": 1}],
+      "actions": [
+        {"type": "attack", "value": 10, "weight": 50},
+        {"type": "emotion_push", "emotion": "rage", "value": 1, "weight": 30},
+        {"type": "weaken", "value": 15, "weight": 20}
+      ],
+      "du_hua_condition": null,
+      "description": "带着怨恨死去的普通人，情绪激烈但执念单一"
+    },
+    {
+      "id": "she_mi_yan",
+      "name": "摄魅眼",
+      "type": "normal",
+      "layer": 2,
+      "hp": 45,
+      "emotion_pressure": [{"emotion": "fear", "value": 2}],
+      "actions": [
+        {"type": "attack", "value": 8, "weight": 40},
+        {"type": "emotion_push", "emotion": "fear", "value": 2, "weight": 40},
+        {"type": "draw_player", "value": -1, "weight": 20}
+      ],
+      "du_hua_condition": null,
+      "description": "以恐惧为食的诡异存在，专门扰乱玩家手牌"
+    },
+    {
+      "id": "lv_tou_gui",
+      "name": "缕头鬼",
+      "type": "normal",
+      "layer": 2,
+      "hp": 55,
+      "emotion_pressure": [{"emotion": "grief", "value": 1}],
+      "actions": [
+        {"type": "attack", "value": 12, "weight": 50},
+        {"type": "emotion_push", "emotion": "grief", "value": 2, "weight": 30},
+        {"type": "dot", "value": 4, "duration": 2, "weight": 20}
+      ],
+      "du_hua_condition": null,
+      "description": "背负过多悲伤的执念体，每次攻击都带着哭声"
+    },
+    {
+      "id": "shan_huo_gui",
+      "name": "闪火鬼",
+      "type": "normal",
+      "layer": 3,
+      "hp": 50,
+      "emotion_pressure": [{"emotion": "rage", "value": 2}],
+      "actions": [
+        {"type": "attack", "value": 15, "weight": 60},
+        {"type": "emotion_push", "emotion": "rage", "value": 2, "weight": 40}
+      ],
+      "du_hua_condition": null,
+      "description": "被愤怒彻底扭曲的灵体，只剩本能的暴力冲动"
+    },
+    {
+      "id": "shuigui_wanggui",
+      "name": "水鬼·望归",
+      "type": "boss",
+      "layer": 1,
+      "hp": 80,
+      "emotion_pressure": [{"emotion": "grief", "value": 2}, {"emotion": "fear", "value": 1}],
+      "actions": [
+        {"type": "attack", "value": 12, "weight": 40},
+        {"type": "emotion_push", "emotion": "grief", "value": 2, "weight": 30},
+        {"type": "summon_tide", "value": 8, "weight": 20},
+        {"type": "shield", "value": 15, "weight": 10}
+      ],
+      "du_hua_condition": {
+        "type": "card_play",
+        "card_id": "yin_du",
+        "emotion_requirement": {"grief": 3},
+        "description": "悲≥3时打出「引渡」牌"
+      },
+      "du_hua_success_text": "七年了……我以为等待本身没有意义，但你告诉我——等待本身就是答案。谢谢你。",
+      "du_hua_fail_text": "不！你根本不懂……他应该早一年回来的……",
+      "backstory": "十八岁渔家女，等候出海未婚夫归来七年。第七年最后一天走进江里。她的执念不是恨，是「他为什么没有早一年回来」。",
+      "description": "水面之下，带着无尽等待的亡魂"
+    },
+    {
+      "id": "hanba_jiaoge",
+      "name": "旱魃·焦骨",
+      "type": "boss",
+      "layer": 2,
+      "hp": 100,
+      "emotion_pressure": [{"emotion": "rage", "value": 2}, {"emotion": "grief", "value": 1}],
+      "actions": [
+        {"type": "attack", "value": 15, "weight": 30},
+        {"type": "dot_fire", "value": 5, "duration": 3, "weight": 30},
+        {"type": "emotion_push", "emotion": "rage", "value": 2, "weight": 20},
+        {"type": "all_field_heat_dot", "value": 3, "weight": 20}
+      ],
+      "du_hua_condition": {
+        "type": "dialogue_choice",
+        "dialogue_id": "believe_you",
+        "emotion_requirement": {"calm": 3},
+        "description": "定≥3，选择「我相信你」对话选项"
+      },
+      "du_hua_success_text": "有人……终于有人相信我了……我等了太久了……",
+      "du_hua_fail_text": "你也是来嘲笑我的！就像那些人一样！",
+      "backstory": "普通村妇，替全村人祈雨，被当作旱魃活埋。真正的旱魃是私吞赈灾粮的村长。她的执念是「没有人相信我」。",
+      "description": "焦骨嶙峋，带着无尽委屈与怒火"
+    },
+    {
+      "id": "guixiniang_sujin",
+      "name": "鬼新娘·素锦",
+      "type": "boss",
+      "layer": 3,
+      "hp": 120,
+      "emotion_pressure": [{"emotion": "grief", "value": 2}, {"emotion": "fear", "value": 2}],
+      "actions": [
+        {"type": "attack", "value": 18, "weight": 30},
+        {"type": "emotion_push", "emotion": "grief", "value": 2, "weight": 25},
+        {"type": "emotion_push", "emotion": "fear", "value": 2, "weight": 25},
+        {"type": "rage_card_storm", "value": 5, "weight": 20}
+      ],
+      "du_hua_condition": {
+        "type": "consecutive_joy_cards",
+        "count": 3,
+        "emotion_requirement": {"joy": 3},
+        "description": "喜≥3，连续打出3张喜类牌"
+      },
+      "du_hua_success_text": "这……这就是喜悦吗……原来是这种感觉……我从来不知道……",
+      "du_hua_fail_text": "爱？那是什么……我的人生里从来没有……",
+      "backstory": "被父母为了彩礼嫁给已死陌生人做冥婚新娘。从未爱过也从未被爱过，甚至不知道爱是什么感觉。执念不是悲，是「空白」。",
+      "description": "穿着嫁衣的新娘，眼中没有任何情绪——甚至连悲伤都没有"
+    }
+  ]
+}

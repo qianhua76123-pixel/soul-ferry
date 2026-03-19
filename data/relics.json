@@ -1,0 +1,95 @@
+{
+  "relics": [
+    {
+      "id": "tong_jing_sui",
+      "name": "铜镜碎片",
+      "description": "她留下的，用途不明，但你从不离身。持有时可感知亡魂的真实情绪。",
+      "effect_type": "passive",
+      "effect": "在战斗开始时，显示敌人当前主导情绪",
+      "flavor_text": "「有些东西，不需要知道用途，只需要留着。」",
+      "rarity": "story"
+    },
+    {
+      "id": "wenlu_xiang",
+      "name": "问路香",
+      "description": "点燃时能短暂看见阴阳两界的重叠处。",
+      "effect_type": "active",
+      "effect": "每场战斗可使用一次：预览敌人所有意图牌和下一个节点内容",
+      "cooldown": 1,
+      "flavor_text": "「知道路在哪里，才能决定走不走。」",
+      "rarity": "story"
+    },
+    {
+      "id": "duhun_ce",
+      "name": "渡魂册",
+      "description": "记录你经手过的每一个亡魂。每渡化成功一个亡魂，册子会多一页。",
+      "effect_type": "passive",
+      "effect": "每次渡化成功后，永久+3最大HP",
+      "flavor_text": "「每一个名字，都是一份沉甸甸的重量。」",
+      "rarity": "story"
+    },
+    {
+      "id": "shaogu_pian",
+      "name": "烧骨片",
+      "description": "从镇压的亡魂身上留下的残骸。有股焦糊味。",
+      "effect_type": "passive",
+      "effect": "每次镇压敌人后，获得2点护盾",
+      "flavor_text": "「镇压之后，总会留下些什么。」",
+      "rarity": "common"
+    },
+    {
+      "id": "qingming_pai",
+      "name": "清明牌",
+      "description": "一块古旧的木牌，写着「清明」二字。",
+      "effect_type": "passive",
+      "effect": "每回合开始时，若「定」值为0，自动获得+定1",
+      "flavor_text": "「渡魂人不能乱，乱了就渡不了任何人。」",
+      "rarity": "common"
+    },
+    {
+      "id": "wuqing_jie",
+      "name": "五情结",
+      "description": "五种颜色的线编织在一起的小结，每种颜色各不相同。",
+      "effect_type": "passive",
+      "effect": "当所有五情同时大于0时，每回合额外获得1费用",
+      "flavor_text": "「五情并存，才是完整的人。」",
+      "rarity": "rare"
+    },
+    {
+      "id": "nianhua_yan",
+      "name": "年画眼",
+      "description": "从百年年画上取下的神明眼睛，带着百年的见证。",
+      "effect_type": "passive",
+      "effect": "事件选项时，可以看到所有选项的真实结果后再做选择（一局使用一次）",
+      "flavor_text": "「见过太多，反而能看清。」",
+      "rarity": "rare"
+    },
+    {
+      "id": "yin_yang_bi",
+      "name": "阴阳笔",
+      "description": "墨汁一半纯黑，一半透明，据说能在阴阳两界同时书写。",
+      "effect_type": "passive",
+      "effect": "每次打出「定」类牌时，随机为另一情绪+1（不触发失调）",
+      "flavor_text": "「有些事情，需要在两个世界之间找到平衡。」",
+      "rarity": "rare"
+    },
+    {
+      "id": "hun_bo_lu",
+      "name": "魂魄炉",
+      "description": "一个小型的铜炉，燃烧着不会熄灭的蓝色火焰。",
+      "effect_type": "passive",
+      "effect": "每回合开始，将一张手牌的费用降低1（随机选择）",
+      "flavor_text": "「有些路，走过了就能走快些。」",
+      "rarity": "common"
+    },
+    {
+      "id": "si_xiang_pian",
+      "name": "思乡片",
+      "description": "一块家乡泥土，被包在布里带着。不知是谁的。",
+      "effect_type": "passive",
+      "effect": "每当「悲」达到3时，自动回复5HP（每回合最多触发一次）",
+      "flavor_text": "「思念可以是力量。」",
+      "rarity": "common"
+    }
+  ]
+}

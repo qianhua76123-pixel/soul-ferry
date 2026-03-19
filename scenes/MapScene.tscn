@@ -1,0 +1,66 @@
+[gd_scene load_steps=2 format=3 uid="uid://map_scene_v3"]
+
+[ext_resource type="Script" path="res://scripts/map/MapScene.gd" id="1_map"]
+
+[node name="MapScene" type="Node2D"]
+script = ExtResource("1_map")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.025, 0.02, 1)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+; ---- 顶栏 ----
+[node name="TopBar" type="HBoxContainer" parent="UI"]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 1268.0
+offset_bottom = 44.0
+
+[node name="Title" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "渡魂录  SOUL FERRY"
+
+[node name="HPLabel" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = "HP: 80/80"
+
+[node name="GoldLabel" type="Label" parent="UI/TopBar"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "金币: 100"
+
+; ---- 层标题 ----
+[node name="LayerLabel" type="Label" parent="UI"]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 52.0
+offset_right = 800.0
+offset_bottom = 80.0
+text = "第一层：荒村"
+
+; ---- 节点容器（由脚本动态填充）----
+[node name="NodeContainer" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 86.0
+offset_right = 1270.0
+offset_bottom = 670.0
+alignment = 1
+
+; ---- 底部遗物栏 ----
+[node name="RelicBar" type="HBoxContainer" parent="UI"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 678.0
+offset_right = 1270.0
+offset_bottom = 712.0

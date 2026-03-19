@@ -1,0 +1,124 @@
+[gd_scene load_steps=2 format=3 uid="uid://shop_scene_v2"]
+
+[ext_resource type="Script" path="res://scripts/shop/ShopScene.gd" id="1_shop"]
+
+[node name="ShopScene" type="Node2D"]
+script = ExtResource("1_shop")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03, 0.03, 0.05, 1)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Title" type="Label" parent="UI"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 20.0
+anchor_right = 1.0
+horizontal_alignment = 1
+text = "🏮 渡魂商店"
+theme_override_font_sizes/font_size = 22
+
+[node name="FlavorText" type="Label" parent="UI"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 55.0
+anchor_right = 1.0
+horizontal_alignment = 1
+text = "「有些东西，走这一程才能用得上。」"
+
+[node name="GoldLabel" type="Label" parent="UI"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 85.0
+anchor_right = 1.0
+horizontal_alignment = 1
+text = "金币: 100"
+
+[node name="CardsForSale" type="HBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+offset_left = -360.0
+offset_top = 120.0
+offset_right = 360.0
+offset_bottom = 380.0
+alignment = 1
+
+[node name="RemoveSection" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+offset_left = -200.0
+offset_top = 390.0
+offset_right = 200.0
+offset_bottom = 460.0
+alignment = 1
+
+[node name="RemoveLabel" type="Label" parent="UI/RemoveSection"]
+text = "移除一张牌（75金币）"
+horizontal_alignment = 1
+
+[node name="RemoveButton" type="Button" parent="UI/RemoveSection"]
+custom_minimum_size = Vector2(200, 40)
+text = "🗑 选择要移除的牌"
+
+; --- 移除面板（全屏选牌）---
+[node name="RemovePanel" type="Panel" parent="UI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 60.0
+visible = false
+
+[node name="RemoveTitle" type="Label" parent="UI/RemovePanel"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 10.0
+anchor_right = 1.0
+horizontal_alignment = 1
+text = "选择要移除的牌"
+
+[node name="DeckGrid" type="GridContainer" parent="UI/RemovePanel"]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 50.0
+offset_bottom = -60.0
+offset_left = 10.0
+offset_right = -10.0
+columns = 8
+
+[node name="CancelBtn" type="Button" parent="UI/RemovePanel"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -50.0
+offset_right = 80.0
+offset_bottom = -10.0
+text = "取消"
+
+[node name="LeaveButton" type="Button" parent="UI"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -80.0
+offset_top = -50.0
+offset_right = 80.0
+offset_bottom = -10.0
+text = "离开"

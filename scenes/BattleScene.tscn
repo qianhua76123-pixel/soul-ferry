@@ -1,0 +1,211 @@
+[gd_scene load_steps=4 format=3 uid="uid://battle_scene_v3"]
+
+[ext_resource type="Script" path="res://scripts/battle/BattleScene.gd" id="1_battle"]
+[ext_resource type="Script" path="res://scripts/battle/BattleStateMachine.gd" id="2_sm"]
+[ext_resource type="Script" path="res://scripts/ui/EmotionRadar.gd" id="3_radar"]
+
+; =============================================
+; 祭坛式布局 1280x720
+; CanvasLayer > Control 做全屏容器
+; 左栏(PlayerArea) | 中央(EmotionRadar) | 右栏(EnemyArea)
+; 底部手牌 HandContainer
+; =============================================
+
+[node name="BattleScene" type="Node2D"]
+script = ExtResource("1_battle")
+
+[node name="BattleStateMachine" type="Node" parent="."]
+script = ExtResource("2_sm")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047, 0.031, 0.027, 1)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+; ---- 顶部 HUD ----
+[node name="HUD" type="HBoxContainer" parent="UI"]
+layout_mode = 1
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 1272.0
+offset_bottom = 44.0
+
+[node name="TurnLabel" type="Label" parent="UI/HUD"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "第 1 回合"
+
+[node name="CostLabel" type="Label" parent="UI/HUD"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 1
+text = "费用: 3"
+
+[node name="DeckCount" type="Label" parent="UI/HUD"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = "牌库: 10"
+
+[node name="DiscardCount" type="Label" parent="UI/HUD"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+text = "弃牌: 0"
+
+[node name="EndTurnBtn" type="Button" parent="UI/HUD"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 30)
+text = "结束回合"
+
+[node name="DuHuaBtn" type="Button" parent="UI/HUD"]
+layout_mode = 2
+custom_minimum_size = Vector2(110, 30)
+text = "✨ 发起渡化"
+visible = false
+
+; ---- 主战场三栏 ----
+[node name="AltarLayout" type="HBoxContainer" parent="UI"]
+layout_mode = 1
+offset_left = 8.0
+offset_top = 50.0
+offset_right = 1272.0
+offset_bottom = 530.0
+
+; == 左栏：玩家 ==
+[node name="PlayerArea" type="VBoxContainer" parent="UI/AltarLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 0)
+size_flags_vertical = 4
+
+[node name="PlayerTitle" type="Label" parent="UI/AltarLayout/PlayerArea"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "── 渡魂人 ──"
+
+[node name="HPBar" type="ProgressBar" parent="UI/AltarLayout/PlayerArea"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 20)
+max_value = 80.0
+value = 80.0
+
+[node name="HPLabel" type="Label" parent="UI/AltarLayout/PlayerArea"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "80 / 80"
+
+[node name="ShieldLabel" type="Label" parent="UI/AltarLayout/PlayerArea"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "🛡 护盾: 0"
+
+; == 中栏：情绪雷达图（Control容器+Node2D绘制）==
+[node name="AltarCenter" type="VBoxContainer" parent="UI/AltarLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
+
+[node name="AltarTitle" type="Label" parent="UI/AltarLayout/AltarCenter"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "── 五情祭坛 ──"
+
+[node name="RadarContainer" type="Control" parent="UI/AltarLayout/AltarCenter"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 220)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="EmotionRadar" type="Node2D" parent="UI/AltarLayout/AltarCenter/RadarContainer"]
+script = ExtResource("3_radar")
+position = Vector2(110, 110)
+
+[node name="DisorderWarning" type="Label" parent="UI/AltarLayout/AltarCenter"]
+layout_mode = 2
+horizontal_alignment = 1
+modulate = Color(1, 0.2, 0.2, 1)
+text = ""
+
+; == 右栏：敌人 ==
+[node name="EnemyArea" type="VBoxContainer" parent="UI/AltarLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 0)
+size_flags_vertical = 4
+alignment = 1
+
+[node name="EnemyName" type="Label" parent="UI/AltarLayout/EnemyArea"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "── ??? ──"
+
+[node name="EnemySprite" type="ColorRect" parent="UI/AltarLayout/EnemyArea"]
+layout_mode = 2
+custom_minimum_size = Vector2(120, 140)
+size_flags_horizontal = 4
+color = Color(0.12, 0.09, 0.15, 1)
+
+[node name="HPBar" type="ProgressBar" parent="UI/AltarLayout/EnemyArea"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 20)
+max_value = 100.0
+value = 100.0
+
+[node name="ShieldLabel" type="Label" parent="UI/AltarLayout/EnemyArea"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "🛡 护盾: 0"
+
+[node name="IntentLabel" type="Label" parent="UI/AltarLayout/EnemyArea"]
+layout_mode = 2
+horizontal_alignment = 1
+text = "意图：..."
+
+[node name="DuHuaHint" type="Label" parent="UI/AltarLayout/EnemyArea"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 3
+modulate = Color(0.85, 0.72, 0.0, 1)
+text = ""
+
+; ---- 手牌区（底部）----
+[node name="HandContainer" type="HBoxContainer" parent="UI"]
+layout_mode = 1
+offset_left = 8.0
+offset_top = 540.0
+offset_right = 1272.0
+offset_bottom = 710.0
+alignment = 1
+
+; ---- 结算面板（居中弹出）----
+[node name="ResultPanel" type="Panel" parent="UI"]
+layout_mode = 1
+offset_left = 390.0
+offset_top = 235.0
+offset_right = 890.0
+offset_bottom = 485.0
+visible = false
+
+[node name="ResultLabel" type="Label" parent="UI/ResultPanel"]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 20.0
+offset_right = 490.0
+offset_bottom = 180.0
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+text = "结算中..."
+
+[node name="ContinueBtn" type="Button" parent="UI/ResultPanel"]
+layout_mode = 1
+offset_left = 160.0
+offset_top = 195.0
+offset_right = 340.0
+offset_bottom = 235.0
+text = "继续前行"
