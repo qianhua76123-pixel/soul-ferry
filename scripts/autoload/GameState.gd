@@ -33,7 +33,13 @@ func new_run() -> void:
 	visited_nodes = []; relics = []; choice_history = []
 	du_hua_count = 0; zhen_ya_count = 0; route_tendency = ""
 	if has_meta("pending_enemy_id"): remove_meta("pending_enemy_id")
+	if has_meta("map_data"): remove_meta("map_data")
 	EmotionManager.reset_all()
+	# 清空 RelicManager（RelicManager 监听 relic_added 信号，new_run 后重新 add）
+	if Engine.has_singleton("RelicManager"):
+		RelicManager.active_relics = []
+		RelicManager.nianhua_used_this_run = false
+		RelicManager._wuqing_bonus_active = false
 	add_relic("tong_jing_sui")
 	add_relic("wenlu_xiang")
 	add_relic("duhun_ce")

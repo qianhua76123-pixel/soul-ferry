@@ -52,4 +52,4 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			if is_playable:
-				emit_signal("card_clicked", card_data)
+				card_clicked.emit(card_data)

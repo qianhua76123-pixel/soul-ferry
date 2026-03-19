@@ -106,7 +106,7 @@ func _animate_hover(on: bool) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT and is_playable:
-			emit_signal("card_clicked", card_data)
+			card_clicked.emit(card_data)
 			var tween = create_tween()
 			tween.tween_property(self,"scale",Vector2(0.9,0.9),0.05)
 			tween.tween_property(self,"scale",Vector2(1.0,1.0),0.1)

@@ -36,6 +36,7 @@ func _ready() -> void:
 
 	GameState.hp_changed.connect(func(_o,_n): _update_status())
 	GameState.gold_changed.connect(func(_o,_n): _update_status())
+	GameState.relic_added.connect(func(_id): _render_relics())
 
 	# 加载或生成地图数据
 	if GameState.has_meta("map_data"):
@@ -178,11 +179,16 @@ func _check_layer_done() -> void:
 
 func _render_relics() -> void:
 	for child in relic_bar.get_children(): child.queue_free()
-	var relic_icons = {"tong_jing_sui":"🪞","wenlu_xiang":"🕯","duhun_ce":"📖"}
+	var relic_icons = {
+		"tong_jing_sui":"🪞","wenlu_xiang":"🕯","duhun_ce":"📖",
+		"shaogu_pian":"🦴","qingming_pai":"🪶","wuqing_jie":"🎀",
+		"nianhua_yan":"👁","yin_yang_bi":"✒","hun_bo_lu":"🔥","si_xiang_pian":"🌾",
+	}
 	for rid in GameState.relics:
-		var lbl = Label.new()
-		lbl.text = relic_icons.get(rid, "◈") + " "
-		lbl.tooltip_text = rid
+		var data = RelicManager._all_relics_data.get(rid, {})
+		var lbl  = Label.new()
+		lbl.text = relic_icons.get(rid, "◈")
+		lbl.tooltip_text = data.get("name","???") + "\n" + data.get("effect","")
 		relic_bar.add_child(lbl)
 
 func _update_status() -> void:

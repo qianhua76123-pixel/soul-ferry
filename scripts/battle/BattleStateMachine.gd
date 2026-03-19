@@ -46,7 +46,7 @@ func start_battle(enemy_id: String) -> void:
 	joy_cards_played_this_turn = 0
 	du_hua_triggered = false
 	current_state = STATE_BATTLE_START
-	emit_signal("battle_started", enemy_data)
+	battle_started.emit(enemy_data)
 	_begin_player_turn()
 
 func _load_enemy(enemy_id: String) -> Dictionary:
@@ -69,7 +69,7 @@ func _begin_player_turn() -> void:
 	DeckManager.on_turn_start()
 	if EmotionManager.is_disorder("fear"):
 		DeckManager.discard_random()
-	emit_signal("player_turn_started", current_turn)
+	player_turn_started.emit(current_turn)
 
 func play_card(card: Dictionary) -> bool:
 	if current_state != STATE_PLAYER_TURN:
@@ -79,7 +79,7 @@ func play_card(card: Dictionary) -> bool:
 		current_state = STATE_PLAYER_TURN
 		return false
 	var result = _apply_card_effect(card)
-	emit_signal("card_effect_applied", card, result)
+	card_effect_applied.emit(card, result)
 	if card.get("emotion_tag", "") == "joy":
 		joy_cards_played_this_turn += 1
 	else:
@@ -100,7 +100,7 @@ func end_player_turn() -> void:
 
 func _begin_enemy_turn() -> void:
 	current_state = STATE_ENEMY_TURN
-	emit_signal("enemy_turn_started")
+	enemy_turn_started.emit()
 	var action = _choose_enemy_action()
 	_execute_enemy_action(action)
 	if GameState.hp > 0:
@@ -175,12 +175,12 @@ func _check_du_hua(played_card: Dictionary) -> void:
 func _trigger_du_hua() -> void:
 	du_hua_triggered = true
 	var desc = enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足")
-	emit_signal("du_hua_available", desc)
+	du_hua_available.emit(desc)
 
 func confirm_du_hua() -> void:
 	if not du_hua_triggered: return
 	GameState.record_du_hua(enemy_data.get("id", ""))
-	emit_signal("du_hua_succeeded", enemy_data.get("id", ""))
+	du_hua_succeeded.emit(enemy_data.get("id",""))
 	_end_battle("du_hua")
 
 func _choose_enemy_action() -> Dictionary:
@@ -225,4 +225,4 @@ func _end_battle(result: String) -> void:
 	current_state = STATE_BATTLE_END
 	if result == "victory":
 		GameState.record_zhen_ya(enemy_data.get("id", ""))
-	emit_signal("battle_ended", result)
+	battle_ended.emit(result)

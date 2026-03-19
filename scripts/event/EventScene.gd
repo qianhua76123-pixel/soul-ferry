@@ -169,5 +169,5 @@ func _show_result(result: Dictionary) -> void:
 	result_label.text = desc
 
 func _on_continue_pressed() -> void:
-	emit_signal("event_completed", _current_event)
+	event_completed.emit(_current_event)
 	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")

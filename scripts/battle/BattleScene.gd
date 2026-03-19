@@ -45,11 +45,18 @@ func _ready() -> void:
 	du_hua_btn.pressed.connect(_on_du_hua_pressed)
 	result_btn.pressed.connect(_on_result_continue)
 
+	# 连接 RelicManager 触发信号 → UI 提示
+	RelicManager.relic_triggered.connect(_on_relic_triggered)
+	# 连接渡化成功
+	state_machine.du_hua_succeeded.connect(func(_eid): RelicManager.on_du_hua_success())
+
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
 
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
+	# 遗物：战斗开始触发
+	RelicManager.on_battle_start(enemy_data)
 	enemy_hp_bar.max_value  = enemy_data.get("hp", 100)
 	enemy_hp_bar.value      = enemy_data.get("hp", 100)
 	enemy_shield_label.text = "🛡 0"
@@ -62,6 +69,8 @@ func _on_player_turn_started(turn: int) -> void:
 	end_turn_btn.disabled = false
 	du_hua_btn.visible    = false
 	disorder_warning.text = ""
+	# 遗物：回合开始触发（DeckManager.on_turn_start 之后，手牌已摸完）
+	RelicManager.on_turn_start()
 	_update_hud()
 
 func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
@@ -75,6 +84,9 @@ func _on_battle_ended(result: String) -> void:
 	_last_battle_result = result
 	end_turn_btn.disabled = true
 	result_panel.visible  = true
+	# 遗物：镇压胜利触发烧骨片等
+	if result == "victory":
+		RelicManager.on_victory_zhenya()
 	match result:
 		"victory":
 			result_label.text = "镇压成功\n\n亡魂已被强行驱散。"
@@ -85,6 +97,26 @@ func _on_battle_ended(result: String) -> void:
 		"defeat":
 			result_label.text = "你也困在这里了\n\n渡魂人，渡人先渡己。"
 			result_btn.text   = "重新开始"
+
+## 遗物触发时在屏幕左上角浮现提示
+func _on_relic_triggered(relic_id: String, effect_desc: String) -> void:
+	# 烧骨片护盾：直接加到 state_machine
+	if relic_id == "shaogu_pian_shield_2":
+		state_machine.player_shield += 2
+		player_shield_label.text = "🛡 %d" % state_machine.player_shield
+	_show_relic_popup(effect_desc)
+
+func _show_relic_popup(desc: String) -> void:
+	var lbl = Label.new()
+	lbl.text = "✦ " + desc
+	lbl.add_theme_color_override("font_color", Color(0.85, 0.72, 0.0))
+	lbl.add_theme_font_size_override("font_size", 13)
+	add_child(lbl)
+	lbl.position = Vector2(12, 80 + randf_range(0, 20))
+	var tween = create_tween()
+	tween.tween_property(lbl, "position:y", lbl.position.y - 40, 1.2)
+	tween.parallel().tween_property(lbl, "modulate:a", 0.0, 1.2)
+	tween.tween_callback(lbl.queue_free)
 
 func _on_du_hua_available(desc: String) -> void:
 	du_hua_btn.visible     = true
