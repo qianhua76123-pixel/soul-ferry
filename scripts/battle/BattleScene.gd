@@ -57,6 +57,9 @@ func _ready() -> void:
 	# 迷你遗物栏（战斗场内展示，用于触发闪光）
 	_build_relic_bar()
 
+	# Buff 图标栏 + Tooltip 系统
+	_setup_buff_ui()
+
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
 
@@ -297,3 +300,131 @@ func _on_wenlu_pressed() -> void:
 	# 禁用按钮
 	var btn = get_node_or_null("UI/HUD/WenluBtn")
 	if btn: btn.disabled = true
+
+## ══════════════════════════════════════════════════════
+## Buff 图标栏系统
+## ══════════════════════════════════════════════════════
+
+# 全局 Tooltip Label（鼠标悬停显示）
+var _tooltip_label: Label = null
+
+func _setup_buff_ui() -> void:
+	# 连接 BuffManager 信号
+	BuffManager.buff_changed.connect(_on_buff_changed)
+	BuffManager.buff_expired.connect(func(tgt, _id): _rebuild_buff_bar(tgt))
+
+	# 玩家 Buff 栏：插入 PlayerArea 底部
+	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
+	if player_area:
+		var bar = HBoxContainer.new()
+		bar.name = "PlayerBuffBar"
+		player_area.add_child(bar)
+
+	# 敌人 Buff 栏：插入 EnemyArea 顶部（名字下方）
+	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if enemy_area:
+		var bar = HBoxContainer.new()
+		bar.name = "EnemyBuffBar"
+		# 插到敌人名字下面（index 1）
+		enemy_area.add_child(bar)
+		enemy_area.move_child(bar, 1)
+
+	# 全局 Tooltip Label（挂到 CanvasLayer 最顶层）
+	var ui = get_node_or_null("UI")
+	if ui:
+		_tooltip_label = Label.new()
+		_tooltip_label.name             = "BuffTooltip"
+		_tooltip_label.visible          = false
+		_tooltip_label.z_index          = 100
+		_tooltip_label.autowrap_mode    = TextServer.AUTOWRAP_WORD_SMART
+		_tooltip_label.custom_minimum_size = Vector2(180, 0)
+		_tooltip_label.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
+		_tooltip_label.add_theme_font_size_override("font_size", 12)
+		# 添加半透明背景 Panel
+		var panel = Panel.new()
+		panel.name = "TooltipPanel"
+		panel.add_child(_tooltip_label)
+		_tooltip_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		ui.add_child(panel)
+		panel.visible = false
+		_tooltip_label = panel   # 让 _tooltip_label 指向 Panel（一起显示/隐藏）
+
+func _on_buff_changed(target: String, _buff_id: String, _stacks: int) -> void:
+	_rebuild_buff_bar(target)
+
+## 重建某一目标的 Buff 图标栏（清空后重建，stacks=0 不显示）
+func _rebuild_buff_bar(target: String) -> void:
+	var bar_path = "UI/AltarLayout/PlayerArea/PlayerBuffBar" \
+		if target == BuffManager.TARGET_PLAYER \
+		else "UI/AltarLayout/EnemyArea/EnemyBuffBar"
+	var bar = get_node_or_null(bar_path)
+	if not bar: return
+
+	# 清空旧图标
+	for child in bar.get_children():
+		child.queue_free()
+
+	# 重建
+	var buffs = BuffManager.get_buffs(target)
+	for buff in buffs:
+		if buff["stacks"] <= 0: continue
+		var slot = _make_buff_icon(buff)
+		bar.add_child(slot)
+
+## 构建单个 Buff 图标：半透明色块 + 层数文字 + Tooltip
+func _make_buff_icon(buff: Dictionary) -> Control:
+	# 外层 Control 作为槽位
+	var slot = Control.new()
+	slot.custom_minimum_size = Vector2(32, 32)
+
+	# 背景色 Panel
+	var bg = Panel.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = buff.get("icon_color", Color(0.5, 0.5, 0.5, 0.8))
+	sb.set_corner_radius_all(3)
+	bg.add_theme_stylebox_override("panel", sb)
+	slot.add_child(bg)
+
+	# 层数 Label（右下角）
+	var stacks_lbl = Label.new()
+	stacks_lbl.text                = str(buff["stacks"])
+	stacks_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	stacks_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_BOTTOM
+	stacks_lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	stacks_lbl.add_theme_font_size_override("font_size", 10)
+	stacks_lbl.add_theme_color_override("font_color", Color.WHITE)
+	slot.add_child(stacks_lbl)
+
+	# Buff 名首字（中央）
+	var name_lbl = Label.new()
+	name_lbl.text                 = buff.get("display_name","?").substr(0,1)
+	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	name_lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	name_lbl.add_theme_font_size_override("font_size", 14)
+	name_lbl.add_theme_color_override("font_color", Color(1,1,1,0.9))
+	slot.add_child(name_lbl)
+
+	# Tooltip：鼠标 Enter/Exit
+	slot.mouse_entered.connect(func(): _show_tooltip(buff, slot))
+	slot.mouse_exited.connect(func():  _hide_tooltip())
+
+	return slot
+
+func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
+	if not _tooltip_label: return
+	var title = buff.get("display_name","???")
+	var tip   = buff.get("tooltip","")
+	var stacks= buff.get("stacks", 0)
+	# 找到 Panel 内的 Label
+	var lbl = _tooltip_label.get_node_or_null("BuffTooltip")
+	if not lbl: return
+	lbl.text = "%s ×%d\n%s" % [title, stacks, tip]
+	_tooltip_label.visible  = true
+	# 定位在图标上方
+	var pos = anchor.get_global_rect().position
+	_tooltip_label.position = Vector2(clamp(pos.x - 60, 4, 1080), max(pos.y - 72, 4))
+
+func _hide_tooltip() -> void:
+	if _tooltip_label: _tooltip_label.visible = false

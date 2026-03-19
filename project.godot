@@ -22,6 +22,7 @@ CardDatabase="*res://scripts/autoload/CardDatabase.gd"
 DeckManager="*res://scripts/autoload/DeckManager.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 RelicManager="*res://scripts/autoload/RelicManager.gd"
+BuffManager="*res://scripts/autoload/BuffManager.gd"
 
 [display]
 

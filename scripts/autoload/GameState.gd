@@ -40,6 +40,8 @@ func new_run() -> void:
 		RelicManager.active_relics = []
 		RelicManager.nianhua_used_this_run = false
 		RelicManager._wuqing_bonus_active = false
+	if Engine.has_singleton("BuffManager"):
+		BuffManager.clear_all()
 	add_relic("tong_jing_sui")
 	add_relic("wenlu_xiang")
 	add_relic("duhun_ce")

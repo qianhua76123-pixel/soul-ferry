@@ -35,7 +35,6 @@ func start_battle(enemy_id: String) -> void:
 	var enemy = _load_enemy(enemy_id)
 	if enemy.is_empty():
 		push_error("BattleStateMachine: 未找到敌人 " + enemy_id)
-		# 使用默认敌人数据防止崩溃
 		enemy = {"id": enemy_id, "name": "亡魂", "hp": 50, "actions": [{"type":"attack","value":8,"weight":100}]}
 	enemy_data = enemy
 	enemy_hp = enemy.get("hp", 50)
@@ -45,9 +44,19 @@ func start_battle(enemy_id: String) -> void:
 	current_turn = 0
 	joy_cards_played_this_turn = 0
 	du_hua_triggered = false
+	# 清空上一场战斗遗留 Buff
+	BuffManager.clear_all()
+	# 接收 BuffManager 对敌人的 Buff 伤害
+	if not BuffManager.buff_damage_to_enemy.is_connected(_on_buff_damage_to_enemy):
+		BuffManager.buff_damage_to_enemy.connect(_on_buff_damage_to_enemy)
 	current_state = STATE_BATTLE_START
 	battle_started.emit(enemy_data)
 	_begin_player_turn()
+
+func _on_buff_damage_to_enemy(amount: int) -> void:
+	_deal_damage_to_enemy(amount)
+	if enemy_hp <= 0:
+		_end_battle("victory")
 
 func _load_enemy(enemy_id: String) -> Dictionary:
 	var file = FileAccess.open("res://data/enemies.json", FileAccess.READ)
@@ -66,6 +75,8 @@ func _begin_player_turn() -> void:
 	current_turn += 1
 	joy_cards_played_this_turn = 0
 	current_state = STATE_PLAYER_TURN
+	# Buff 系统：回合开始处理（执念锁定在 DeckManager.on_turn_start 之前）
+	BuffManager.process_turn_start(BuffManager.TARGET_PLAYER)
 	DeckManager.on_turn_start()
 	if EmotionManager.is_disorder("fear"):
 		DeckManager.discard_random()
@@ -95,7 +106,12 @@ func end_player_turn() -> void:
 		return
 	current_state = STATE_TURN_END
 	DeckManager.on_turn_end()
-	EmotionManager.on_turn_end()
+	# 执念：若激活，跳过情绪自然衰减
+	if not BuffManager.obsession_active:
+		EmotionManager.on_turn_end()
+	# Buff 系统：回合结束处理（灼烧/中毒伤害、层数衰减）
+	BuffManager.process_turn_end(BuffManager.TARGET_PLAYER)
+	BuffManager.process_turn_end(BuffManager.TARGET_ENEMY)
 	_begin_enemy_turn()
 
 func _begin_enemy_turn() -> void:
@@ -197,10 +213,14 @@ func _choose_enemy_action() -> Dictionary:
 
 func _execute_enemy_action(action: Dictionary) -> void:
 	if action.is_empty(): return
-	var mul = EmotionManager.get_enemy_damage_multiplier()
-	match action.get("type", ""):
+	var mul   = EmotionManager.get_enemy_damage_multiplier()
+	var atype = action.get("type", "")
+	match atype:
 		"attack":
-			var dmg = int(action.get("value", 0) * mul)
+			var raw = int(action.get("value", 0) * mul)
+			# BuffManager 护盾拦截（玩家护盾 Buff）
+			var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
+			# BattleStateMachine 自身的 player_shield（卡牌产生的）
 			if player_shield > 0:
 				var blocked = min(player_shield, dmg)
 				player_shield -= blocked
@@ -210,7 +230,8 @@ func _execute_enemy_action(action: Dictionary) -> void:
 		"emotion_push":
 			EmotionManager.modify(action.get("emotion", ""), action.get("value", 1))
 		"dot", "dot_fire", "all_field_heat_dot":
-			GameState.take_damage(action.get("value", 0))
+			# 统一走 BuffManager 解析，转化为 Buff 而非直接扣血
+			BuffManager.parse_dot_action(action)
 		"shield":
 			enemy_shield += action.get("value", 0)
 
