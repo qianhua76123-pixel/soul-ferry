@@ -128,6 +128,8 @@ func _on_node_pressed(nd: Dictionary) -> void:
 	nd["visited"] = true
 	GameState.set_meta("map_data", _map_data)
 	GameState.advance_node(nd["id"])
+	# 自动存档
+	GameState.save_to_file()
 	var ntype = nd.get("type","battle")
 
 	if ntype == "rest":

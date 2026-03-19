@@ -6,11 +6,14 @@ signal hp_changed(old_hp: int, new_hp: int)
 signal max_hp_changed(old_max: int, new_max: int)
 signal gold_changed(old_gold: int, new_gold: int)
 signal relic_added(relic_id: String)
+signal game_saved()
+signal game_loaded()
 signal game_over()
 
 const STARTING_HP     = 80
 const STARTING_MAX_HP = 80
 const STARTING_GOLD   = 100
+const SAVE_PATH       = "user://save.json"
 
 var hp:             int    = STARTING_HP
 var max_hp:         int    = STARTING_MAX_HP
@@ -27,19 +30,149 @@ var route_tendency: String = ""
 func _ready() -> void:
 	pass
 
+# ════════════════════════════════════════════
+#  存档系统
+# ════════════════════════════════════════════
+
+func has_save() -> bool:
+	if not FileAccess.file_exists(SAVE_PATH): return false
+	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if not file: return false
+	var content = file.get_as_text().strip_edges()
+	file.close()
+	return content.length() > 2
+
+func save_to_file() -> void:
+	# 序列化牌库（保留每张牌的 id + 升级等级）
+	var deck_data = []
+	for card in DeckManager.get_full_deck():
+		deck_data.append({
+			"id":    card.get("id", ""),
+			"level": card.get("level", 0),
+		})
+
+	var data = {
+		"current_hp":    hp,
+		"max_hp":        max_hp,
+		"gold":          gold,
+		"current_layer": current_layer,
+		"current_node":  current_node,
+		"visited_nodes": visited_nodes,
+		"relics":        relics,
+		"choice_history":choice_history,
+		"du_hua_count":  du_hua_count,
+		"zhen_ya_count": zhen_ya_count,
+		"route_tendency":route_tendency,
+		"deck":          deck_data,
+		"emotion_values":EmotionManager.values.duplicate(),
+		"map_state":     get_meta("map_data") if has_meta("map_data") else [],
+		"save_version":  1,
+		"save_time":     Time.get_unix_time_from_system(),
+	}
+
+	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if not file:
+		push_error("GameState: 无法写入存档 " + SAVE_PATH); return
+	file.store_string(JSON.stringify(data, "\t"))
+	file.close()
+	game_saved.emit()
+
+func load_from_file() -> bool:
+	if not has_save(): return false
+
+	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	if not file: return false
+	var json = JSON.new()
+	if json.parse(file.get_as_text()) != OK:
+		file.close()
+		push_error("GameState: 存档解析失败"); return false
+	file.close()
+
+	var data = json.get_data()
+	if typeof(data) != TYPE_DICTIONARY: return false
+
+	# ── 恢复 GameState ──
+	var old_hp = hp
+	hp             = data.get("current_hp",    STARTING_HP)
+	max_hp         = data.get("max_hp",        STARTING_MAX_HP)
+	gold           = data.get("gold",          STARTING_GOLD)
+	current_layer  = data.get("current_layer", 1)
+	current_node   = data.get("current_node",  0)
+	visited_nodes  = data.get("visited_nodes", [])
+	relics         = data.get("relics",        [])
+	choice_history = data.get("choice_history",[])
+	du_hua_count   = data.get("du_hua_count",  0)
+	zhen_ya_count  = data.get("zhen_ya_count", 0)
+	route_tendency = data.get("route_tendency","")
+
+	hp_changed.emit(old_hp, hp)
+	gold_changed.emit(0, gold)
+
+	# ── 恢复地图数据 ──
+	var map_state = data.get("map_state", [])
+	if map_state is Array and not map_state.is_empty():
+		set_meta("map_data", map_state)
+
+	# ── 恢复情绪 ──
+	var emotions = data.get("emotion_values", {})
+	EmotionManager.reset_all()
+	for emotion in emotions:
+		EmotionManager.modify(emotion, int(emotions[emotion]))
+
+	# ── 恢复遗物（通过 RelicManager）──
+	if Engine.has_singleton("RelicManager"):
+		RelicManager.active_relics = []
+		RelicManager.nianhua_used_this_run = false
+		RelicManager._wuqing_bonus_active  = false
+		for rid in relics:
+			RelicManager.add_relic(rid)
+
+	# ── 恢复牌库 ──
+	var deck_data = data.get("deck", [])
+	if not deck_data.is_empty():
+		var card_ids = []
+		var upgrades = {}
+		for entry in deck_data:
+			var cid   = entry.get("id","")
+			var level = entry.get("level", 0)
+			card_ids.append(cid)
+			if level > 0: upgrades[cid] = level
+		DeckManager.init_deck(card_ids)
+		# 应用升级等级
+		for card in DeckManager.deck:
+			var cid = card.get("id","")
+			if cid in upgrades:
+				card["level"] = upgrades[cid]
+				card["cost"]  = max(0, card.get("cost",1) - upgrades[cid])
+	else:
+		DeckManager.init_starter_deck()
+
+	if Engine.has_singleton("BuffManager"):
+		BuffManager.clear_all()
+
+	game_loaded.emit()
+	return true
+
+func delete_save() -> void:
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+
+# ════════════════════════════════════════════
+#  游戏逻辑
+# ════════════════════════════════════════════
+
 func new_run() -> void:
 	hp = STARTING_HP; max_hp = STARTING_MAX_HP; gold = STARTING_GOLD
 	current_layer = 1; current_node = 0
 	visited_nodes = []; relics = []; choice_history = []
 	du_hua_count = 0; zhen_ya_count = 0; route_tendency = ""
 	if has_meta("pending_enemy_id"): remove_meta("pending_enemy_id")
-	if has_meta("map_data"): remove_meta("map_data")
+	if has_meta("map_data"):         remove_meta("map_data")
 	EmotionManager.reset_all()
-	# 清空 RelicManager（RelicManager 监听 relic_added 信号，new_run 后重新 add）
 	if Engine.has_singleton("RelicManager"):
-		RelicManager.active_relics = []
-		RelicManager.nianhua_used_this_run = false
-		RelicManager._wuqing_bonus_active = false
+		RelicManager.active_relics         = []
+		RelicManager.nianhua_used_this_run  = false
+		RelicManager._wuqing_bonus_active   = false
 	if Engine.has_singleton("BuffManager"):
 		BuffManager.clear_all()
 	add_relic("tong_jing_sui")

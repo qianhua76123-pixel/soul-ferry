@@ -1,0 +1,104 @@
+
+[gd_scene load_steps=4 format=3 uid="uid://main_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_mm"]
+[ext_resource type="Script" path="res://scripts/ui/BgCanvas.gd" id="2_bg"]
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_mm")
+
+; ── 程序化水墨背景 ──
+[node name="BgCanvas" type="Node2D" parent="."]
+script = ExtResource("2_bg")
+
+; ── 水墨粒子 ──
+[node name="InkParticles" type="GPUParticles2D" parent="."]
+amount = 35
+lifetime = 8.0
+emitting = true
+local_coords = false
+position = Vector2(640, -10)
+draw_pass_1 = null
+
+; ── CanvasLayer UI ──
+[node name="UI" type="CanvasLayer" parent="."]
+
+; 标题 "渡 魂 录"
+[node name="TitleLabel" type="Label" parent="UI"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 170.0
+anchor_right = 1.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 72
+theme_override_colors/font_color = Color(0.91, 0.878, 0.816, 1)
+text = "渡 魂 录"
+
+; 副标题
+[node name="SubtitleLabel" type="Label" parent="UI"]
+layout_mode = 1
+offset_left = 0.0
+offset_top = 280.0
+anchor_right = 1.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.722, 0.525, 0.043, 0.8)
+text = "SOUL FERRY  ·  替走不掉的人了结执念"
+
+; 朱红分割线（用 ColorRect 模拟）
+[node name="Divider" type="ColorRect" parent="UI"]
+layout_mode = 1
+offset_left = 440.0
+offset_top = 316.0
+offset_right = 840.0
+offset_bottom = 317.0
+color = Color(0.545, 0.102, 0.102, 0.5)
+
+; 按钮容器
+[node name="ButtonContainer" type="VBoxContainer" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+offset_left = -110.0
+offset_top  = -20.0
+offset_right = 110.0
+offset_bottom = 130.0
+theme_override_constants/separation = 14
+
+[node name="NewGameBtn" type="Button" parent="UI/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 46)
+text = "踏  上  旅  途"
+theme_override_font_sizes/font_size = 17
+
+[node name="ContinueBtn" type="Button" parent="UI/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 46)
+text = "继  续  渡  魂"
+theme_override_font_sizes/font_size = 17
+
+[node name="QuitBtn" type="Button" parent="UI/ButtonContainer"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 46)
+text = "就  此  搁  笔"
+theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.627, 0.600, 0.549, 0.75)
+
+; 版本号（右下角）
+[node name="VersionLabel" type="Label" parent="UI"]
+layout_mode = 1
+anchors_preset = 4
+anchor_left = 1.0
+anchor_top  = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -110.0
+offset_top  = -28.0
+offset_right = -10.0
+offset_bottom = -8.0
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.3, 0.25, 0.2, 0.6)
+text = "v0.1"
