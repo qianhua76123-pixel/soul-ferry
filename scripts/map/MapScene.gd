@@ -187,8 +187,10 @@ func _render_relics() -> void:
 	for rid in GameState.relics:
 		var data = RelicManager._all_relics_data.get(rid, {})
 		var lbl  = Label.new()
+		lbl.name = "relic_" + rid          # 命名方便后续定位
 		lbl.text = relic_icons.get(rid, "◈")
 		lbl.tooltip_text = data.get("name","???") + "\n" + data.get("effect","")
+		lbl.add_theme_font_size_override("font_size", 22)
 		relic_bar.add_child(lbl)
 
 func _update_status() -> void:
