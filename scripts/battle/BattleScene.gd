@@ -72,6 +72,7 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	_show_popup(result)
 
 func _on_battle_ended(result: String) -> void:
+	_last_battle_result = result
 	end_turn_btn.disabled = true
 	result_panel.visible  = true
 	match result:
@@ -98,7 +99,17 @@ func _on_du_hua_pressed() -> void:
 
 func _on_result_continue() -> void:
 	result_panel.visible = false
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	var result = _last_battle_result
+	if result == "victory" or result == "du_hua":
+		# 胜利/渡化 → 选牌奖励
+		get_tree().change_scene_to_file("res://scenes/CardRewardScene.tscn")
+	else:
+		# 失败 → 回主菜单（以后做存档）
+		GameState.new_run()
+		DeckManager.init_starter_deck()
+		get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+
+var _last_battle_result: String = ""
 
 func _on_hand_updated(hand: Array) -> void:
 	for child in hand_container.get_children():

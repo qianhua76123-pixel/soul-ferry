@@ -23,6 +23,12 @@ func _ready() -> void:
 	result_panel.visible = false
 	result_continue_btn.pressed.connect(_on_continue_pressed)
 	_load_events()
+	# 自动加载（来自地图传入的事件ID）
+	var eid = ""
+	if GameState.has_meta("pending_event_id"):
+		eid = str(GameState.get_meta("pending_event_id"))
+		GameState.remove_meta("pending_event_id")
+	load_event(eid)
 
 func _load_events() -> void:
 	var file = FileAccess.open("res://data/events.json", FileAccess.READ)
