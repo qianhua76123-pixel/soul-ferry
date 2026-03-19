@@ -67,18 +67,56 @@ func _render_event() -> void:
 	for child in choices_container.get_children():
 		child.queue_free()
 
+	# 年画眼：若持有且本局未用，展示所有选项的真实结果
+	var show_results = RelicManager.has_relic("nianhua_yan") and not RelicManager.nianhua_used_this_run
+
 	# 创建选项按钮
 	var choices = _current_event.get("choices", [])
 	for i in len(choices):
 		var choice = choices[i]
 		var btn = Button.new()
-		btn.text = choice.get("text", "选项%d" % (i + 1))
+		var btn_text = choice.get("text", "选项%d" % (i + 1))
+		if show_results:
+			# 附加真实结果预览
+			var result_preview = _get_result_preview(choice.get("result", {}))
+			btn_text += "\n[年画眼] → " + result_preview
+		btn.text = btn_text
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		btn.custom_minimum_size = Vector2(500, 44)
-		# 连接信号（闭包捕获 choice）
 		var captured = choice
 		btn.pressed.connect(func(): _on_choice_selected(captured))
 		choices_container.add_child(btn)
+
+	# 年画眼激活按钮（一局一次）
+	if RelicManager.has_relic("nianhua_yan") and not RelicManager.nianhua_used_this_run and not show_results:
+		var reveal_btn = Button.new()
+		reveal_btn.text = "👁 年画眼：看清真相（本局仅一次）"
+		reveal_btn.custom_minimum_size = Vector2(500, 36)
+		reveal_btn.pressed.connect(func():
+			RelicManager.use_nianhua_yan()
+			_render_event()   # 重新渲染带预览的选项
+		)
+		choices_container.add_child(reveal_btn)
+
+func _get_result_preview(result: Dictionary) -> String:
+	var parts = []
+	var rtype = result.get("type","")
+	match rtype:
+		"hp_gain":        parts.append("HP +%d" % result.get("value",0))
+		"hp_loss":        parts.append("HP -%d" % result.get("value",0))
+		"gold":           parts.append("金币 +%d" % result.get("value",0))
+		"max_hp_gain":    parts.append("最大HP +%d" % result.get("value",0))
+		"relic_reward":   parts.append("获得遗物")
+		"card_reward":    parts.append("获得牌")
+		"curse_card":     parts.append("获得诅咒牌")
+		"emotion_gain":
+			var e = EmotionManager.get_emotion_name(result.get("emotion",""))
+			parts.append("%s +%d" % [e, result.get("value",0)])
+		"multi":
+			for eff in result.get("effects", []):
+				parts.append(_get_result_preview(eff))
+	if parts.is_empty(): return result.get("description","???")
+	return "、".join(parts)
 
 func _on_choice_selected(choice: Dictionary) -> void:
 	# 禁用所有按钮，防止重复点击

@@ -74,7 +74,7 @@ func on_turn_start() -> void:
 	_sixiang_triggered_this_turn = false
 	_effect_qingming_pai_on_turn_start()
 	_effect_hun_bo_lu_on_turn_start()
-	_update_wuqing_jie()
+	_update_wuqing_jie()   # 回合开始也检查一次五情结
 
 # 回合结束时由 BattleScene 调用
 func on_turn_end() -> void:
@@ -126,14 +126,11 @@ func _effect_tong_jing_sui_on_battle_start(enemy_data: Dictionary) -> void:
 		relic_triggered.emit("tong_jing_sui",
 			"铜镜碎片感知到：敌人情绪以「%s」为主" % EmotionManager.get_emotion_name(dominant))
 
-## 烧骨片 — 镇压后获得2护盾（由 on_victory_zhenya 调用）
+## 烧骨片 — 镇压后获得2护盾（通过信号通知 BattleScene）
 func _effect_shaogu_pian_on_zhenya() -> void:
 	if not has_relic("shaogu_pian"): return
-	# 护盾通过 BattleStateMachine 处理，这里发信号通知
-	relic_triggered.emit("shaogu_pian", "烧骨片：获得 2 护盾")
-	# 直接修改 BattleScene 里的 state_machine.player_shield
-	# 由于 RelicManager 不持有场景引用，通过信号通知
-	relic_triggered.emit("shaogu_pian_shield_2", "+2护盾")
+	# "shaogu_pian_shield_2" 是 BattleScene 识别的特殊 relic_id，用于直接加护盾
+	relic_triggered.emit("shaogu_pian_shield_2", "烧骨片：护盾 +2")
 
 ## 清明牌 — 回合开始，定=0时自动+定1
 func _effect_qingming_pai_on_turn_start() -> void:

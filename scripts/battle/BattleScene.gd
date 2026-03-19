@@ -50,6 +50,10 @@ func _ready() -> void:
 	# 连接渡化成功
 	state_machine.du_hua_succeeded.connect(func(_eid): RelicManager.on_du_hua_success())
 
+	# 问路香按钮（仅持有时可见）
+	if RelicManager.has_relic("wenlu_xiang"):
+		_add_wenlu_btn()
+
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
 
@@ -210,3 +214,29 @@ func _show_popup(result: Dictionary) -> void:
 	tween.tween_property(lbl, "position:y", lbl.position.y - 70, 0.7)
 	tween.parallel().tween_property(lbl, "modulate:a", 0.0, 0.7)
 	tween.tween_callback(lbl.queue_free)
+
+## 问路香按钮（动态添加到 HUD）
+func _add_wenlu_btn() -> void:
+	var hud = get_node_or_null("UI/HUD")
+	if not hud: return
+	var btn = Button.new()
+	btn.name = "WenluBtn"
+	btn.text = "🕯问路香"
+	btn.custom_minimum_size = Vector2(90, 30)
+	btn.pressed.connect(_on_wenlu_pressed)
+	hud.add_child(btn)
+
+func _on_wenlu_pressed() -> void:
+	if not RelicManager.use_wenlu_xiang(): return
+	# 展示敌人下两回合意图（从 state_machine 读取）
+	var intent_lbl = get_node_or_null("UI/AltarLayout/EnemyArea/IntentLabel")
+	if intent_lbl:
+		var acts = state_machine.enemy_data.get("actions", [])
+		if acts.is_empty(): return
+		var preview = []
+		for a in acts.slice(0, min(2, len(acts))):
+			preview.append("%s %s" % [a.get("type","?"), str(a.get("value",""))])
+		intent_lbl.text = "感知：" + " / ".join(preview)
+	# 禁用按钮
+	var btn = get_node_or_null("UI/HUD/WenluBtn")
+	if btn: btn.disabled = true
