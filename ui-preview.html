@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>渡魂录 SOUL FERRY — 游戏界面预览</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&family=Noto+Serif+SC:wght@300;400;600;700&display=swap');
+
+  :root {
+    --ink:     #0a0705;
+    --paper:   #e8dfc8;
+    --vermil:  #8b1a1a;
+    --gold:    #b8860b;
+    --ash:     #2a2018;
+    --mist:    #c8bfa0;
+    --rage:    #8b1a1a;
+    --fear:    #4b0082;
+    --grief:   #1a3a6b;
+    --joy:     #b8860b;
+    --calm:    #a09070;
+    --glow-r:  rgba(139,26,26,0.35);
+    --glow-g:  rgba(184,134,11,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ink);
+    font-family: 'Noto Serif SC', serif;
+    color: var(--paper);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ─── 像素噪点底纹 ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='1' height='1' x='0' y='0' fill='%23ffffff08'/%3E%3Crect width='1' height='1' x='2' y='2' fill='%23ffffff05'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ══════════════════════════════════════
+     NAV TABS
+  ══════════════════════════════════════ */
+  .tab-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; gap: 2px;
+    background: #060402;
+    border-bottom: 1px solid #2a2018;
+    z-index: 100; padding: 0 8px;
+  }
+  .tab {
+    padding: 10px 22px;
+    font-size: 13px; letter-spacing: .1em;
+    color: var(--mist); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .2s; white-space: nowrap;
+    font-family: 'ZCOOL XiaoWei', serif;
+  }
+  .tab:hover   { color: var(--paper); }
+  .tab.active  { color: var(--vermil); border-bottom-color: var(--vermil); }
+
+  .screen { display: none; padding-top: 44px; min-height: 100vh; }
+  .screen.active { display: block; }
+
+  /* ══════════════════════════════════════
+     共用组件
+  ══════════════════════════════════════ */
+  .brush-line {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--vermil) 30%, var(--gold) 60%, transparent);
+    opacity: .5; margin: 0;
+  }
+
+  /* ══════════════════════════════════════
+     1. 主菜单
+  ══════════════════════════════════════ */
+  #screen-menu {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 100vh; position: relative; overflow: hidden;
+  }
+  .menu-bg-calligraphy {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: clamp(140px,22vw,340px);
+    color: rgba(139,26,26,.06);
+    user-select: none; pointer-events: none;
+    letter-spacing: -.05em;
+    animation: ink-breathe 6s ease-in-out infinite;
+  }
+  @keyframes ink-breathe {
+    0%,100% { opacity:.6; transform:scale(1); }
+    50%      { opacity:1;  transform:scale(1.015); }
+  }
+  .menu-content { position: relative; z-index: 2; text-align: center; }
+  .menu-title-cn {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: clamp(52px,8vw,100px);
+    color: var(--paper);
+    text-shadow: 0 0 60px rgba(139,26,26,.8), 0 2px 4px #000;
+    letter-spacing: .15em; line-height: 1;
+  }
+  .menu-title-en {
+    font-size: clamp(13px,1.8vw,18px);
+    letter-spacing: .5em; color: var(--gold);
+    margin-top: 6px; opacity: .85;
+  }
+  .menu-tagline {
+    margin: 28px auto 48px;
+    max-width: 460px; font-size: 14px;
+    color: var(--mist); line-height: 1.9;
+    font-style: italic;
+    border-left: 2px solid var(--vermil);
+    padding-left: 16px; text-align: left;
+  }
+  .menu-btns { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+  .menu-btn {
+    width: 220px; padding: 13px 0;
+    font-family: 'ZCOOL XiaoWei', serif;
+    font-size: 16px; letter-spacing: .2em;
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid rgba(139,26,26,.5);
+    cursor: pointer; position: relative; overflow: hidden;
+    transition: all .25s;
+  }
+  .menu-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(139,26,26,.15), transparent);
+    transform: translateX(-100%);
+    transition: transform .3s;
+  }
+  .menu-btn:hover { border-color: var(--vermil); color: var(--gold); }
+  .menu-btn:hover::before { transform: translateX(100%); }
+  .menu-btn.primary {
+    background: linear-gradient(135deg, rgba(139,26,26,.3), rgba(100,10,10,.5));
+    border-color: var(--vermil);
+  }
+  .version { margin-top: 60px; font-size: 11px; color: #403020; letter-spacing: .15em; }
+
+  /* ══════════════════════════════════════
+     2. 地图界面
+  ══════════════════════════════════════ */
+  #screen-map { background: radial-gradient(ellipse at center, #120d08 0%, #060402 100%); }
+  .map-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px;
+    background: rgba(6,4,2,.8); border-bottom: 1px solid #2a2018;
+  }
+  .map-header-title { font-family:'Ma Shan Zheng',cursive; font-size:22px; color:var(--vermil); }
+  .map-header-stats { display:flex; gap:24px; }
+  .stat-item { display:flex; align-items:center; gap:8px; font-size:13px; }
+  .stat-icon { font-size:16px; }
+  .stat-bar-wrap { width:100px; height:8px; background:#1a1208; border-radius:2px; overflow:hidden; }
+  .stat-bar { height:100%; border-radius:2px; transition:width .4s; }
+  .stat-bar.hp   { background:linear-gradient(90deg,#6b1010,#c02020); width:75%; }
+  .stat-bar.gold { background:linear-gradient(90deg,#7a5a00,#c8950a); width:100%; }
+
+  .map-body { padding: 20px; }
+  .map-layer-section { margin-bottom: 32px; }
+  .map-layer-title {
+    font-size: 12px; letter-spacing: .3em; color: var(--mist);
+    margin-bottom: 14px; padding-left: 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .map-layer-title::after {
+    content:''; flex:1; height:1px;
+    background:linear-gradient(90deg,rgba(139,26,26,.4),transparent);
+  }
+  .map-nodes { display:flex; gap:12px; flex-wrap:wrap; }
+
+  .map-node {
+    width: 80px; height: 80px;
+    border: 1px solid #2a2018;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px; cursor: pointer;
+    background: rgba(15,10,6,.6);
+    position: relative; transition: all .2s;
+    font-size: 11px; color: var(--mist);
+    letter-spacing: .05em;
+  }
+  .map-node:hover { border-color: var(--gold); color: var(--gold); transform:translateY(-3px); }
+  .map-node .node-icon { font-size: 24px; line-height:1; }
+  .map-node.current { border-color: var(--vermil); box-shadow: 0 0 16px rgba(139,26,26,.4); }
+  .map-node.current .node-icon { animation: node-pulse 1.5s ease-in-out infinite; }
+  @keyframes node-pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+  .map-node.visited { opacity:.35; cursor:default; }
+  .map-node.boss {
+    border-color: rgba(139,26,26,.6);
+    background: rgba(30,5,5,.6);
+  }
+  .map-node.boss .node-icon { color: var(--vermil); }
+  .map-node-connector {
+    width: 24px; height: 1px;
+    background: linear-gradient(90deg, var(--vermil), transparent);
+    opacity: .3; align-self: center; flex-shrink: 0;
+  }
+
+  /* ══════════════════════════════════════
+     3. 战斗界面（祭坛式）
+  ══════════════════════════════════════ */
+  #screen-battle {
+    display: none;
+    background: radial-gradient(ellipse at 50% 30%, #1a0f08 0%, #060402 70%);
+  }
+  #screen-battle.active { display: flex; flex-direction: column; }
+
+  /* 顶部 HUD */
+  .battle-hud {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px;
+    background: rgba(6,4,2,.9); border-bottom: 1px solid #1a1208;
+    flex-shrink: 0;
+  }
+  .hud-turn { font-family:'ZCOOL XiaoWei',serif; font-size:14px; color:var(--mist); }
+  .hud-cost {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--gold);
+  }
+  .cost-gem {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #d4a820, #7a5a00);
+    border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #0a0705;
+  }
+  .cost-gem.used { background: radial-gradient(circle at 35% 35%, #2a2018, #1a1208); opacity:.4; }
+  .hud-deck { display:flex; gap:14px; font-size:12px; color:var(--mist); }
+  .hud-end-turn {
+    padding: 7px 18px;
+    background: linear-gradient(135deg, rgba(139,26,26,.4), rgba(80,8,8,.6));
+    border: 1px solid rgba(139,26,26,.7);
+    color: var(--paper); font-family:'ZCOOL XiaoWei',serif;
+    font-size: 13px; letter-spacing:.1em; cursor:pointer;
+    transition: all .2s;
+  }
+  .hud-end-turn:hover { border-color:var(--vermil); background:rgba(139,26,26,.5); }
+
+  /* 战场三栏 */
+  .battle-arena {
+    flex: 1; display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    gap: 0; min-height: 0;
+    padding: 0;
+  }
+
+  /* ─ 玩家区 ─ */
+  .player-area {
+    padding: 20px 16px;
+    border-right: 1px solid #1a1208;
+    display: flex; flex-direction: column; gap: 10px;
+    background: rgba(10,7,5,.3);
+  }
+  .area-title {
+    font-size: 11px; letter-spacing:.3em; color:var(--mist);
+    text-align:center; margin-bottom:4px;
+  }
+  .hp-bar-wrap { display:flex; flex-direction:column; gap:4px; }
+  .hp-bar-label { display:flex; justify-content:space-between; font-size:11px; color:var(--mist); }
+  .hp-bar-track { height:10px; background:#1a1208; border-radius:1px; overflow:hidden; }
+  .hp-bar-fill { height:100%; background:linear-gradient(90deg,#6b1010,#c83030); border-radius:1px; transition:width .4s; }
+  .shield-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; background:rgba(30,50,80,.4);
+    border:1px solid rgba(40,80,140,.4); font-size:12px; color:#7090c0;
+  }
+  .relic-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:4px; }
+  .relic-chip {
+    width:32px; height:32px; border:1px solid #2a2018;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; background:rgba(15,10,6,.6);
+    cursor:pointer; transition:border-color .2s;
+  }
+  .relic-chip:hover { border-color:var(--gold); }
+
+  /* ─ 祭坛中央 ─ */
+  .altar-center {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 12px; gap: 10px; position: relative;
+  }
+  .altar-label {
+    font-size: 11px; letter-spacing:.35em; color:rgba(184,134,11,.6);
+    text-align:center;
+  }
+  .radar-wrap {
+    position: relative; width: 220px; height: 220px;
+  }
+  canvas#radar { position:absolute; top:0; left:0; }
+
+  .disorder-warning {
+    font-size: 12px; color: var(--vermil); letter-spacing:.1em;
+    text-align:center; min-height:18px;
+    animation: flash-warn .6s ease-in-out infinite;
+  }
+  @keyframes flash-warn { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ─ 敌人区 ─ */
+  .enemy-area {
+    padding: 20px 16px;
+    border-left: 1px solid #1a1208;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    background: rgba(10,7,5,.3);
+  }
+  .enemy-sprite-wrap {
+    width: 120px; height: 150px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  canvas#enemy-pixel { image-rendering: pixelated; }
+  .enemy-name {
+    font-family:'Ma Shan Zheng',cursive; font-size:18px;
+    color:var(--paper); text-align:center;
+    text-shadow: 0 0 20px rgba(139,26,26,.5);
+  }
+  .enemy-hp-wrap { width:100%; }
+  .intent-box {
+    width: 100%; padding: 6px 10px;
+    border: 1px solid #2a2018;
+    font-size: 11px; color: var(--mist);
+    background: rgba(10,7,5,.4);
+    text-align: center; letter-spacing:.05em;
+  }
+  .du-hua-btn {
+    width:100%; padding:8px 0;
+    background:linear-gradient(135deg,rgba(184,134,11,.3),rgba(100,80,0,.5));
+    border:1px solid rgba(184,134,11,.6);
+    color:var(--gold); font-family:'ZCOOL XiaoWei',serif;
+    font-size:13px; letter-spacing:.1em; cursor:pointer;
+    animation: du-hua-glow 2s ease-in-out infinite;
+  }
+  @keyframes du-hua-glow {
+    0%,100%{box-shadow:0 0 8px rgba(184,134,11,.3)}
+    50%{box-shadow:0 0 20px rgba(184,134,11,.6)}
+  }
+
+  /* 手牌区 */
+  .hand-area {
+    padding: 12px 16px 16px;
+    background: rgba(6,4,2,.85); border-top: 1px solid #1a1208;
+    display: flex; justify-content: center; gap: 10px;
+    flex-shrink: 0; flex-wrap: wrap; min-height: 165px;
+  }
+
+  /* ══════════════════════════════════════
+     牌卡组件
+  ══════════════════════════════════════ */
+  .card {
+    width: 88px; height: 130px;
+    border: 1px solid var(--border-col, #3a2a1a);
+    background: var(--ink);
+    position: relative; cursor: pointer; flex-shrink: 0;
+    transition: transform .15s, box-shadow .15s;
+    overflow: hidden;
+  }
+  .card:hover {
+    transform: translateY(-18px) scale(1.06);
+    box-shadow: 0 20px 40px rgba(0,0,0,.7), 0 0 20px var(--emotion-glow,rgba(139,26,26,.3));
+    z-index: 10;
+  }
+  .card-emotion-bar { height:8px; width:100%; background:var(--emotion-col,var(--vermil)); }
+  .card-art {
+    height: 52px; width:100%;
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(10,7,5,.8); position:relative; overflow:hidden;
+  }
+  .card-art canvas { image-rendering:pixelated; }
+  .card-divider {
+    height:1px; background:linear-gradient(90deg,transparent,var(--border-col,#3a2a1a),transparent);
+  }
+  .card-name {
+    padding:5px 6px 2px; font-size:12px;
+    color:var(--paper); letter-spacing:.05em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .card-desc {
+    padding:0 6px; font-size:9.5px; color:var(--mist);
+    line-height:1.4; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .card-cost {
+    position:absolute; top:2px; left:3px;
+    width:22px; height:22px; border-radius:50%;
+    background:rgba(10,7,5,.9); border:1px solid var(--border-col,#3a2a1a);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; color:var(--paper);
+    font-family:monospace; z-index:2;
+  }
+  .card-emotion-tag {
+    position:absolute; bottom:4px; right:4px;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--emotion-col,var(--vermil)); opacity:.8;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; color:#000; font-weight:700;
+  }
+  .card.unplayable { filter:grayscale(.7); opacity:.55; cursor:not-allowed; }
+  .card.legendary { box-shadow:inset 0 0 20px rgba(139,26,26,.15); }
+
+  /* ══════════════════════════════════════
+     4. 事件界面
+  ══════════════════════════════════════ */
+  #screen-event {
+    background: radial-gradient(ellipse at 50% 0%, #1a0808 0%, #060402 60%);
+    display: none; align-items: center; justify-content: center;
+  }
+  #screen-event.active { display:flex; }
+  .event-panel {
+    max-width: 680px; width: 90%; padding: 40px;
+    border: 1px solid #2a2018;
+    background: rgba(10,7,5,.92);
+    position: relative;
+  }
+  .event-panel::before, .event-panel::after {
+    content:''; position:absolute;
+    width:40px; height:40px;
+    border-color:var(--vermil); border-style:solid;
+    opacity:.5;
+  }
+  .event-panel::before { top:-1px; left:-1px; border-width:2px 0 0 2px; }
+  .event-panel::after  { bottom:-1px; right:-1px; border-width:0 2px 2px 0; }
+
+  .event-title {
+    font-family:'Ma Shan Zheng',cursive; font-size:26px;
+    color:var(--paper); text-align:center; margin-bottom:6px;
+    text-shadow: 0 0 30px rgba(139,26,26,.4);
+  }
+  .event-brush { display:flex; justify-content:center; margin-bottom:20px; }
+  .event-brush span {
+    width:80px; height:1px;
+    background:linear-gradient(90deg,transparent,var(--vermil));
+    display:block;
+  }
+  .event-brush span:last-child {
+    background:linear-gradient(90deg,var(--vermil),transparent);
+  }
+  .event-brush-dot {
+    width:6px; height:6px; border-radius:50%;
+    background:var(--vermil); margin:0 4px; align-self:center;
+  }
+  .event-desc {
+    font-size:14px; color:var(--mist); line-height:1.95;
+    margin-bottom:28px; border-left:2px solid rgba(139,26,26,.3);
+    padding-left:16px;
+  }
+  .event-choices { display:flex; flex-direction:column; gap:10px; }
+  .event-choice {
+    padding:13px 18px;
+    border:1px solid #2a2018;
+    color:var(--paper); font-size:13px;
+    background:rgba(15,10,6,.5); cursor:pointer;
+    transition:all .2s; line-height:1.6; text-align:left;
+    letter-spacing:.03em;
+  }
+  .event-choice:hover {
+    border-color:var(--gold); color:var(--gold);
+    background:rgba(25,18,6,.6); padding-left:26px;
+  }
+  .event-choice::before { content:'◈ '; color:var(--vermil); opacity:.6; }
+
+  /* ══════════════════════════════════════
+     5. 商店界面
+  ══════════════════════════════════════ */
+  #screen-shop { background:radial-gradient(ellipse at 50% 0%,#0a0814 0%,#060402 70%); }
+  .shop-header {
+    padding:20px 28px; border-bottom:1px solid #1a1208;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .shop-title { font-family:'Ma Shan Zheng',cursive; font-size:28px; color:var(--gold); }
+  .shop-gold { font-size:16px; color:var(--gold); }
+  .shop-body { padding:24px 28px; }
+  .shop-section-title {
+    font-size:11px; letter-spacing:.3em; color:var(--mist);
+    margin-bottom:16px;
+  }
+  .shop-cards { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:32px; }
+  .shop-card-slot { display:flex; flex-direction:column; gap:8px; align-items:center; }
+  .shop-price {
+    font-size:13px; color:var(--gold);
+  }
+  .shop-buy-btn {
+    padding:5px 16px;
+    border:1px solid rgba(184,134,11,.5);
+    background:transparent; color:var(--gold);
+    font-family:'ZCOOL XiaoWei',serif; font-size:12px;
+    letter-spacing:.1em; cursor:pointer; transition:all .2s;
+  }
+  .shop-buy-btn:hover { background:rgba(184,134,11,.2); border-color:var(--gold); }
+  .shop-remove {
+    padding:12px 24px; border:1px solid #2a2018;
+    background:rgba(10,7,5,.5); color:var(--mist);
+    font-size:13px; cursor:pointer; transition:all .2s;
+    letter-spacing:.05em;
+  }
+  .shop-remove:hover { border-color:var(--vermil); color:var(--vermil); }
+
+  /* 浮现动画 */
+  @keyframes screen-in {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .screen.active { animation: screen-in .3s ease-out; }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--vermil); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<!-- ─── 导航 ─── -->
+<div class="tab-bar">
+  <div class="tab active" onclick="showScreen('menu')">主菜单</div>
+  <div class="tab" onclick="showScreen('map')">地图</div>
+  <div class="tab" onclick="showScreen('battle')">战斗</div>
+  <div class="tab" onclick="showScreen('event')">事件</div>
+  <div class="tab" onclick="showScreen('shop')">商店</div>
+</div>
+
+<!-- ══════════════════ 1. 主菜单 ══════════════════ -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-bg-calligraphy">渡魂</div>
+  <div class="menu-content">
+    <div class="menu-title-cn">渡魂录</div>
+    <div class="menu-title-en">S O U L &nbsp; F E R R Y</div>
+    <p class="menu-tagline">「你是游走乡间的渡魂人，<br>用情绪作为武器与货币，<br>替走不掉的人了结执念。」</p>
+    <div class="menu-btns">
+      <button class="menu-btn primary" onclick="showScreen('map')">开始渡魂</button>
+      <button class="menu-btn" onclick="showScreen('battle')">预览战斗</button>
+      <button class="menu-btn">遗物图鉴</button>
+      <button class="menu-btn">设置</button>
+    </div>
+    <div class="version">v0.1 Demo &nbsp;·&nbsp; Solo + AI 辅助开发</div>
+  </div>
+</div>
+
+<!-- ══════════════════ 2. 地图 ══════════════════ -->
+<div id="screen-map" class="screen">
+  <div class="map-header">
+    <div class="map-header-title">渡魂录</div>
+    <div class="map-header-stats">
+      <div class="stat-item">
+        <span class="stat-icon">🩸</span>
+        <div>
+          <div style="font-size:11px;color:var(--mist);margin-bottom:3px">60 / 80</div>
+          <div class="stat-bar-wrap"><div class="stat-bar hp" style="width:75%"></div></div>
+        </div>
+      </div>
+      <div class="stat-item">
+        <span class="stat-icon">💰</span>
+        <span style="font-size:14px;color:var(--gold)">120</span>
+      </div>
+      <div class="stat-item" style="font-size:12px;color:var(--mist)">
+        🃏 牌库 14张
+      </div>
+    </div>
+  </div>
+
+  <div class="map-body">
+    <!-- 层1：荒村 -->
+    <div class="map-layer-section">
+      <div class="map-layer-title">第一层 · 荒村（悲·惧）</div>
+      <div class="map-nodes">
+        <div class="map-node visited"><div class="node-icon">⚔</div>战斗</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node visited"><div class="node-icon">📜</div>事件</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node visited"><div class="node-icon">🏮</div>商店</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node visited"><div class="node-icon">⚔</div>战斗</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node visited"><div class="node-icon">🕯</div>休息</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node boss visited"><div class="node-icon" style="color:#8b1a1a">☠</div>Boss</div>
+      </div>
+    </div>
+    <!-- 层2：古祠（当前层） -->
+    <div class="map-layer-section">
+      <div class="map-layer-title">第二层 · 古祠（怒·定）</div>
+      <div class="map-nodes">
+        <div class="map-node current" onclick="showScreen('battle')"><div class="node-icon">⚔</div>战斗</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node" onclick="showScreen('event')"><div class="node-icon">📜</div>事件</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node" onclick="showScreen('shop')"><div class="node-icon">🏮</div>商店</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node"><div class="node-icon">⚔</div>战斗</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node"><div class="node-icon">🕯</div>休息</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node boss"><div class="node-icon">☠</div>Boss</div>
+      </div>
+    </div>
+    <!-- 层3：锁定 -->
+    <div class="map-layer-section" style="opacity:.35">
+      <div class="map-layer-title">第三层 · 幽冥渡口（喜·定）</div>
+      <div class="map-nodes">
+        <div class="map-node"><div class="node-icon">⚔</div>战斗</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node"><div class="node-icon">📜</div>事件</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node"><div class="node-icon">⚔</div>战斗</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node"><div class="node-icon">🕯</div>休息</div>
+        <div class="map-node-connector"></div>
+        <div class="map-node boss"><div class="node-icon">☠</div>Boss</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 3. 战斗 ══════════════════ -->
+<div id="screen-battle" class="screen">
+  <!-- HUD -->
+  <div class="battle-hud">
+    <div class="hud-turn">第 3 回合</div>
+    <div class="hud-cost">
+      费用&nbsp;
+      <div class="cost-gem">1</div>
+      <div class="cost-gem used"></div>
+      <div class="cost-gem used"></div>
+    </div>
+    <div class="hud-deck">
+      <span>牌库 <b>7</b></span>
+      <span>弃牌 <b>5</b></span>
+    </div>
+    <button class="hud-end-turn">结束回合 ↵</button>
+  </div>
+
+  <!-- 三栏战场 -->
+  <div class="battle-arena">
+    <!-- 玩家区 -->
+    <div class="player-area">
+      <div class="area-title">— 渡魂人 —</div>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar-label"><span>生命</span><span>60/80</span></div>
+        <div class="hp-bar-track"><div class="hp-bar-fill" style="width:75%"></div></div>
+      </div>
+      <div class="shield-badge">🛡 护盾 &nbsp;<b>12</b></div>
+      <div style="font-size:11px;color:var(--mist);margin-top:6px">随身遗物</div>
+      <div class="relic-row">
+        <div class="relic-chip" title="铜镜碎片">🪞</div>
+        <div class="relic-chip" title="问路香">🕯</div>
+        <div class="relic-chip" title="渡魂册">📖</div>
+      </div>
+    </div>
+
+    <!-- 祭坛中央 -->
+    <div class="altar-center">
+      <div class="altar-label">— 五 情 祭 坛 —</div>
+      <div class="radar-wrap">
+        <canvas id="radar" width="220" height="220"></canvas>
+      </div>
+      <div class="disorder-warning" id="disorder-warning" style="visibility:hidden">⚠ 怒 失调！</div>
+    </div>
+
+    <!-- 敌人区 -->
+    <div class="enemy-area">
+      <div class="area-title">— 敌人 —</div>
+      <div class="enemy-name">旱魃·焦骨</div>
+      <div class="enemy-sprite-wrap">
+        <canvas id="enemy-pixel" width="80" height="112"></canvas>
+      </div>
+      <div class="enemy-hp-wrap">
+        <div class="hp-bar-label" style="display:flex;justify-content:space-between;font-size:11px;color:var(--mist);margin-bottom:3px"><span>HP</span><span>62/100</span></div>
+        <div class="hp-bar-track"><div class="hp-bar-fill" style="width:62%;background:linear-gradient(90deg,#5a3000,#c07000)"></div></div>
+      </div>
+      <div class="shield-badge" style="width:100%;justify-content:center">🛡 护盾 &nbsp;<b>0</b></div>
+      <div class="intent-box">意图：🔥 攻击 15</div>
+      <button class="du-hua-btn">✨ 发起渡化</button>
+    </div>
+  </div>
+
+  <!-- 手牌 -->
+  <div class="hand-area" id="hand-area"></div>
+</div>
+
+<!-- ══════════════════ 4. 事件 ══════════════════ -->
+<div id="screen-event" class="screen">
+  <div class="event-panel">
+    <div class="event-title">年画神</div>
+    <div class="event-brush">
+      <span></span><div class="event-brush-dot"></div><span></span>
+    </div>
+    <p class="event-desc">
+      一张被贴了一百年的门神年画，见证了这家人的百年悲欢，
+      情绪积累到无法承受。年画上的神明已经开始流泪，
+      墙上的颜色在渗血。<br><br>
+      「渡魂人……我太累了。」
+    </p>
+    <div class="event-choices">
+      <button class="event-choice" onclick="eventChoose(0)">「让我听你说说这一百年。」<br><small style="color:var(--gold);font-size:10px">升级一张牌，+悲1+喜1</small></button>
+      <button class="event-choice" onclick="eventChoose(1)">「将你请下来，送你离开。」<br><small style="color:var(--gold);font-size:10px">获得「年画眼」遗物，-5HP</small></button>
+      <button class="event-choice" onclick="eventChoose(2)">「烧掉这张年画。」<br><small style="color:var(--vermil);font-size:10px">获得诅咒牌「愤怒爆发」，+怒2</small></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ 5. 商店 ══════════════════ -->
+<div id="screen-shop" class="screen">
+  <div class="shop-header">
+    <div class="shop-title">🏮 渡魂商店</div>
+    <div class="shop-gold">💰 120 金币</div>
+  </div>
+  <div class="shop-body">
+    <div class="shop-section-title">— 今日售卖 —</div>
+    <div class="shop-cards" id="shop-cards"></div>
+    <div class="shop-section-title">— 其他服务 —</div>
+    <button class="shop-remove">🗑 移除一张牌（75金币）</button>
+  </div>
+</div>
+
+<script>
+// ─── 界面切换 ───
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  const tabs = ['menu','map','battle','event','shop'];
+  const idx = tabs.indexOf(id);
+  if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(id==='battle') { drawRadar(); drawEnemyPixel(); }
+}
+
+// ─── 五边形雷达图 ───
+function drawRadar() {
+  const canvas = document.getElementById('radar');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=220, H=220, cx=110, cy=110, R=80;
+  ctx.clearRect(0,0,W,H);
+
+  const emotions = [
+    { name:'定', val:3, color:'#a09070' },
+    { name:'怒', val:4, color:'#8b1a1a' },
+    { name:'惧', val:1, color:'#4b0082' },
+    { name:'悲', val:2, color:'#1a3a6b' },
+    { name:'喜', val:1, color:'#b8860b' },
+  ];
+  const N=emotions.length;
+  const MAX=5;
+
+  function ang(i) { return -Math.PI/2 + (Math.PI*2*i/N); }
+  function pt(i, r) { return [cx + Math.cos(ang(i))*r, cy + Math.sin(ang(i))*r]; }
+
+  // 背景网格
+  for(let lv=1;lv<=3;lv++) {
+    const r=R*lv/3;
+    ctx.beginPath();
+    for(let i=0;i<N;i++) {
+      const [x,y]=pt(i,r);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle='rgba(80,60,40,0.4)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+  // 轴线
+  for(let i=0;i<N;i++) {
+    const [x,y]=pt(i,R);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y);
+    ctx.strokeStyle='rgba(80,60,40,0.3)'; ctx.lineWidth=1; ctx.stroke();
+  }
+
+  // 怒值最高→用怒色渐变
+  const dominant = emotions.reduce((a,b)=>a.val>b.val?a:b);
+
+  // 填充多边形
+  ctx.beginPath();
+  for(let i=0;i<N;i++) {
+    const ratio = Math.max(emotions[i].val/MAX, 0.05);
+    const [x,y] = pt(i, R*ratio);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = dominant.color+'55';
+  ctx.fill();
+  ctx.strokeStyle = dominant.color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 顶点发光
+  for(let i=0;i<N;i++) {
+    const ratio = Math.max(emotions[i].val/MAX, 0.05);
+    const [x,y] = pt(i, R*ratio);
+    if(emotions[i].val>=3) {
+      ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fillStyle=emotions[i].color+'cc'; ctx.fill();
+    }
+  }
+
+  // 标签
+  ctx.font='13px "Noto Serif SC",serif';
+  for(let i=0;i<N;i++) {
+    const [x,y] = pt(i, R+20);
+    const e = emotions[i];
+    ctx.fillStyle = e.val>=4 ? '#c03030' : e.color;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(e.name+e.val, x, y);
+  }
+
+  // 失调警告
+  const warn = document.getElementById('disorder-warning');
+  if(warn) {
+    const hasDisorder = emotions.some(e=>e.val>=4 && e.name!=='定');
+    warn.style.visibility = hasDisorder ? 'visible' : 'hidden';
+    if(hasDisorder) {
+      const dis = emotions.filter(e=>e.val>=4 && e.name!=='定').map(e=>e.name).join('、');
+      warn.textContent = '⚠ '+dis+' 失调！';
+    }
+  }
+}
+
+// ─── 敌人像素立绘 ───
+function drawEnemyPixel() {
+  const c = document.getElementById('enemy-pixel');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const W=80, H=112;
+  ctx.clearRect(0,0,W,H);
+
+  // 旱魃·焦骨：橙红骨架像素风
+  const px = (x,y,col)=>{ ctx.fillStyle=col; ctx.fillRect(x*4,y*4,4,4); };
+
+  // 身体
+  const body = [
+    [0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,1,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    [0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+  ];
+  const cols = ['#c07020','#d08030','#a05010','#e09040'];
+  body.forEach((row,y)=>row.forEach((v,x)=>{
+    if(v) px(x,y,cols[Math.floor(Math.random()*2)]);
+  }));
+
+  // 火焰效果
+  const flames = [[3,1],[4,1],[5,1],[3,0],[5,0],[4,0]];
+  flames.forEach(([x,y])=> px(x,y-1>0?y-1:0,x,y,'#ff6010'));
+
+  // 光晕
+  const grd = ctx.createRadialGradient(40,56,20,40,56,50);
+  grd.addColorStop(0,'rgba(200,80,0,0.2)');
+  grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+}
+
+// ─── 生成牌卡 ───
+const CARDS_DATA = [
+  { id:'zhenhunfu',  name:'镇魂符',  emotion:'calm',  cost:1, effect:'获得8护盾\n定≥3额外+4', rarity:'common',   desc:'获得8点护盾' },
+  { id:'liguihao',   name:'厉鬼嚎',  emotion:'rage',  cost:2, effect:'造成14伤害\n怒主导+4',  rarity:'common',   desc:'造成14点伤害' },
+  { id:'wangxiangqi',name:'望乡泣',  emotion:'grief', cost:1, effect:'目标伤害-25%\n悲主导施加执念', rarity:'common', desc:'削弱目标' },
+  { id:'podan',      name:'破胆',    emotion:'fear',  cost:0, effect:'摸2张牌\n+惧2',         rarity:'common',   desc:'摸2张牌' },
+  { id:'duyinzhou',  name:'渡引咒',  emotion:'joy',   cost:2, effect:'回复12HP\n喜主导困惑全敌', rarity:'rare',  desc:'回复12HP' },
+  { id:'wuqing',     name:'五情归一',emotion:'calm',  cost:3, effect:'情绪归零\n获得总和×3护盾', rarity:'legendary', desc:'传说牌' },
+];
+
+const EMOTION_STYLE = {
+  rage:  { col:'#8b1a1a', glow:'rgba(139,26,26,.4)', tag:'怒' },
+  fear:  { col:'#4b0082', glow:'rgba(75,0,130,.4)',  tag:'惧' },
+  grief: { col:'#1a3a6b', glow:'rgba(26,58,107,.4)', tag:'悲' },
+  joy:   { col:'#b8860b', glow:'rgba(184,134,11,.4)',tag:'喜' },
+  calm:  { col:'#706050', glow:'rgba(110,90,70,.3)', tag:'定' },
+};
+const RARITY_BORDER = { common:'#3a2a1a', rare:'#8a7000', legendary:'#8b1010' };
+
+function makeCard(data, playable=true) {
+  const es = EMOTION_STYLE[data.emotion];
+  const rb = RARITY_BORDER[data.rarity];
+  const div = document.createElement('div');
+  div.className = 'card' + (data.rarity==='legendary'?' legendary':'') + (playable?'':' unplayable');
+  div.style.setProperty('--emotion-col', es.col);
+  div.style.setProperty('--emotion-glow', es.glow);
+  div.style.setProperty('--border-col', rb);
+
+  const artCanvas = document.createElement('canvas');
+  artCanvas.width=84; artCanvas.height=52;
+
+  div.innerHTML = `
+    <div class="card-cost">${data.cost}</div>
+    <div class="card-emotion-bar"></div>
+    <div class="card-art"></div>
+    <div class="card-divider"></div>
+    <div class="card-name">${data.name}</div>
+    <div class="card-desc">${data.desc}</div>
+    <div class="card-emotion-tag">${es.tag}</div>
+  `;
+  div.querySelector('.card-art').appendChild(artCanvas);
+  drawCardArt(artCanvas, data.emotion, es.col);
+  return div;
+}
+
+function drawCardArt(canvas, emotion, color) {
+  const ctx = canvas.getContext('2d');
+  const W=84, H=52, cx=W/2, cy=H/2;
+  ctx.clearRect(0,0,W,H);
+
+  // 背景
+  const bg = ctx.createRadialGradient(cx,cy,2,cx,cy,W/2);
+  bg.addColorStop(0, color+'22');
+  bg.addColorStop(1, 'transparent');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle=color; ctx.lineWidth=1.5; ctx.globalAlpha=0.7;
+
+  switch(emotion) {
+    case 'rage':
+      ctx.beginPath();
+      ctx.moveTo(cx,cy-18); ctx.lineTo(cx-14,cy+14); ctx.lineTo(cx+14,cy+14);
+      ctx.closePath(); ctx.strokeStyle=color; ctx.stroke();
+      ctx.fillStyle=color+'66'; ctx.fill();
+      break;
+    case 'fear':
+      ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
+      ctx.fillStyle=color+'99'; ctx.fill();
+      break;
+    case 'grief':
+      ctx.beginPath(); ctx.arc(cx,cy+4,12,0,Math.PI*2);
+      ctx.fillStyle=color+'55'; ctx.fill(); ctx.stroke();
+      break;
+    case 'joy':
+      [18,13,8].forEach(r=>{
+        ctx.globalAlpha=r/22*0.7;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+      });
+      ctx.globalAlpha=0.9;
+      ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2);
+      ctx.fillStyle=color; ctx.fill();
+      break;
+    case 'calm':
+      ctx.globalAlpha=0.7;
+      ctx.strokeRect(cx-13,cy-13,26,26);
+      ctx.beginPath(); ctx.arc(cx,cy,8,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx-13,cy); ctx.lineTo(cx+13,cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx,cy-13); ctx.lineTo(cx,cy+13); ctx.stroke();
+      break;
+  }
+  ctx.globalAlpha=1;
+}
+
+// 填充手牌
+function initHand() {
+  const hand = document.getElementById('hand-area');
+  if(!hand) return;
+  const shown = CARDS_DATA.slice(0,5);
+  shown.forEach((card,i)=>{
+    const c = makeCard(card, i<4);
+    hand.appendChild(c);
+  });
+}
+
+// 填充商店
+function initShop() {
+  const shop = document.getElementById('shop-cards');
+  if(!shop) return;
+  [CARDS_DATA[1], CARDS_DATA[4], CARDS_DATA[5]].forEach(card=>{
+    const slot = document.createElement('div');
+    slot.className='shop-card-slot';
+    const prices={common:60,rare:120,legendary:200};
+    slot.innerHTML=`<div class="shop-price">💰 ${prices[card.rarity]}</div>`;
+    slot.insertBefore(makeCard(card,true), slot.firstChild);
+    const btn=document.createElement('button');
+    btn.className='shop-buy-btn'; btn.textContent='购买';
+    btn.onclick=()=>{ btn.textContent='已购买'; btn.disabled=true; slot.style.opacity='.4'; };
+    slot.appendChild(btn);
+    shop.appendChild(slot);
+  });
+}
+
+function eventChoose(idx) {
+  const choices=['「让我听你说说这一百年。」已选择。随机升级一张牌，+悲1+喜1',
+    '「将你请下来，送你离开。」已选择。获得「年画眼」遗物，-5HP',
+    '「烧掉这张年画。」已选择。获得诅咒牌，+怒2'];
+  const panel=document.querySelector('.event-choices');
+  panel.innerHTML=`<div style="padding:20px;text-align:center;color:var(--gold);font-size:14px;border:1px solid rgba(184,134,11,.3)">${choices[idx]}</div>
+    <button class="event-choice" style="margin-top:16px;text-align:center" onclick="showScreen('map')">↩ 继续前行</button>`;
+}
+
+// ─── 初始化 ───
+initHand();
+initShop();
+</script>
+</body>
+</html>
