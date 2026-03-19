@@ -4,7 +4,6 @@ extends Node
 ## 管理怒/惧/悲/喜/定五种情绪的值、失调检测、增幅计算
 ## 使用信号广播情绪变化，其他系统监听并响应
 
-class_name EmotionManager
 
 # ========== 信号 ==========
 signal emotion_changed(emotion: String, old_value: int, new_value: int)

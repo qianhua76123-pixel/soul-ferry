@@ -3,7 +3,6 @@ extends Control
 ## CardUI.gd - 单张牌卡的 UI 组件
 ## 显示牌名、费用、效果描述、情绪标签颜色
 
-class_name CardUI
 
 signal card_clicked(card_data: Dictionary)
 

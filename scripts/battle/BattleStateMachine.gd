@@ -3,7 +3,6 @@ extends Node
 ## BattleStateMachine.gd - 战斗状态机
 ## 管理战斗的完整流程：开始→玩家回合→打牌→结算→敌方回合→循环
 
-class_name BattleStateMachine
 
 # ========== 信号 ==========
 signal state_changed(new_state: State)

@@ -3,7 +3,6 @@ extends Node
 ## DeckManager.gd - 牌库/手牌/弃牌堆管理器
 ## 管理牌库的洗牌、摸牌、出牌、弃牌全流程
 
-class_name DeckManager
 
 # ========== 信号 ==========
 signal card_drawn(card: Dictionary)

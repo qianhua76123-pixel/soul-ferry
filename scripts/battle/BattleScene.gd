@@ -4,7 +4,7 @@ extends Node2D
 ## 祭坛式：左(玩家) | 中(情绪雷达) | 右(敌人) | 底(手牌)
 
 # ========== 节点引用（路径与 BattleScene.tscn 严格对齐）==========
-@onready var state_machine:       BattleStateMachine = $BattleStateMachine
+@onready var state_machine = $BattleStateMachine
 @onready var hand_container:      HBoxContainer      = $UI/HandContainer
 
 # HUD
@@ -131,7 +131,7 @@ func _on_hand_updated(hand: Array) -> void:
 		child.queue_free()
 
 	for card_data in hand:
-		var card_ui = _card_scene.instantiate() as CardUINode
+		var card_ui = _card_scene.instantiate()
 		if not card_ui:
 			continue
 		card_ui.setup(card_data)
@@ -141,7 +141,7 @@ func _on_hand_updated(hand: Array) -> void:
 		hand_container.add_child(card_ui)
 
 func _on_card_clicked(card_data: Dictionary) -> void:
-	if state_machine.current_state != BattleStateMachine.State.PLAYER_TURN:
+	if state_machine.current_state != 2: # PLAYER_TURN
 		return
 	state_machine.play_card(card_data)
 
@@ -177,7 +177,7 @@ func _update_hud() -> void:
 
 func _refresh_hand_playable() -> void:
 	for card_ui in hand_container.get_children():
-		if card_ui is CardUINode:
+		if card_ui != null:
 			var can_afford = DeckManager.current_cost >= max(0, card_ui.card_data.get("cost", 0) - EmotionManager.get_cost_reduction())
 			card_ui.set_playable(can_afford and EmotionManager.can_play_card(card_ui.card_data))
 

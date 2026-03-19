@@ -3,7 +3,6 @@ extends Control
 ## EmotionWheel.gd - 五情盘 UI 组件
 ## 显示当前五情状态、主导情绪、失调警告
 
-class_name EmotionWheel
 
 @export var emotion_bars: Dictionary = {}  # emotion -> ProgressBar 节点
 

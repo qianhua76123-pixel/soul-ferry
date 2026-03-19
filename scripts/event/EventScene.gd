@@ -3,7 +3,6 @@ extends Node2D
 ## EventScene.gd - 民俗事件场景
 ## 从 events.json 加载事件，渲染故事文本和选项，处理选择结果
 
-class_name EventSceneController
 
 signal event_completed(result: Dictionary)
 

@@ -3,7 +3,6 @@ extends Node2D
 ## MapScene.gd - 地图节点系统
 ## 生成三层地图，每层横排节点，点击节点跳转场景
 
-class_name MapSceneController
 
 # ========== 节点引用 ==========
 @onready var node_container: VBoxContainer = $UI/NodeContainer

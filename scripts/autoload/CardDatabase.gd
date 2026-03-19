@@ -3,7 +3,6 @@ extends Node
 ## CardDatabase.gd - 牌卡数据库
 ## 从 JSON 文件加载所有牌卡数据，运行时只读缓存
 
-class_name CardDatabase
 
 const CARDS_DATA_PATH = "res://data/cards.json"
 

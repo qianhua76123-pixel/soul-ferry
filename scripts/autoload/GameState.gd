@@ -3,7 +3,6 @@ extends Node
 ## GameState.gd - 游戏整体状态管理
 ## 存储当局游戏的所有持久数据：HP、金钱、遗物、地图进度、选择记录等
 
-class_name GameState
 
 # ========== 信号 ==========
 signal hp_changed(old_hp: int, new_hp: int)

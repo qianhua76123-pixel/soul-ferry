@@ -4,7 +4,6 @@ extends Node2D
 ## 提供两种选择：回复HP / 升级一张牌
 ## 背景氛围：烛火、古庙
 
-class_name RestSceneController
 
 @onready var heal_btn: Button = $UI/Options/HealBtn
 @onready var upgrade_btn: Button = $UI/Options/UpgradeBtn

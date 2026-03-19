@@ -4,7 +4,6 @@ extends Node2D
 ## 祭坛式布局核心 UI，以 _draw() 直接绘制多边形
 ## 五情各占一个顶点（顺时针：怒/惧/悲/喜/定）
 
-class_name EmotionRadar
 
 # ========== 配置 ==========
 @export var radius: float = 80.0         # 最大半径

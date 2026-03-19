@@ -4,7 +4,6 @@ extends Control
 ## 像素化/民俗剪纸风占位符渲染，_draw() 直接绘制卡面
 ## 支持点击出牌、悬停预览、灰显不可用状态
 
-class_name CardUINode
 
 signal card_clicked(card_data: Dictionary)
 

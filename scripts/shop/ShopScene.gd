@@ -3,7 +3,6 @@ extends Node2D
 ## ShopScene.gd - 渡魂商店
 ## 随机展示3张可购买牌卡，支持移除牌卡，使用金币交易
 
-class_name ShopSceneController
 
 # ========== 节点引用 ==========
 @onready var gold_label: Label = $UI/GoldLabel
