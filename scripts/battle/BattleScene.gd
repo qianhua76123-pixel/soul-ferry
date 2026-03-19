@@ -23,7 +23,8 @@ extends Node2D
 @onready var result_label        = $UI/ResultPanel/ResultLabel
 @onready var result_btn          = $UI/ResultPanel/ContinueBtn
 
-var _card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
+var _card_scene:   PackedScene = preload("res://scenes/CardUI.tscn")
+var _dmgnum_scene: PackedScene = preload("res://scenes/DamageNumber.tscn")
 
 func _ready() -> void:
 	result_panel.visible = false
@@ -69,6 +70,8 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	RelicManager.on_battle_start(enemy_data)
 	enemy_hp_bar.max_value  = enemy_data.get("hp", 100)
 	enemy_hp_bar.value      = enemy_data.get("hp", 100)
+	# 像素立绘：替换 ColorRect
+	_setup_enemy_sprite(enemy_data)
 	enemy_shield_label.text = "🛡 0"
 	enemy_intent_label.text = "意图：..."
 	du_hua_hint_label.text  = ""
@@ -88,6 +91,14 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	enemy_shield_label.text  = "🛡 %d" % state_machine.enemy_shield
 	player_shield_label.text = "🛡 %d" % state_machine.player_shield
 	_update_hud()
+	# 浮字：根据效果类型选择颜色和位置
+	var rtype = result.get("type","")
+	var rval  = result.get("value", 0)
+	if rval > 0:
+		match rtype:
+			"attack","attack_all": _spawn_enemy_damage(rval, "damage")
+			"heal","heal_all_buffs": _spawn_player_number(rval, "heal")
+			"shield": _spawn_player_number(rval, "shield")
 	_show_popup(result)
 
 func _on_battle_ended(result: String) -> void:
@@ -226,9 +237,21 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 		return
 	state_machine.play_card(card_data)
 
-func _on_emotion_changed(_e: String, _o: int, _n: int) -> void:
+func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 	_update_hud()
 	_refresh_hand()
+	# 情绪变化浮字（在祭坛中央雷达图位置）
+	var diff = new_val - old_val
+	if diff != 0:
+		var radar_area = get_node_or_null("UI/AltarLayout/AltarCenter")
+		if radar_area:
+			var rect = radar_area.get_global_rect()
+			var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
+							   rect.position.y + rect.size.y * 0.5)
+			var ename = EmotionManager.get_emotion_name(emotion)
+			var arrow = "↑" if diff > 0 else "↓"
+			spawn_damage_number(abs(diff), "emotion", pos,
+				"%s%s%d" % [ename, arrow, abs(diff)])
 
 func _on_disorder_triggered(emotion: String) -> void:
 	disorder_warning.text = "⚠ %s 失调！" % EmotionManager.get_emotion_name(emotion)
@@ -239,10 +262,16 @@ func _on_disorder_triggered(emotion: String) -> void:
 func _on_disorder_cleared(_e: String) -> void:
 	disorder_warning.text = ""
 
-func _on_player_hp_changed(_o: int, new_hp: int) -> void:
+func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	player_hp_bar.max_value = GameState.max_hp
 	player_hp_bar.value     = new_hp
 	player_hp_label.text    = "%d / %d" % [new_hp, GameState.max_hp]
+	# 浮字：受伤/回血
+	var diff = new_hp - old_hp
+	if diff < 0:
+		_spawn_player_number(-diff, "damage")
+	elif diff > 0:
+		_spawn_player_number(diff, "heal")
 
 func _update_hud() -> void:
 	cost_label.text          = "费用: %d" % DeckManager.current_cost
@@ -428,3 +457,73 @@ func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
 
 func _hide_tooltip() -> void:
 	if _tooltip_label: _tooltip_label.visible = false
+
+## ══════════════════════════════════════════════════════
+## 浮字数字系统
+## ══════════════════════════════════════════════════════
+
+## 在世界坐标 pos 生成浮字
+func spawn_damage_number(value: int, type: String, pos: Vector2, extra: String = "") -> void:
+	if not _dmgnum_scene: return
+	var node = _dmgnum_scene.instantiate()
+	# 挂到 CanvasLayer，不受场景缩放影响
+	var ui = get_node_or_null("UI")
+	if ui: ui.add_child(node)
+	else:  add_child(node)
+	node.spawn(value, type, pos, extra)
+
+## 敌人受伤浮字（在 _on_card_effect 里调用）
+func _spawn_enemy_damage(value: int, type: String) -> void:
+	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if not enemy_area: return
+	var rect = enemy_area.get_global_rect()
+	var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
+					   rect.position.y + rect.size.y * 0.35)
+	spawn_damage_number(value, type, pos)
+
+## 玩家受伤/回血浮字
+func _spawn_player_number(value: int, type: String) -> void:
+	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
+	if not player_area: return
+	var rect = player_area.get_global_rect()
+	var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
+					   rect.position.y + rect.size.y * 0.4)
+	spawn_damage_number(value, type, pos)
+
+## ══════════════════════════════════════════════════════
+## 敌人像素立绘
+## ══════════════════════════════════════════════════════
+func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
+	var enemy_id = enemy_data.get("id", "")
+	var sprite_node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
+	if not sprite_node: return
+
+	# 把 ColorRect 换成 TextureRect（如果还没换过）
+	if sprite_node is ColorRect:
+		var parent = sprite_node.get_parent()
+		var idx    = sprite_node.get_index()
+		sprite_node.queue_free()
+
+		var tr = TextureRect.new()
+		tr.name              = "EnemySprite"
+		tr.texture_filter    = CanvasItem.TEXTURE_FILTER_NEAREST   # 保持像素感
+		tr.expand_mode       = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		tr.custom_minimum_size = Vector2(80, 112)
+		tr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		parent.add_child(tr)
+		parent.move_child(tr, idx)
+		sprite_node = tr
+
+	# 生成像素纹理
+	var tex = EnemyPixelArt.create_texture(enemy_id)
+	if sprite_node is TextureRect:
+		sprite_node.texture = tex
+
+	# Boss 发光效果
+	var is_boss = enemy_data.get("type","") == "boss"
+	if is_boss and sprite_node:
+		var tw = sprite_node.create_tween().set_loops()
+		tw.tween_property(sprite_node, "modulate",
+			Color(1.2, 1.0, 0.8, 1.0), 1.0).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(sprite_node, "modulate",
+			Color.WHITE, 1.0).set_ease(Tween.EASE_IN_OUT)
