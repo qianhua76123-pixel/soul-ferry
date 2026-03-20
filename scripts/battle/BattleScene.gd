@@ -27,7 +27,8 @@ var _card_scene:   PackedScene = preload("res://scenes/CardUI.tscn")
 var _dmgnum_scene: PackedScene = preload("res://scenes/DamageNumber.tscn")
 
 ## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
-const EnemyPixelArtClass = preload("res://scripts/ui/EnemyPixelArt.gd")
+const EnemyPixelArtClass  = preload("res://scripts/ui/EnemyPixelArt.gd")
+const PlayerPixelArtClass = preload("res://scripts/ui/PlayerPixelArt.gd")
 
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
@@ -66,6 +67,9 @@ func _ready() -> void:
 
 	# Buff 图标栏 + Tooltip 系统
 	_setup_buff_ui()
+
+	# 主角立绘初始化
+	_setup_player_sprite()
 
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
@@ -264,6 +268,10 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 	if state_machine.current_state != 2: # STATE_PLAYER_TURN
 		return
 	SoundManager.play_sfx("card_play")
+	# 出牌时切换施法立绘（0.5s 后恢复 idle）
+	_set_player_sprite_state("attack")
+	get_tree().create_timer(0.5).timeout.connect(
+		func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
 	state_machine.play_card(card_data)
 
 func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
@@ -300,8 +308,15 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	var diff = new_hp - old_hp
 	if diff < 0:
 		_spawn_player_number(-diff, "damage")
+		# 主角立绘切换受伤状态（0.4s 后恢复 idle）
+		_set_player_sprite_state("hurt")
+		get_tree().create_timer(0.4).timeout.connect(
+			func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
 	elif diff > 0:
 		_spawn_player_number(diff, "heal")
+	# 死亡
+	if new_hp <= 0:
+		_set_player_sprite_state("dead")
 
 func _update_hud() -> void:
 	cost_label.text          = "费用: %d" % DeckManager.current_cost
@@ -578,3 +593,18 @@ func _on_boss_phase_changed(new_phase: int) -> void:
 			if disorder_warning.text == "⚡ Boss 进入愤怒阶段！":
 				disorder_warning.text = ""
 		)
+
+## ══════════════════════════════════════════════════════
+## 主角像素立绘
+## ══════════════════════════════════════════════════════
+
+func _setup_player_sprite() -> void:
+	var sprite = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
+	if not sprite: return
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_set_player_sprite_state("idle")
+
+func _set_player_sprite_state(state: String) -> void:
+	var sprite = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
+	if not sprite: return
+	sprite.texture = PlayerPixelArtClass.create_texture(state)

@@ -638,6 +638,9 @@
     <!-- 玩家区 -->
     <div class="player-area">
       <div class="area-title">— 渡魂人 —</div>
+      <div class="sprite-wrap" style="width:80px;height:112px;margin:0 auto 6px">
+        <canvas id="player-pixel" width="80" height="112" style="image-rendering:pixelated"></canvas>
+      </div>
       <div class="hp-bar-wrap">
         <div class="hp-bar-label"><span>生命</span><span>60/80</span></div>
         <div class="hp-bar-track"><div class="hp-bar-fill" style="width:75%"></div></div>
@@ -725,7 +728,7 @@ function showScreen(id) {
   const tabs = ['menu','map','battle','event','shop'];
   const idx = tabs.indexOf(id);
   if(idx>=0) document.querySelectorAll('.tab')[idx].classList.add('active');
-  if(id==='battle') { drawRadar(); drawEnemyPixel(); }
+  if(id==='battle') { drawRadar(); drawPlayerPixel(); drawEnemyPixel('hanba_jiaoge'); }
 }
 
 // ─── 五边形雷达图 ───
@@ -819,45 +822,237 @@ function drawRadar() {
 }
 
 // ─── 敌人像素立绘 ───
-function drawEnemyPixel() {
+function drawPlayerPixel() {
+  const c = document.getElementById('player-pixel');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,80,112);
+  // 每像素 = 4×4
+  const px = (x,y,col,a=1) => {
+    ctx.globalAlpha = a;
+    ctx.fillStyle = col;
+    ctx.fillRect(x*4, y*4, 4, 4);
+    ctx.globalAlpha = 1;
+  };
+  const rect = (x,y,w,h,col,a=1) => {
+    for(let dy=0;dy<h;dy++) for(let dx=0;dx<w;dx++) px(x+dx,y+dy,col,a);
+  };
+  const circle = (cx,cy,r,col,a=1) => {
+    for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++)
+      if(dx*dx+dy*dy<=r*r) px(cx+dx,cy+dy,col,a);
+  };
+
+  // === 渡魂人·站立待机 ===
+  // 调色板
+  const ROBE   = '#59696f'; // 青灰袍
+  const ROBED  = '#374850'; // 袍阴影
+  const ROBEL  = '#7a8e91'; // 袍高光
+  const SASH   = '#9e1f1f'; // 朱红腰带
+  const SASHD  = '#671010'; // 腰带阴影
+  const CROWN  = '#1a1414'; // 道冠黑
+  const CROWNR = '#b88d0d'; // 道冠金边
+  const SKIN   = '#d6c2a8'; // 肤色
+  const SKIND  = '#a68c72'; // 肤色阴影
+  const BANNER = '#ebe4d0'; // 幡白
+  const BANRD  = '#b81a1a'; // 幡红符
+  const POLE   = '#2e2010'; // 幡杆
+  const HAIR   = '#1a1414'; // 头发
+  const EYE    = '#261e18'; // 眼睛
+
+  // 幡杆（贯穿从顶到手）
+  for(let y=0;y<22;y++) px(7,y,POLE);
+  rect(4,2,7,1,POLE); // 横木
+  // 幡面
+  rect(5,3,6,14,BANNER);
+  for(let y=3;y<17;y++){px(5,y,BANRD);px(10,y,BANRD);}
+  rect(5,3,6,1,BANRD); rect(5,16,6,1,BANRD);
+  // 符文（渡字笔画）
+  rect(6,5,4,1,BANRD);rect(6,8,4,1,BANRD);rect(6,11,4,1,BANRD);rect(6,14,4,1,BANRD);
+  for(let y=5;y<15;y++) px(8,y,BANRD);
+  // 幡穗
+  for(let dx=-1;dx<=1;dx++) for(let y=17;y<21;y++) px(8+dx,y,y%2===0?BANRD:BANNER);
+
+  // 下袍
+  for(let i=0;i<16;i++){
+    const w=8+Math.floor(i/2), x=16-Math.floor(w/2);
+    rect(x,31+i,w,1,ROBE);
+    if(i%4===0){px(x,31+i,ROBED);px(x+w-1,31+i,ROBED);}
+  }
+  rect(8,46,16,1,ROBED);
+  rect(11,47,4,2,CROWN); rect(17,47,4,2,CROWN); // 翘头鞋
+
+  // 躯干道袍
+  rect(12,19,8,12,ROBE);
+  rect(12,19,2,12,ROBED); rect(18,19,2,12,ROBED);
+  rect(14,19,2,10,ROBEL);
+  px(15,19,SKIN);px(16,19,SKIN);px(16,20,SKIN); // 领口
+  // 腰带
+  rect(11,28,10,3,SASH); rect(11,30,10,1,SASHD);
+  rect(15,28,2,3,SASHD); // 腰带结
+
+  // 左臂（持幡）
+  rect(9,20,3,7,ROBE); px(9,20,ROBED); px(9,21,ROBED);
+  rect(8,27,3,5,ROBED);
+  rect(8,32,3,3,SKIN); px(8,32,SKIND); // 手
+
+  // 右臂（自然下垂）
+  rect(20,20,3,7,ROBE); px(22,20,ROBED);
+  rect(21,27,3,5,ROBEL);
+  rect(21,32,3,3,SKIN);
+
+  // 头
+  circle(16,11,5,SKIN);
+  px(11,11,SKIN);px(21,11,SKIN); // 耳
+  px(11,10,HAIR);px(11,11,HAIR);px(11,12,HAIR);
+  px(21,10,HAIR);px(21,11,HAIR);px(21,12,HAIR);
+  // 眉
+  rect(13,9,2,1,EYE); rect(17,9,2,1,EYE);
+  // 眼（单眼皮，沉静）
+  px(13,10,EYE);px(14,10,EYE);px(15,10,EYE);
+  px(17,10,EYE);px(18,10,EYE);px(19,10,EYE);
+  px(14,11,EYE);px(18,11,EYE);
+  // 鼻
+  px(16,12,SKIND);
+  // 嘴
+  px(15,13,SKIND);px(16,13,SKIND);px(17,13,SKIND);
+
+  // 道冠
+  rect(12,3,8,5,CROWN);
+  rect(11,7,10,1,CROWNR); px(11,6,CROWNR); px(20,6,CROWNR);
+  rect(13,3,6,1,CROWNR);
+  px(16,4,CROWNR);px(16,5,CROWNR);
+
+  // 轮廓加深
+  const grd = ctx.createRadialGradient(32,70,10,32,70,50);
+  grd.addColorStop(0,'transparent');
+  grd.addColorStop(1,'rgba(5,3,2,0.25)');
+  ctx.fillStyle=grd; ctx.fillRect(0,0,80,112);
+}
+
+function drawEnemyPixel(enemyId='hanba_jiaoge') {
   const c = document.getElementById('enemy-pixel');
   if(!c) return;
   const ctx = c.getContext('2d');
   const W=80, H=112;
   ctx.clearRect(0,0,W,H);
 
-  // 旱魃·焦骨：橙红骨架像素风
-  const px = (x,y,col)=>{ ctx.fillStyle=col; ctx.fillRect(x*4,y*4,4,4); };
+  const px = (x,y,col,a=1) => {
+    ctx.globalAlpha=a; ctx.fillStyle=col;
+    ctx.fillRect(x*4,y*4,4,4); ctx.globalAlpha=1;
+  };
+  const rect = (x,y,w,h,col,a=1)=>{
+    for(let dy=0;dy<h;dy++) for(let dx=0;dx<w;dx++) px(x+dx,y+dy,col,a);
+  };
+  const circle=(cx,cy,r,col,a=1)=>{
+    for(let dy=-r;dy<=r;dy++) for(let dx=-r;dx<=r;dx++)
+      if(dx*dx+dy*dy<=r*r) px(cx+dx,cy+dy,col,a);
+  };
 
-  // 身体
-  const body = [
-    [0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,1,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,1,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
-    [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
-    [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
-    [0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
-  ];
-  const cols = ['#c07020','#d08030','#a05010','#e09040'];
-  body.forEach((row,y)=>row.forEach((v,x)=>{
-    if(v) px(x,y,cols[Math.floor(Math.random()*2)]);
-  }));
+  const ENEMIES = {
+    // 孤魂游灵
+    gu_hun_you_ling: ()=>{
+      for(let i=0;i<8;i++) rect(10+Math.floor(i/2),28+i*2,12-i,2,'#99bbf2',0.35+i*0.03);
+      circle(16,18,8,'#b3ccf2',0.75); circle(16,18,6,'#d9e8ff',0.55);
+      circle(13,16,2,'#141428',0.95); circle(19,16,2,'#141428',0.95);
+      for(let x=13;x<20;x++) px(x,22+Math.abs(x-16),'#141428',0.95);
+    },
+    // 怨鬼
+    yuan_gui: ()=>{
+      rect(9,10,14,22,'#801a1a');
+      [9,11,13,15,17,19,21].forEach(i=>{px(i,9,'#801a1a');px(i,8,'#4d0d0d');});
+      rect(9,10,2,22,'#4d0d0d'); rect(21,10,2,22,'#4d0d0d');
+      for(let y=12;y<28;y++) if(y%3!==0) px(16,y,'#330505');
+      rect(11,14,4,2,'#ffd924'); rect(17,14,4,2,'#ffd924');
+      [12,14].forEach(x=>px(x,13,'#ffd924')); [18,20].forEach(x=>px(x,13,'#ffd924'));
+    },
+    // 旱魃·焦骨（Boss 2）
+    hanba_jiaoge: ()=>{
+      // 光环
+      for(let a=0;a<360;a+=15){
+        const rad=a*Math.PI/180;
+        for(let r=10;r<14;r++){
+          const fx=Math.round(16+Math.cos(rad)*r), fy=Math.round(16+Math.sin(rad)*r);
+          if(fy<20) px(fx,fy,r<12?'#fae034':'#f28d0d',0.7);
+        }
+      }
+      rect(13,14,6,20,'#b86a25'); rect(9,14,14,4,'#b86a25');
+      rect(5,14,8,3,'#b86a25'); rect(19,14,8,3,'#b86a25');
+      circle(16,9,6,'#b86a25');
+      for(let y=14;y<34;y+=4){px(15,y,'#7a3008');px(17,y,'#7a3008');}
+      circle(13,8,2,'#fae034'); circle(19,8,2,'#fae034');
+      circle(13,8,1,'#fff566'); circle(19,8,1,'#fff566');
+      for(let y=10;y<46;y++){px(27,y,'#331404');if(y%3===0)px(26,y,'#f28d0d');}
+    },
+    // 鬼新娘·素锦（Boss 3）
+    guixiniang_sujin: ()=>{
+      for(let y=22;y<46;y++){const w=8+Math.floor((y-22)/3),x=16-Math.floor(w/2);rect(x,y,w,1,'#ebe5e0');}
+      for(let y=22;y<46;y+=2){px(12,y,'#991a1a');px(19,y,'#991a1a');}
+      rect(7,20,2,12,'#ffe040'); rect(7,18,2,3,'#e6d9bf');
+      circle(8,17,2,'#f27310',0.9); px(8,15,'#fff599',0.7);
+      rect(12,14,8,10,'#d1c9b8');
+      circle(16,9,6,'#d1c9b8');
+      rect(12,3,8,6,'#0f0a0f'); rect(14,1,4,3,'#0f0a0f');
+      for(let y=4;y<13;y++){const vw=10-Math.abs(y-8),vx=16-Math.floor(vw/2);rect(vx,y,vw,1,'#e02030',0.65+y*0.02);}
+      for(let x=14;x<19;x++) px(x,13,'#b32626');
+      rect(13,9,2,1,'#8c0d0d'); rect(18,9,2,1,'#8c0d0d');
+    },
+    // 水鬼·望归（Boss 1）
+    shuigui_wanggui: ()=>{
+      rect(11,16,10,26,'#3f8cbf',0.85); rect(12,15,8,2,'#3f8cbf',0.85);
+      for(let y=16;y<42;y+=3){px(11,y,'#b3e0f2',0.65);px(20,y,'#b3e0f2',0.65);}
+      circle(16,11,7,'#3f8cbf',0.85); circle(16,10,5,'#b3e0f2',0.65);
+      for(let i=0;i<6;i++){rect(9-i,8+i*2,3,2,'#1e2e4d',0.9);rect(21+i,8+i*2,3,2,'#1e2e4d',0.9);}
+      rect(6,14,5,3,'#3f8cbf',0.85); rect(21,12,5,3,'#3f8cbf',0.85);
+      rect(5,10,3,4,'#3f8cbf',0.85); rect(24,8,3,4,'#3f8cbf',0.85);
+      for(let x=13;x<16;x++) px(x,11,'#050a1f',0.95);
+      for(let x=18;x<21;x++) px(x,11,'#050a1f',0.95);
+    },
+    // 闪火鬼
+    shan_huo_gui: ()=>{
+      for(let x=8;x<24;x++){
+        const h=20-Math.abs(x-16)*2+Math.floor(Math.random()*4);
+        for(let y=Math.max(4,14-h);y<38;y++) px(x,y,'#f28d0d');
+      }
+      for(let x=11;x<21;x++) for(let y=18;y<36;y++) if(Math.abs(x-16)<4) px(x,y,'#f5e025',0.8);
+      circle(16,14,5,'#e0d8c8'); rect(14,19,4,10,'#e0d8c8');
+      [21,24].forEach(y=>{rect(12,y,3,1,'#e0d8c8');rect(17,y,3,1,'#e0d8c8');});
+      circle(14,13,1,'#faf566'); circle(18,13,1,'#faf566');
+    },
+    // 缕头鬼
+    lv_tou_gui: ()=>{
+      rect(11,24,10,18,'#8c7f99'); rect(12,24,10,18,'#8c7f99');
+      rect(9,8,14,18,'#c7b8ad');
+      const HAIR='#141014';
+      for(let x=9;x<23;x++){
+        const hl=28+Math.abs(x-16)*2;
+        for(let y=6;y<Math.min(hl,46);y++){
+          if(x<11||x>21||y<10) px(x,y,HAIR);
+          else if(y<14&&Math.random()>0.35) px(x,y,HAIR);
+        }
+      }
+      rect(13,17,3,2,'#d91a1a'); rect(18,17,3,2,'#d91a1a');
+    },
+    // 摄魅眼
+    she_mi_yan: ()=>{
+      [[-1,1],[1,1],[0,1],[0,-1]].forEach(([dx,dy],i)=>{
+        for(let r=0;r<5;r++) px(16+dx*(6+r),16+dy*(1+r),'#3d1e73');
+      });
+      circle(16,18,10,'#331a66'); circle(16,18,9,'#d9d1c7');
+      [30,120,210,300].forEach(a=>{
+        const rad=a*Math.PI/180;
+        for(let r=6;r<9;r++) px(Math.round(16+Math.cos(rad)*r),Math.round(18+Math.sin(rad)*r),'#b32626',0.7);
+      });
+      circle(16,18,5,'#8c1abf'); circle(16,18,2,'#050208');
+      px(18,16,'#ffffff'); px(19,15,'#ffffff',0.6);
+    },
+  };
 
-  // 火焰效果
-  const flames = [[3,1],[4,1],[5,1],[3,0],[5,0],[4,0]];
-  flames.forEach(([x,y])=> px(x,y-1>0?y-1:0,x,y,'#ff6010'));
+  const drawFn = ENEMIES[enemyId] || ENEMIES['gu_hun_you_ling'];
+  drawFn();
 
   // 光晕
-  const grd = ctx.createRadialGradient(40,56,20,40,56,50);
-  grd.addColorStop(0,'rgba(200,80,0,0.2)');
+  const grd = ctx.createRadialGradient(40,56,10,40,56,50);
+  grd.addColorStop(0,'rgba(139,26,26,0.15)');
   grd.addColorStop(1,'transparent');
   ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
 }

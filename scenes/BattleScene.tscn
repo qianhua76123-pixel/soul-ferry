@@ -88,6 +88,12 @@ layout_mode = 2
 horizontal_alignment = 1
 text = "── 渡魂人 ──"
 
+[node name="PlayerSprite" type="TextureRect" parent="UI/AltarLayout/PlayerArea"]
+layout_mode = 2
+custom_minimum_size = Vector2(80, 112)
+size_flags_horizontal = 4
+stretch_mode = 5
+
 [node name="HPBar" type="ProgressBar" parent="UI/AltarLayout/PlayerArea"]
 layout_mode = 2
 custom_minimum_size = Vector2(180, 20)
