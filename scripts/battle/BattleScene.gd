@@ -769,10 +769,11 @@ func _setup_layout_improvements() -> void:
 	var ground = ColorRect.new()
 	ground.name = "BattleGround"
 	ground.color = Color(0.05, 0.10, 0.06, 0.6)
-	ground.set_anchors_preset(Control.PRESET_WIDE)   # 全宽
-	ground.custom_minimum_size = Vector2(0, 4)
-	ground.size = Vector2(1216, 4)
-	ground.position = Vector2(0, 484)
+	# 全宽固定高度：anchor 左右拉满，高度固定 4px
+	ground.set_anchor_and_offset(SIDE_LEFT,  0.0, 0)
+	ground.set_anchor_and_offset(SIDE_RIGHT, 1.0, 0)
+	ground.set_anchor_and_offset(SIDE_TOP,   0.0, 484)
+	ground.set_anchor_and_offset(SIDE_BOTTOM,0.0, 488)
 	ground.z_index = 2
 	var ui = get_node_or_null("UI")
 	if ui: ui.add_child(ground)
