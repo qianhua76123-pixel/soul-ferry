@@ -593,14 +593,19 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 	if sprite_node is TextureRect:
 		sprite_node.texture = tex
 
-	# Boss 发光效果
+	# Boss 发光脉冲 + 慢速浮动
 	var is_boss = enemy_data.get("type","") == "boss"
 	if is_boss and sprite_node:
 		var tw = sprite_node.create_tween().set_loops()
 		tw.tween_property(sprite_node, "modulate",
-			Color(1.2, 1.0, 0.8, 1.0), 1.0).set_ease(Tween.EASE_IN_OUT)
+			Color(1.2, 1.0, 0.8, 1.0), 1.2).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_property(sprite_node, "modulate",
-			Color.WHITE, 1.0).set_ease(Tween.EASE_IN_OUT)
+			Color.WHITE, 1.2).set_ease(Tween.EASE_IN_OUT)
+	# 所有敌人都有 idle 浮动（Boss 幅度更大更慢）
+	if sprite_node:
+		var amp    = 6.0 if is_boss else 3.5
+		var period = 2.6 if is_boss else 2.0
+		_start_idle_float(sprite_node, amp, period)
 
 ## ══════════════════════════════════════════════════════
 ## Boss UI 初始化
@@ -634,8 +639,27 @@ func _setup_player_sprite() -> void:
 	if not sprite: return
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_set_player_sprite_state("idle")
+	# idle 浮动动画：上下 4px，1.8s 循环
+	_start_idle_float(sprite, 4.0, 1.8)
 
 func _set_player_sprite_state(state: String) -> void:
 	var sprite = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
 	if not sprite: return
 	sprite.texture = PlayerPixelArtClass.create_texture(state)
+	# 非 idle 状态时停止浮动，idle 时重新启动
+	if state == "idle":
+		_start_idle_float(sprite, 4.0, 1.8)
+	else:
+		# 停掉所有 tween（attack/hurt/dead 状态不浮动）
+		sprite.set_meta("_float_active", false)
+
+## 立绘 idle 浮动动画（主角 & 敌人通用）
+func _start_idle_float(node: Control, amp: float = 4.0, period: float = 2.0) -> void:
+	if not node: return
+	node.set_meta("_float_active", true)
+	var base_y = node.position.y
+	var tw = node.create_tween().set_loops()
+	tw.tween_property(node, "position:y", base_y - amp, period * 0.5)\
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(node, "position:y", base_y + amp * 0.3, period * 0.5)\
+		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)

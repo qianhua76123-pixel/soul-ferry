@@ -27,6 +27,7 @@ var enemy_hp: int = 0
 var enemy_max_hp: int = 0
 var enemy_shield: int = 0
 var player_shield: int = 0
+var _dodge_charges: int = 0   # 下次受击无效次数（dodge_next 牌效果）
 
 var joy_cards_played_this_turn: int = 0
 var du_hua_triggered: bool = false
@@ -140,26 +141,171 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg)
 			result.value = dmg
+
+		"attack_all_triple":
+			# 三次多段伤害
+			var dmg_each = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			var total = 0
+			for _i in 3:
+				_deal_damage_to_enemy(dmg_each)
+				total += dmg_each
+			result.value = total
+
+		"attack_lifesteal":
+			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+			GameState.heal(dmg)
+			result.value = dmg
+			result["healed"] = dmg
+
+		"attack_dot":
+			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "dot_fire", 4, 3)
+			result.value = dmg
+
+		"attack_scaling_rage":
+			# 伤害 = base_val × 当前怒值
+			var rage_val = EmotionManager.values.get("rage", 0)
+			var dmg = int((base_val * max(1, rage_val)) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+			result.value = dmg
+
+		"attack_and_weaken_all":
+			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+			result["weaken_percent"] = 50
+			result["defense_break"]  = 50
+			result.value = dmg
+
 		"shield":
 			var sv = base_val + bonus
 			player_shield += sv
 			result.value = sv
+
+		"shield_attack":
+			# 护盾 + 造成等量伤害
+			var sv = base_val + bonus
+			player_shield += sv
+			_deal_damage_to_enemy(sv)
+			result.value = sv
+
+		"shield_and_draw":
+			var sv = base_val + bonus
+			player_shield += sv
+			DeckManager.draw_cards(2)
+			result.value = sv
+
 		"heal", "heal_all_buffs":
 			var hv = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv)
 			result.value = hv
+
+		"heal_and_draw":
+			var hv = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv)
+			DeckManager.draw_cards(2)
+			result.value = hv
+
+		"heal_scale_grief":
+			# 回复 = base_val × 悲情绪值
+			var grief_val = EmotionManager.values.get("grief", 0)
+			var hv = int(base_val * max(1, grief_val) * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv)
+			result.value = hv
+
+		"mass_heal_shield":
+			var hv = int(base_val * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv)
+			player_shield += base_val
+			result.value = base_val
+			result["healed"] = hv
+
 		"draw":
 			DeckManager.draw_cards(base_val)
 			result.value = base_val
-		"weaken":
-			result["weaken_percent"] = base_val
-		"reset_shield":
-			var total = EmotionManager.get_total_value()
-			var sv = total * base_val
+
+		"draw_shield":
+			DeckManager.draw_cards(base_val)
+			var sv = bonus if bonus > 0 else 5
 			player_shield += sv
 			result.value = sv
+
+		"weaken":
+			result["weaken_percent"] = base_val
+
+		"weaken_fear":
+			result["weaken_percent"] = base_val
+			result["weaken_duration"] = 2
+
+		"weaken_and_draw":
+			result["weaken_percent"] = base_val
+			DeckManager.draw_cards(1)
+			result.value = 1
+
+		"dodge_next":
+			# 标记下次受击无效（BattleScene 处理浮字，状态机存标记）
+			_dodge_charges += (base_val + bonus)
+			result.value = _dodge_charges
+
+		"dodge_attack":
+			# 格挡并反击
+			_dodge_charges += 1
+			var dmg = int(base_val * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+			result.value = dmg
+
+		"remove_enemy_shield":
+			# 清除敌人护盾并转化为伤害
+			var removed = enemy_shield
+			enemy_shield = 0
+			if removed > 0:
+				_deal_damage_to_enemy(removed)
+			result.value = removed
+
+		"status_fear_all":
+			EmotionManager.modify("fear", base_val)
+			result.value = base_val
+
+		"status_seal":
+			result["sealed_turns"] = base_val
+
+		"balance_emotions":
+			# 将所有情绪值向均值靠拢（差值缩小 base_val）
+			var vals = EmotionManager.values
+			var avg = 0.0
+			for k in vals: avg += vals[k]
+			avg /= float(vals.size())
+			for k in vals:
+				var diff = vals[k] - int(avg)
+				if abs(diff) > base_val:
+					EmotionManager.modify(k, -sign(diff) * base_val)
+			player_shield += 10
+			result.value = 10
+
+		"du_hua_progress":
+			result["du_hua_progress"] = base_val + bonus
+
 		"du_hua_trigger":
 			result["du_hua_attempt"] = true
+
+		"reduce_enemy_emotion":
+			result["reduce_emotion"] = base_val
+
+		"buff_all_cards":
+			result["buff_all"] = base_val
+
+		"draw_discard_enemy":
+			DeckManager.draw_cards(base_val)
+			result.value = base_val
+
+		"peek_enemy":
+			result["peek"] = true
+
+		"status_fear_all", "dot_and_weaken":
+			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "dot", base_val, 3)
+			result["weaken_percent"] = base_val * 5
+
 		_:
 			pass
 	return result
@@ -172,9 +318,14 @@ func _check_condition(card: Dictionary) -> bool:
 		"fear_dominant":  return EmotionManager.dominant_emotion == "fear"
 		"grief_dominant": return EmotionManager.dominant_emotion == "grief"
 		"joy_dominant":   return EmotionManager.dominant_emotion == "joy"
-		"calm >= 3":      return EmotionManager.values["calm"]  >= 3
-		"grief >= 3":     return EmotionManager.values["grief"] >= 3
-		"fear >= 3":      return EmotionManager.values["fear"]  >= 3
+		"calm_dominant":  return EmotionManager.dominant_emotion == "calm"
+		"rage >= 3":      return EmotionManager.values.get("rage",  0) >= 3
+		"calm >= 3":      return EmotionManager.values.get("calm",  0) >= 3
+		"grief >= 3":     return EmotionManager.values.get("grief", 0) >= 3
+		"grief >= 2":     return EmotionManager.values.get("grief", 0) >= 2
+		"fear >= 3":      return EmotionManager.values.get("fear",  0) >= 3
+		"fear >= 2":      return EmotionManager.values.get("fear",  0) >= 2
+		"joy >= 3":       return EmotionManager.values.get("joy",   0) >= 3
 	return false
 
 func _check_du_hua(played_card: Dictionary) -> void:
@@ -237,14 +388,20 @@ func _execute_enemy_action(action: Dictionary) -> void:
 	var atype = action.get("type", "")
 	match atype:
 		"attack":
-			var raw = int(action.get("value", 0) * mul)
-			var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
-			if player_shield > 0:
-				var blocked = min(player_shield, dmg)
-				player_shield -= blocked
-				dmg -= blocked
-			if dmg > 0:
-				GameState.take_damage(dmg)
+			# 先检查闪避
+			if _dodge_charges > 0:
+				_dodge_charges -= 1
+				result["dodged"] = true
+				result.value = 0
+			else:
+				var raw = int(action.get("value", 0) * mul)
+				var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
+				if player_shield > 0:
+					var blocked = min(player_shield, dmg)
+					player_shield -= blocked
+					dmg -= blocked
+				if dmg > 0:
+					GameState.take_damage(dmg)
 
 		"emotion_push":
 			EmotionManager.modify(action.get("emotion", ""), action.get("value", 1))

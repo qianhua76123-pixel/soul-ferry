@@ -20,8 +20,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": 30},
-              {"type": "emotion_gain", "emotion": "grief", "value": 1}
+              {
+                "type": "gold",
+                "value": 30
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 1
+              }
             ],
             "description": "你找来了村里最后一个认识他的人。获得30金币，+悲1"
           }
@@ -49,9 +56,18 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_reward", "card_id": "du_hua_yin"},
-              {"type": "relic_reward", "relic_id": "tong_jing_sui"},
-              {"type": "narrative", "text": "亡魂说完了他未尽的话，平静地离开了。"}
+              {
+                "type": "card_reward",
+                "card_id": "du_hua_yin"
+              },
+              {
+                "type": "relic_reward",
+                "relic_id": "tong_jing_sui"
+              },
+              {
+                "type": "narrative",
+                "text": "亡魂说完了他未尽的话，平静地离开了。"
+              }
             ],
             "description": "亡魂离去，留下渡化碎片。获得「渡化引」+铜镜碎片"
           }
@@ -61,9 +77,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": 50},
-              {"type": "emotion_gain", "emotion": "rage", "value": 2},
-              {"type": "hp_loss", "value": 10}
+              {
+                "type": "gold",
+                "value": 50
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "rage",
+                "value": 2
+              },
+              {
+                "type": "hp_loss",
+                "value": 10
+              }
             ],
             "description": "强行驱逐受到反噬。获得50金币，-10HP，+怒2"
           }
@@ -82,9 +108,20 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_upgrade", "description": "随机升级一张牌"},
-              {"type": "emotion_gain", "emotion": "grief", "value": 1},
-              {"type": "emotion_gain", "emotion": "joy", "value": 1}
+              {
+                "type": "card_upgrade",
+                "description": "随机升级一张牌"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 1
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "joy",
+                "value": 1
+              }
             ],
             "description": "你倾听了百年的悲喜。随机升级一张牌，+悲1+喜1"
           }
@@ -94,8 +131,14 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "relic_reward", "relic_id": "nianhua_yan"},
-              {"type": "hp_loss", "value": 5}
+              {
+                "type": "relic_reward",
+                "relic_id": "nianhua_yan"
+              },
+              {
+                "type": "hp_loss",
+                "value": 5
+              }
             ],
             "description": "年画神离去，留下法器。获得「年画眼」遗物，-5HP"
           }
@@ -105,8 +148,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "curse_card", "card_id": "fen_nu_bao"},
-              {"type": "emotion_gain", "emotion": "rage", "value": 2}
+              {
+                "type": "curse_card",
+                "card_id": "fen_nu_bao"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "rage",
+                "value": 2
+              }
             ],
             "description": "年画神愤怒消散，诅咒牌进入牌库。获得「愤怒爆发」（诅咒），+怒2"
           }
@@ -125,8 +175,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_reward", "card_id": "wan_gui_chao_zong"},
-              {"type": "emotion_gain", "emotion": "joy", "value": 2}
+              {
+                "type": "card_reward",
+                "card_id": "wan_gui_chao_zong"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "joy",
+                "value": 2
+              }
             ],
             "description": "狐仙赠你传说牌。获得「万鬼朝宗」，+喜2"
           }
@@ -136,8 +193,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "hp_gain", "value": 20},
-              {"type": "emotion_gain", "emotion": "calm", "value": 1}
+              {
+                "type": "hp_gain",
+                "value": 20
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 1
+              }
             ],
             "description": "狐仙留下祝福。回复20HP，+定1"
           }
@@ -156,9 +220,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_reward", "card_id": "wangxiangqi"},
-              {"type": "emotion_gain", "emotion": "grief", "value": 2},
-              {"type": "narrative", "text": "他笑了，是那种终于可以放下的笑。"}
+              {
+                "type": "card_reward",
+                "card_id": "wangxiangqi"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "他笑了，是那种终于可以放下的笑。"
+              }
             ],
             "description": "亡魂安心离去。获得「望乡泣」升级版，+悲2"
           }
@@ -168,8 +242,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "max_hp_gain", "value": 10},
-              {"type": "emotion_gain", "emotion": "calm", "value": 2}
+              {
+                "type": "max_hp_gain",
+                "value": 10
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 2
+              }
             ],
             "description": "你记下了他的名字。最大HP+10，+定2"
           }
@@ -179,9 +260,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "hp_loss", "value": 15},
-              {"type": "emotion_gain", "emotion": "rage", "value": 1},
-              {"type": "narrative", "text": "他愤怒了——「我不能去阳间！」在愤怒中消散，未被渡化。"}
+              {
+                "type": "hp_loss",
+                "value": 15
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "rage",
+                "value": 1
+              },
+              {
+                "type": "narrative",
+                "text": "他愤怒了——「我不能去阳间！」在愤怒中消散，未被渡化。"
+              }
             ],
             "description": "亡魂愤怒消散，未被渡化。-15HP，+怒1"
           }
@@ -200,9 +291,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "hp_gain", "value": 15},
-              {"type": "emotion_gain", "emotion": "calm", "value": 2},
-              {"type": "narrative", "text": "亡魂沉默了很久，然后消散了。有些道歉，晚了也比没有好。"}
+              {
+                "type": "hp_gain",
+                "value": 15
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "亡魂沉默了很久，然后消散了。有些道歉，晚了也比没有好。"
+              }
             ],
             "description": "亡魂平息。回复15HP，+定2"
           }
@@ -212,8 +313,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_reward", "card_id": "hun_po_lie"},
-              {"type": "emotion_gain", "emotion": "rage", "value": 2}
+              {
+                "type": "card_reward",
+                "card_id": "hun_po_lie"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "rage",
+                "value": 2
+              }
             ],
             "description": "你听了他的冤屈，怒意涌上心头。获得「魂魄裂」，+怒2"
           }
@@ -223,9 +331,18 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": -20},
-              {"type": "max_hp_gain", "value": 8},
-              {"type": "narrative", "text": "你用金币请来石匠，刻下了一个名字。亡魂终于有了归宿。"}
+              {
+                "type": "gold",
+                "value": -20
+              },
+              {
+                "type": "max_hp_gain",
+                "value": 8
+              },
+              {
+                "type": "narrative",
+                "text": "你用金币请来石匠，刻下了一个名字。亡魂终于有了归宿。"
+              }
             ],
             "description": "花费20金币立碑。-20金，最大HP+8"
           }
@@ -244,9 +361,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "hp_gain", "value": 25},
-              {"type": "emotion_gain", "emotion": "joy", "value": 3},
-              {"type": "narrative", "text": "他笑了，消散在阳光里，像个终于被找到的孩子。"}
+              {
+                "type": "hp_gain",
+                "value": 25
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "joy",
+                "value": 3
+              },
+              {
+                "type": "narrative",
+                "text": "他笑了，消散在阳光里，像个终于被找到的孩子。"
+              }
             ],
             "description": "孩子安心渡化。回复25HP，+喜3"
           }
@@ -256,8 +383,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_reward", "card_id": "yin_hun_zhen"},
-              {"type": "emotion_gain", "emotion": "grief", "value": 2}
+              {
+                "type": "card_reward",
+                "card_id": "yin_hun_zhen"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 2
+              }
             ],
             "description": "你听完了那段孤独的等待。获得「引魂阵」，+悲2"
           }
@@ -276,9 +410,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_upgrade", "description": "随机升级一张牌"},
-              {"type": "emotion_gain", "emotion": "calm", "value": 2},
-              {"type": "narrative", "text": "你看清了恐惧的真面目，它比你想象的要小很多。"}
+              {
+                "type": "card_upgrade",
+                "description": "随机升级一张牌"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "你看清了恐惧的真面目，它比你想象的要小很多。"
+              }
             ],
             "description": "正视恐惧。随机升级一张牌，+定2"
           }
@@ -288,9 +432,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "relic_reward", "relic_id": "tong_jing_sui"},
-              {"type": "emotion_gain", "emotion": "fear", "value": 1},
-              {"type": "hp_loss", "value": 8}
+              {
+                "type": "relic_reward",
+                "relic_id": "tong_jing_sui"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "fear",
+                "value": 1
+              },
+              {
+                "type": "hp_loss",
+                "value": 8
+              }
             ],
             "description": "镜子碎裂，碎片刺伤了你。获得铜镜碎片，-8HP，+惧1"
           }
@@ -300,8 +454,15 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": 20},
-              {"type": "emotion_gain", "emotion": "fear", "value": 2}
+              {
+                "type": "gold",
+                "value": 20
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "fear",
+                "value": 2
+              }
             ],
             "description": "你快步走过，心跳加速。+20金，+惧2"
           }
@@ -320,9 +481,18 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": 60},
-              {"type": "curse_card", "card_id": "fen_nu_bao"},
-              {"type": "narrative", "text": "他把一生的积蓄交给你，但心里的债却更重了。"}
+              {
+                "type": "gold",
+                "value": 60
+              },
+              {
+                "type": "curse_card",
+                "card_id": "fen_nu_bao"
+              },
+              {
+                "type": "narrative",
+                "text": "他把一生的积蓄交给你，但心里的债却更重了。"
+              }
             ],
             "description": "获得60金，但诅咒牌进入牌库"
           }
@@ -332,9 +502,18 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": -30},
-              {"type": "max_hp_gain", "value": 15},
-              {"type": "narrative", "text": "你帮他偿清了欠债，他终于可以走了。"}
+              {
+                "type": "gold",
+                "value": -30
+              },
+              {
+                "type": "max_hp_gain",
+                "value": 15
+              },
+              {
+                "type": "narrative",
+                "text": "你帮他偿清了欠债，他终于可以走了。"
+              }
             ],
             "description": "-30金，最大HP+15，商人渡化"
           }
@@ -353,9 +532,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "card_reward", "card_id": "wuqingguiyi"},
-              {"type": "emotion_gain", "emotion": "calm", "value": 3},
-              {"type": "narrative", "text": "他愣了很久，然后放下了剑。三百年了，终于可以回家了。"}
+              {
+                "type": "card_reward",
+                "card_id": "wuqingguiyi"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 3
+              },
+              {
+                "type": "narrative",
+                "text": "他愣了很久，然后放下了剑。三百年了，终于可以回家了。"
+              }
             ],
             "description": "将军渡化。获得「五情归一」，+定3"
           }
@@ -365,9 +554,19 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "hp_loss", "value": 20},
-              {"type": "card_reward", "card_id": "nie_huo_fen"},
-              {"type": "emotion_gain", "emotion": "rage", "value": 2}
+              {
+                "type": "hp_loss",
+                "value": 20
+              },
+              {
+                "type": "card_reward",
+                "card_id": "nie_huo_fen"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "rage",
+                "value": 2
+              }
             ],
             "description": "他不信任你，出手攻击。受伤-20HP，获得「孽火焚」，+怒2"
           }
@@ -377,11 +576,316 @@
           "result": {
             "type": "multi",
             "effects": [
-              {"type": "gold", "value": 40},
-              {"type": "relic_reward", "relic_id": "qingming_pai"},
-              {"type": "narrative", "text": "你写下了他的名字，他的戾气消散了一半。"}
+              {
+                "type": "gold",
+                "value": 40
+              },
+              {
+                "type": "relic_reward",
+                "relic_id": "qingming_pai"
+              },
+              {
+                "type": "narrative",
+                "text": "你写下了他的名字，他的戾气消散了一半。"
+              }
             ],
             "description": "获得40金 + 清明牌遗物"
+          }
+        }
+      ]
+    },
+    {
+      "id": "gui_chuan_ke",
+      "name": "鬼船客",
+      "title": "迷雾渡口",
+      "layer": 1,
+      "description": "迷雾中，一艘没有船夫的渡船停在渡口。船上有三个乘客，他们已经等了不知道多少年，不知道该不该上船。看见你来了，他们齐声问：「渡魂人，我们能走了吗？」",
+      "choices": [
+        {
+          "text": "「可以，上船。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "gold",
+                "value": 45
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "joy",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "三个魂魄依次上船，船缓缓驶入雾中消失。你听见远处传来欢笑声。"
+              }
+            ],
+            "description": "三魂渡化，获得45金，+喜2"
+          }
+        },
+        {
+          "text": "「还不是时候，你们还有牵挂未了。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "card_reward",
+                "card_id": "yin_du"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 1
+              }
+            ],
+            "description": "你帮他们整理牵挂，获得「引渡」牌卡，+悲1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "shi_nian_de_zhu",
+      "name": "十年的咒",
+      "title": "封印古井",
+      "layer": 2,
+      "description": "村里有口古井，被封印了十年。十年前一个孩子失足落井，尸体找不到，从此井里每到夜里就有哭声。今晚封印松动，哭声越来越大。",
+      "choices": [
+        {
+          "text": "「打开封印，听清哭声说的是什么。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "hp_loss",
+                "value": 12
+              },
+              {
+                "type": "card_reward",
+                "card_id": "ku_sha"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 3
+              },
+              {
+                "type": "narrative",
+                "text": "「妈妈，我不是故意的……」你终于听清了，孩子只是在道歉。"
+              }
+            ],
+            "description": "-12HP，获得「枯煞」，+悲3"
+          }
+        },
+        {
+          "text": "「重新加固封印，让它沉睡。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "gold",
+                "value": 25
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 2
+              }
+            ],
+            "description": "封印加固，哭声平息。+25金，+定2"
+          }
+        },
+        {
+          "text": "「传话给孩子的母亲，让她来说一声原谅。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "max_hp_gain",
+                "value": 12
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "joy",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "母亲在井边哭着说了原谅，哭声就再也没有了。"
+              }
+            ],
+            "description": "最大HP+12，+喜2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "bai_mao_shen",
+      "name": "白猫神",
+      "title": "废庙白猫",
+      "layer": 1,
+      "description": "废庙里住着一只白猫，毛发雪白，眼睛是金色的。它看着你，用人话说：「渡魂人，你路过这里，帮我捎一句话给庙外那棵老树，就说：等你等了三百年，还没等来，我先走一步了。」",
+      "choices": [
+        {
+          "text": "「我去传话。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "relic_reward",
+                "relic_id": "si_xiang_pian"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "老树的树叶落了一地，像是在回应。白猫满意地消散了。"
+              }
+            ],
+            "description": "获得思乡片遗物，+定2"
+          }
+        },
+        {
+          "text": "「我能问问，你们之间是什么关系吗？」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 2
+              },
+              {
+                "type": "card_reward",
+                "card_id": "wangxiangqi"
+              }
+            ],
+            "description": "+悲2，获得「望乡泣」"
+          }
+        }
+      ]
+    },
+    {
+      "id": "po_mian_zhe",
+      "name": "破面者",
+      "title": "戏班旧戏台",
+      "layer": 3,
+      "description": "旧戏台上，一个演了三百年的戏子还在唱。他的脸上戴着一张破旧的脸谱，早就与皮肉长在了一起。他唱的是同一出戏，同一句词：「问世间情为何物——」",
+      "choices": [
+        {
+          "text": "「直叫人生死相许。」（接下那句）",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "card_reward",
+                "card_id": "yi_hen_qian_nian"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "grief",
+                "value": 2
+              },
+              {
+                "type": "narrative",
+                "text": "他停下了，脸谱缓缓脱落，露出三百年未见光的脸。「有人懂。」他轻声说，然后离去。"
+              }
+            ],
+            "description": "戏子渡化，获得「遗恨千年」（传说），+悲2"
+          }
+        },
+        {
+          "text": "「帮你摘下那张脸谱。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "hp_loss",
+                "value": 20
+              },
+              {
+                "type": "gold",
+                "value": 80
+              },
+              {
+                "type": "narrative",
+                "text": "他挣扎反抗，你强行撕下脸谱，他消散在痛苦的嚎叫中。"
+              }
+            ],
+            "description": "-20HP，+80金"
+          }
+        },
+        {
+          "text": "「这出戏，你愿意唱到什么时候？」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "card_upgrade",
+                "description": "升级手牌中最稀有的一张"
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 1
+              }
+            ],
+            "description": "升级最高稀有度牌卡，+定1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "wu_tou_gui_wang",
+      "name": "无头鬼王",
+      "title": "荒郊无头鬼",
+      "layer": 3,
+      "description": "荒郊里，一个鬼王正在寻找自己的头颅——他死后头被人藏起来，一直无法安息。他不是在找你麻烦，只是每见到一个路人就问：「看见我的头了吗？」",
+      "choices": [
+        {
+          "text": "「我帮你找。」（实际上找不到，但你会陪他走一段）",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "max_hp_gain",
+                "value": 18
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "calm",
+                "value": 3
+              },
+              {
+                "type": "narrative",
+                "text": "你们走了很久，什么都没找到，但他说：『这是三百年来第一次有人愿意陪我找。』然后平静地消散了。"
+              }
+            ],
+            "description": "最大HP+18，+定3"
+          }
+        },
+        {
+          "text": "「没有，但我渡化你，你在另一边自己长一个新的。」",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {
+                "type": "gold",
+                "value": 50
+              },
+              {
+                "type": "emotion_gain",
+                "emotion": "joy",
+                "value": 3
+              },
+              {
+                "type": "narrative",
+                "text": "他愣了一下，然后大笑着消散——可能是三百年来第一次笑。"
+              }
+            ],
+            "description": "+50金，+喜3"
           }
         }
       ]

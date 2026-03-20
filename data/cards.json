@@ -9,7 +9,9 @@
       "effect_value": 8,
       "condition": "calm >= 3",
       "condition_bonus": 4,
-      "emotion_shift": {"calm": 1},
+      "emotion_shift": {
+        "calm": 1
+      },
       "rarity": "common",
       "description": "获得8点护盾，若定≥3额外获得4点"
     },
@@ -22,7 +24,9 @@
       "effect_value": 14,
       "condition": "rage_dominant",
       "condition_bonus": 4,
-      "emotion_shift": {"rage": 2},
+      "emotion_shift": {
+        "rage": 2
+      },
       "rarity": "common",
       "description": "造成14点伤害，若怒为主导额外+4点伤害"
     },
@@ -35,7 +39,9 @@
       "effect_value": 25,
       "condition": "grief_dominant",
       "condition_bonus_type": "status_zhinian",
-      "emotion_shift": {"grief": 1},
+      "emotion_shift": {
+        "grief": 1
+      },
       "rarity": "common",
       "description": "目标下回合伤害-25%，若悲为主导施加「执念」状态"
     },
@@ -48,7 +54,9 @@
       "effect_value": 2,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"fear": 2},
+      "emotion_shift": {
+        "fear": 2
+      },
       "rarity": "common",
       "description": "摸2张牌，+惧2（零费但代价明显）"
     },
@@ -61,7 +69,9 @@
       "effect_value": 12,
       "condition": "joy_dominant",
       "condition_bonus_type": "status_confusion_all",
-      "emotion_shift": {"joy": 1},
+      "emotion_shift": {
+        "joy": 1
+      },
       "rarity": "rare",
       "description": "回复12HP，若喜为主导对所有敌人施加「困惑」"
     },
@@ -74,7 +84,9 @@
       "effect_value": 3,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"clear_all": true},
+      "emotion_shift": {
+        "clear_all": true
+      },
       "rarity": "legendary",
       "description": "【传说】将所有情绪归零，获得等同情绪总和×3的护盾"
     },
@@ -87,7 +99,9 @@
       "effect_value": 12,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"calm": 2},
+      "emotion_shift": {
+        "calm": 2
+      },
       "rarity": "common",
       "description": "获得12点护盾，下回合+定1"
     },
@@ -100,7 +114,9 @@
       "effect_value": 6,
       "condition": "calm >= 3",
       "condition_bonus": 6,
-      "emotion_shift": {"calm": 1},
+      "emotion_shift": {
+        "calm": 1
+      },
       "rarity": "rare",
       "description": "获得6护盾并造成6点伤害，定≥3时效果翻倍"
     },
@@ -113,7 +129,9 @@
       "effect_value": 2,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"calm": 2},
+      "emotion_shift": {
+        "calm": 2
+      },
       "rarity": "rare",
       "description": "对目标施加「封印」状态2层，被封印的敌人无法使用特殊技能"
     },
@@ -126,7 +144,9 @@
       "effect_value": 5,
       "condition": "calm >= 3",
       "condition_bonus": 5,
-      "emotion_shift": {"calm": 1},
+      "emotion_shift": {
+        "calm": 1
+      },
       "rarity": "common",
       "description": "造成5点伤害，定≥3时伤害翻倍"
     },
@@ -139,7 +159,9 @@
       "effect_value": 8,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"rage": 1},
+      "emotion_shift": {
+        "rage": 1
+      },
       "rarity": "common",
       "description": "造成8点伤害"
     },
@@ -152,7 +174,9 @@
       "effect_value": 10,
       "condition": "rage_dominant",
       "condition_bonus": 5,
-      "emotion_shift": {"rage": 2},
+      "emotion_shift": {
+        "rage": 2
+      },
       "rarity": "rare",
       "description": "对所有敌人造成10点伤害，怒为主导时额外+5点"
     },
@@ -165,7 +189,10 @@
       "effect_value": 12,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"rage": 2, "grief": 1},
+      "emotion_shift": {
+        "rage": 2,
+        "grief": 1
+      },
       "rarity": "rare",
       "description": "造成12点伤害并吸取6点HP，+怒2+悲1"
     },
@@ -178,7 +205,9 @@
       "effect_value": 0,
       "condition": "rage_dominant",
       "condition_bonus_type": "rage_times_4",
-      "emotion_shift": {"rage": 3},
+      "emotion_shift": {
+        "rage": 3
+      },
       "rarity": "rare",
       "description": "造成等同当前怒×4的伤害，+怒3（危险！）"
     },
@@ -191,7 +220,9 @@
       "effect_value": 3,
       "condition": "grief_dominant",
       "condition_bonus": 2,
-      "emotion_shift": {"grief": 2},
+      "emotion_shift": {
+        "grief": 2
+      },
       "rarity": "rare",
       "description": "令敌人弃置3张「意图牌」，悲主导时额外+2层执念"
     },
@@ -204,7 +235,9 @@
       "effect_value": 20,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"grief": 1},
+      "emotion_shift": {
+        "grief": 1
+      },
       "rarity": "common",
       "description": "目标下回合伤害-20%，+悲1"
     },
@@ -217,7 +250,9 @@
       "effect_value": 5,
       "condition": "grief >= 3",
       "condition_bonus": 3,
-      "emotion_shift": {"grief": 2},
+      "emotion_shift": {
+        "grief": 2
+      },
       "rarity": "legendary",
       "description": "【传说】对目标施加持续5回合的执念DOT，悲≥3时每回合伤害+3"
     },
@@ -230,7 +265,9 @@
       "effect_value": 6,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"grief": 1},
+      "emotion_shift": {
+        "grief": 1
+      },
       "rarity": "common",
       "description": "造成6点伤害，+悲1"
     },
@@ -243,7 +280,9 @@
       "effect_value": 1,
       "condition": "fear_dominant",
       "condition_bonus": 2,
-      "emotion_shift": {"fear": 1},
+      "emotion_shift": {
+        "fear": 1
+      },
       "rarity": "common",
       "description": "摸1张牌，惧为主导时改为摸3张"
     },
@@ -256,7 +295,9 @@
       "effect_value": 10,
       "condition": "fear >= 3",
       "condition_bonus": 5,
-      "emotion_shift": {"fear": 2},
+      "emotion_shift": {
+        "fear": 2
+      },
       "rarity": "rare",
       "description": "造成10点伤害并获得闪避效果，惧≥3额外+5伤害"
     },
@@ -269,7 +310,9 @@
       "effect_value": 2,
       "condition": "fear_dominant",
       "condition_bonus": 2,
-      "emotion_shift": {"fear": 3},
+      "emotion_shift": {
+        "fear": 3
+      },
       "rarity": "rare",
       "description": "对所有敌人施加「恐惧」状态，惧主导时持续回合+2"
     },
@@ -282,7 +325,9 @@
       "effect_value": 1,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"fear": 1},
+      "emotion_shift": {
+        "fear": 1
+      },
       "rarity": "common",
       "description": "预览敌人下回合意图，+惧1"
     },
@@ -295,7 +340,9 @@
       "effect_value": 8,
       "condition": "joy_dominant",
       "condition_bonus": 4,
-      "emotion_shift": {"joy": 2},
+      "emotion_shift": {
+        "joy": 2
+      },
       "rarity": "rare",
       "description": "回复8HP，喜为主导时额外回复4HP并施加「祝福」"
     },
@@ -308,7 +355,9 @@
       "effect_value": 5,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"joy": 1},
+      "emotion_shift": {
+        "joy": 1
+      },
       "rarity": "common",
       "description": "回复5HP，+喜1"
     },
@@ -321,7 +370,9 @@
       "effect_value": 2,
       "condition": "joy >= 3",
       "condition_bonus": 2,
-      "emotion_shift": {"joy": 3},
+      "emotion_shift": {
+        "joy": 3
+      },
       "rarity": "legendary",
       "description": "【传说】本回合所有牌效果+2，喜≥3时效果翻倍"
     },
@@ -334,7 +385,9 @@
       "effect_value": 2,
       "condition": "joy_dominant",
       "condition_bonus": 2,
-      "emotion_shift": {"joy": 2},
+      "emotion_shift": {
+        "joy": 2
+      },
       "rarity": "rare",
       "description": "降低目标情绪压力2点，喜主导时额外降低2点并回复HP"
     },
@@ -347,7 +400,10 @@
       "effect_value": 1,
       "condition": null,
       "condition_bonus": 0,
-      "emotion_shift": {"grief": 1, "calm": 1},
+      "emotion_shift": {
+        "grief": 1,
+        "calm": 1
+      },
       "rarity": "rare",
       "description": "推进渡化进度+1，+悲1+定1（渡化路线专用牌）"
     },
@@ -360,9 +416,343 @@
       "effect_value": 1,
       "condition": "grief >= 3",
       "condition_bonus": 0,
-      "emotion_shift": {"grief": 2},
+      "emotion_shift": {
+        "grief": 2
+      },
       "rarity": "rare",
       "description": "悲≥3时触发渡化判定（水鬼·望归渡化专用）"
+    },
+    {
+      "id": "lie_yan_zhan",
+      "name": "裂焰斩",
+      "emotion_tag": "rage",
+      "cost": 2,
+      "effect_type": "attack_lifesteal",
+      "effect_value": 10,
+      "condition": "rage_dominant",
+      "condition_bonus": 8,
+      "emotion_shift": {
+        "rage": 1
+      },
+      "rarity": "common",
+      "description": "造成10点伤害并回复等量HP，若怒主导额外+8伤"
+    },
+    {
+      "id": "bao_lie_chong",
+      "name": "暴裂冲",
+      "emotion_tag": "rage",
+      "cost": 1,
+      "effect_type": "attack",
+      "effect_value": 6,
+      "condition": "rage >= 3",
+      "condition_bonus": 6,
+      "emotion_shift": {
+        "rage": 1
+      },
+      "rarity": "common",
+      "description": "造成6点伤害，若怒≥3额外+6点"
+    },
+    {
+      "id": "zhu_hun_huo",
+      "name": "诛魂火",
+      "emotion_tag": "rage",
+      "cost": 3,
+      "effect_type": "attack_dot",
+      "effect_value": 16,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "rage": 2
+      },
+      "rarity": "rare",
+      "description": "造成16点伤害并附加4层灼烧"
+    },
+    {
+      "id": "fen_nu_gong_ji",
+      "name": "愤怒攻击",
+      "emotion_tag": "rage",
+      "cost": 0,
+      "effect_type": "attack_scaling_rage",
+      "effect_value": 3,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "rage": 1
+      },
+      "rarity": "rare",
+      "description": "造成3×怒情绪值的伤害（费用0）"
+    },
+    {
+      "id": "qian_hun_lie",
+      "name": "千魂裂",
+      "emotion_tag": "rage",
+      "cost": 4,
+      "effect_type": "attack_all_triple",
+      "effect_value": 8,
+      "condition": "rage_dominant",
+      "condition_bonus": 4,
+      "emotion_shift": {
+        "rage": -2
+      },
+      "rarity": "legendary",
+      "description": "对敌人造成三次8点伤害，怒主导额外各+4，怒情绪-2"
+    },
+    {
+      "id": "yin_ying_dun",
+      "name": "阴影遁",
+      "emotion_tag": "fear",
+      "cost": 1,
+      "effect_type": "dodge_next",
+      "effect_value": 1,
+      "condition": "fear >= 2",
+      "condition_bonus": 1,
+      "emotion_shift": {
+        "fear": 1
+      },
+      "rarity": "common",
+      "description": "下次受击无效，若惧≥2获得额外一次格挡"
+    },
+    {
+      "id": "gui_ku_zhen",
+      "name": "鬼哭阵",
+      "emotion_tag": "fear",
+      "cost": 2,
+      "effect_type": "weaken_fear",
+      "effect_value": 30,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "fear": 2
+      },
+      "rarity": "rare",
+      "description": "使敌人的攻击降低30%，持续2回合"
+    },
+    {
+      "id": "huang_hun_mi",
+      "name": "黄昏迷",
+      "emotion_tag": "fear",
+      "cost": 2,
+      "effect_type": "draw_shield",
+      "effect_value": 3,
+      "condition": "fear_dominant",
+      "condition_bonus": 5,
+      "emotion_shift": {
+        "fear": 1
+      },
+      "rarity": "rare",
+      "description": "摸3张牌并获得5点护盾，若惧主导护盾+5"
+    },
+    {
+      "id": "po_jie_fu",
+      "name": "破戒符",
+      "emotion_tag": "fear",
+      "cost": 3,
+      "effect_type": "remove_enemy_shield",
+      "effect_value": 999,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "fear": -1,
+        "calm": 1
+      },
+      "rarity": "legendary",
+      "description": "清除敌人全部护盾，造成等同护盾量的伤害，惧-1定+1"
+    },
+    {
+      "id": "shu_hun_lei",
+      "name": "疏魂泪",
+      "emotion_tag": "grief",
+      "cost": 1,
+      "effect_type": "weaken_and_draw",
+      "effect_value": 20,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "grief": 1
+      },
+      "rarity": "common",
+      "description": "降低敌人攻击20%，摸1张牌"
+    },
+    {
+      "id": "wang_chuan_yin",
+      "name": "忘川引",
+      "emotion_tag": "grief",
+      "cost": 2,
+      "effect_type": "du_hua_progress",
+      "effect_value": 2,
+      "condition": "grief >= 3",
+      "condition_bonus": 1,
+      "emotion_shift": {
+        "grief": 1
+      },
+      "rarity": "rare",
+      "description": "渡化进度+2，若悲≥3额外+1"
+    },
+    {
+      "id": "chen_yuan_ge",
+      "name": "沉冤歌",
+      "emotion_tag": "grief",
+      "cost": 2,
+      "effect_type": "attack_dot",
+      "effect_value": 8,
+      "condition": "grief_dominant",
+      "condition_bonus": 3,
+      "emotion_shift": {
+        "grief": 1
+      },
+      "rarity": "rare",
+      "description": "造成8点伤害，附加3层中毒，悲主导额外+3伤害"
+    },
+    {
+      "id": "ku_hai_du_zhou",
+      "name": "苦海渡舟",
+      "emotion_tag": "grief",
+      "cost": 3,
+      "effect_type": "heal_scale_grief",
+      "effect_value": 4,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "grief": -1
+      },
+      "rarity": "rare",
+      "description": "回复4×悲情绪值的HP，悲-1"
+    },
+    {
+      "id": "wan_gu_chou",
+      "name": "万古愁",
+      "emotion_tag": "grief",
+      "cost": 4,
+      "effect_type": "attack_and_weaken_all",
+      "effect_value": 12,
+      "condition": "grief_dominant",
+      "condition_bonus": 8,
+      "emotion_shift": {
+        "grief": 2
+      },
+      "rarity": "legendary",
+      "description": "造成12点伤害，敌人攻击和防御各降50%，悲主导+8伤"
+    },
+    {
+      "id": "hua_guang_san",
+      "name": "华光散",
+      "emotion_tag": "joy",
+      "cost": 1,
+      "effect_type": "heal",
+      "effect_value": 8,
+      "condition": "joy >= 3",
+      "condition_bonus": 4,
+      "emotion_shift": {
+        "joy": 1
+      },
+      "rarity": "common",
+      "description": "回复8HP，若喜≥3额外回复4HP"
+    },
+    {
+      "id": "du_hua_guang",
+      "name": "渡化光",
+      "emotion_tag": "joy",
+      "cost": 2,
+      "effect_type": "du_hua_progress",
+      "effect_value": 2,
+      "condition": "joy_dominant",
+      "condition_bonus": 2,
+      "emotion_shift": {
+        "joy": 1
+      },
+      "rarity": "rare",
+      "description": "渡化进度+2，喜主导额外+2"
+    },
+    {
+      "id": "xi_lei_jiao_rong",
+      "name": "喜泪交融",
+      "emotion_tag": "joy",
+      "cost": 2,
+      "effect_type": "heal_and_draw",
+      "effect_value": 10,
+      "condition": "grief >= 2",
+      "condition_bonus": 5,
+      "emotion_shift": {
+        "joy": 1,
+        "grief": -1
+      },
+      "rarity": "rare",
+      "description": "回复10HP并摸2张牌，悲≥2时额外回复5HP，悲-1"
+    },
+    {
+      "id": "chao_du_fa_hui",
+      "name": "超度法会",
+      "emotion_tag": "joy",
+      "cost": 3,
+      "effect_type": "mass_heal_shield",
+      "effect_value": 15,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "joy": 2
+      },
+      "rarity": "legendary",
+      "description": "回复15HP并获得15点护盾，渡化进度+1"
+    },
+    {
+      "id": "jie_jie_fu",
+      "name": "结界符",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "shield",
+      "effect_value": 10,
+      "condition": "calm >= 3",
+      "condition_bonus": 6,
+      "emotion_shift": {
+        "calm": 1
+      },
+      "rarity": "common",
+      "description": "获得10点护盾，定≥3额外+6护盾"
+    },
+    {
+      "id": "tai_xu_jing",
+      "name": "太虚境",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "shield_and_draw",
+      "effect_value": 8,
+      "condition": "calm_dominant",
+      "condition_bonus": 4,
+      "emotion_shift": {
+        "calm": 1
+      },
+      "rarity": "rare",
+      "description": "获得8点护盾并摸2张牌，定主导额外+4护盾"
+    },
+    {
+      "id": "ling_hun_ping_heng",
+      "name": "灵魂平衡",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "balance_emotions",
+      "effect_value": 2,
+      "condition": null,
+      "condition_bonus": 0,
+      "emotion_shift": {
+        "calm": 1
+      },
+      "rarity": "rare",
+      "description": "将所有情绪值调整至均值附近（差值缩小2），获得10点护盾"
+    },
+    {
+      "id": "po_wang_xiang",
+      "name": "破妄想",
+      "emotion_tag": "calm",
+      "cost": 3,
+      "effect_type": "shield_attack",
+      "effect_value": 10,
+      "condition": "calm_dominant",
+      "condition_bonus": 8,
+      "emotion_shift": {
+        "calm": -1
+      },
+      "rarity": "rare",
+      "description": "获得10护盾并造成等量伤害，定主导+8，定-1"
     }
   ]
 }

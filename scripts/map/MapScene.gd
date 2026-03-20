@@ -111,20 +111,79 @@ func _render_map() -> void:
 			hbox.add_child(_make_node_btn(nd, is_current))
 		node_container.add_child(hbox)
 
+		# 层间连接线（非最后一层）
+		if layer_idx < len(_map_data) - 1:
+			var connector = _make_layer_connector(is_current)
+			node_container.add_child(connector)
+
 		var line = HSeparator.new()
 		line.modulate = Color(0.15,0.12,0.09)
 		node_container.add_child(line)
 
 func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
-	var btn      = Button.new()
-	var ntype    = nd.get("type","battle")
-	var visited  = nd.get("visited", false)
-	btn.text     = "%s\n%s" % [NODE_ICONS.get(ntype,"?"), NODE_CN.get(ntype,"???")]
-	btn.custom_minimum_size = Vector2(82, 76)
+	var btn     = Button.new()
+	var ntype   = nd.get("type","battle")
+	var visited = nd.get("visited", false)
+
+	# 图标 + 名称（双行，大图标）
+	btn.text = "%s\n%s" % [NODE_ICONS.get(ntype,"◈"), NODE_CN.get(ntype,"???")]
+	btn.custom_minimum_size = Vector2(88, 80)
+
+	# 样式：按类型定制颜色
+	var style = StyleBoxFlat.new()
+	style.corner_radius_top_left    = 6
+	style.corner_radius_top_right   = 6
+	style.corner_radius_bottom_left = 6
+	style.corner_radius_bottom_right= 6
+	style.border_width_left   = 2
+	style.border_width_right  = 2
+	style.border_width_top    = 2
+	style.border_width_bottom = 2
+
+	var node_colors = {
+		"battle":  [Color(0.22, 0.07, 0.07), Color(0.60, 0.12, 0.10)],
+		"boss":    [Color(0.30, 0.05, 0.05), Color(0.90, 0.20, 0.10)],
+		"event":   [Color(0.12, 0.15, 0.08), Color(0.35, 0.60, 0.20)],
+		"shop":    [Color(0.15, 0.12, 0.04), Color(0.75, 0.60, 0.10)],
+		"rest":    [Color(0.05, 0.12, 0.18), Color(0.15, 0.50, 0.70)],
+	}
+	var nc = node_colors.get(ntype, [Color(0.1,0.1,0.1), Color(0.5,0.5,0.5)])
+	style.bg_color     = nc[0]
+	style.border_color = nc[1]
+
+	if visited:
+		style.bg_color     = Color(0.10, 0.09, 0.08)
+		style.border_color = Color(0.28, 0.24, 0.20)
+	elif not is_current:
+		style.bg_color     = Color(nc[0].r*0.5, nc[0].g*0.5, nc[0].b*0.5)
+		style.border_color = Color(nc[1].r*0.45, nc[1].g*0.45, nc[1].b*0.45)
+
+	btn.add_theme_stylebox_override("normal", style)
+
+	# 按下效果
+	var pressed_style = style.duplicate()
+	pressed_style.bg_color = style.border_color * 0.5
+	btn.add_theme_stylebox_override("pressed", pressed_style)
+
+	# 字体颜色
+	if visited:
+		btn.add_theme_color_override("font_color", Color(0.35, 0.30, 0.25))
+	elif not is_current:
+		btn.add_theme_color_override("font_color", Color(0.50, 0.45, 0.40))
+	elif ntype == "boss":
+		btn.add_theme_color_override("font_color", Color(1.0, 0.7, 0.5))
+	else:
+		btn.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
+
+	btn.add_theme_font_size_override("font_size", 12)
 	btn.disabled = not is_current or visited
-	if visited:         btn.modulate = Color(0.35, 0.30, 0.25)
-	elif not is_current: btn.modulate = Color(0.50, 0.45, 0.40)
-	elif ntype == "boss": btn.modulate = Color(1.0, 0.6, 0.6)
+
+	# Boss 节点脉冲动画
+	if ntype == "boss" and is_current and not visited:
+		var tw = btn.create_tween().set_loops()
+		tw.tween_property(btn, "modulate", Color(1.2, 0.8, 0.8, 1.0), 0.8)
+		tw.tween_property(btn, "modulate", Color.WHITE, 0.8)
+
 	var cap = nd
 	btn.pressed.connect(func(): _on_node_pressed(cap))
 	return btn
@@ -217,3 +276,30 @@ func _render_relics() -> void:
 func _update_status() -> void:
 	hp_label.text   = "HP: %d/%d" % [GameState.hp, GameState.max_hp]
 	gold_label.text = "💰 %d"     % GameState.gold
+
+## 生成层间向下箭头连接线
+func _make_layer_connector(is_active: bool) -> Control:
+	var c = Control.new()
+	c.custom_minimum_size = Vector2(0, 28)
+	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var lbl = Label.new()
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	lbl.anchors_preset = Control.PRESET_FULL_RECT
+
+	# 用箭头字符 + 细线模拟路径
+	lbl.text = "│\n▼"
+	lbl.add_theme_font_size_override("font_size", 11)
+
+	if is_active:
+		lbl.add_theme_color_override("font_color", Color(0.65, 0.20, 0.10, 0.9))
+		# 激活层的箭头带脉冲动画
+		var tw = lbl.create_tween().set_loops()
+		tw.tween_property(lbl, "modulate:a", 0.4, 0.7).set_ease(Tween.EASE_IN_OUT)
+		tw.tween_property(lbl, "modulate:a", 1.0, 0.7).set_ease(Tween.EASE_IN_OUT)
+	else:
+		lbl.add_theme_color_override("font_color", Color(0.25, 0.22, 0.18, 0.6))
+
+	c.add_child(lbl)
+	return c
