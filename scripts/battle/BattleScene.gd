@@ -98,7 +98,7 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 		_setup_boss_ui(enemy_data)
 
 func _on_player_turn_started(turn: int) -> void:
-	turn_label.text       = "第 %d 回合" % turn
+	turn_label.text       = "第 %d 回合" % int(turn)
 	end_turn_btn.disabled = false
 	du_hua_btn.visible    = false
 	disorder_warning.text = ""
@@ -140,21 +140,22 @@ func _spawn_special_text(msg: String, color: Color) -> void:
 
 func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	enemy_hp_bar.value       = state_machine.enemy_hp
-	enemy_shield_label.text  = "🛡 %d" % state_machine.enemy_shield
-	player_shield_label.text = "🛡 %d" % state_machine.player_shield
+	enemy_shield_label.text  = "🛡 %d" % int(state_machine.enemy_shield)
+	player_shield_label.text = "🛡 %d" % int(state_machine.player_shield)
 	_update_hud()
-	# 浮字：根据效果类型选择颜色和位置
 	var rtype = result.get("type","")
-	var rval  = result.get("value", 0)
+	var rval  = int(result.get("value", 0))   # 强制 int，防止 float % int 崩溃
 	if rval > 0:
 		match rtype:
-			"attack","attack_all":
+			"attack","attack_all","attack_lifesteal","attack_dot",
+			"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
+			"shield_attack","remove_enemy_shield":
 				_spawn_enemy_damage(rval, "damage")
 				SoundManager.play_sfx("attack_hit")
-			"heal","heal_all_buffs":
+			"heal","heal_all_buffs","heal_and_draw","heal_scale_grief","mass_heal_shield":
 				_spawn_player_number(rval, "heal")
 				SoundManager.play_sfx("heal")
-			"shield":
+			"shield","shield_and_draw","reset_shield","balance_emotions":
 				_spawn_player_number(rval, "shield")
 				SoundManager.play_sfx("shield_block")
 	_show_popup(result)
@@ -224,7 +225,7 @@ func _on_relic_triggered(relic_id: String, effect_desc: String) -> void:
 	# ── 特殊处理：烧骨片护盾直接加数值 ──
 	if relic_id == "shaogu_pian_shield_2":
 		state_machine.player_shield += 2
-		player_shield_label.text = "🛡 %d" % state_machine.player_shield
+		player_shield_label.text = "🛡 %d" % int(state_machine.player_shield)
 
 	# ── 图标闪光：找到对应 Label，做 modulate 动画 ──
 	_flash_relic_icon(relic_id)
@@ -328,7 +329,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 			var ename = EmotionManager.get_emotion_name(emotion)
 			var arrow = "↑" if diff > 0 else "↓"
 			spawn_damage_number(abs(diff), "emotion", pos,
-				"%s%s%d" % [ename, arrow, abs(diff)])
+				"%s%s%d" % [ename, arrow, int(abs(diff))])
 
 func _on_disorder_triggered(emotion: String) -> void:
 	disorder_warning.text = "⚠ %s 失调！" % EmotionManager.get_emotion_name(emotion)
@@ -343,7 +344,7 @@ func _on_disorder_cleared(_e: String) -> void:
 func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	player_hp_bar.max_value = GameState.max_hp
 	player_hp_bar.value     = new_hp
-	player_hp_label.text    = "%d / %d" % [new_hp, GameState.max_hp]
+	player_hp_label.text    = "%d / %d" % [int(new_hp), int(GameState.max_hp)]
 	# 浮字：受伤/回血
 	var diff = new_hp - old_hp
 	if diff < 0:
@@ -361,12 +362,12 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 		_set_player_sprite_state("dead")
 
 func _update_hud() -> void:
-	cost_label.text          = "费用: %d" % DeckManager.current_cost
-	deck_count_label.text    = "牌库: %d" % len(DeckManager.deck)
-	discard_count_label.text = "弃牌: %d" % len(DeckManager.discard_pile)
+	cost_label.text          = "费用: %d" % int(DeckManager.current_cost)
+	deck_count_label.text    = "牌库: %d" % int(len(DeckManager.deck))
+	discard_count_label.text = "弃牌: %d" % int(len(DeckManager.discard_pile))
 	player_hp_bar.max_value  = GameState.max_hp
 	player_hp_bar.value      = GameState.hp
-	player_hp_label.text     = "%d / %d" % [GameState.hp, GameState.max_hp]
+	player_hp_label.text     = "%d / %d" % [int(GameState.hp), int(GameState.max_hp)]
 
 func _refresh_hand() -> void:
 	for card_ui in hand_container.get_children():
@@ -377,9 +378,12 @@ func _refresh_hand() -> void:
 				card_ui.set_playable(can_afford and EmotionManager.can_play_card(cd))
 
 func _show_popup(result: Dictionary) -> void:
-	var value = result.get("value", 0)
+	var value = int(result.get("value", 0))
 	if value <= 0: return
-	var is_dmg = result.get("type", "") in ["attack", "attack_all"]
+	var is_dmg = result.get("type", "") in [
+		"attack","attack_all","attack_lifesteal","attack_dot",
+		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
+		"shield_attack","remove_enemy_shield"]
 	var lbl = Label.new()
 	lbl.text = ("-%d" if is_dmg else "+%d") % value
 	lbl.add_theme_color_override("font_color", Color.RED if is_dmg else Color.GREEN)
@@ -532,7 +536,7 @@ func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
 	var title  = buff.get("display_name", "???")
 	var tip    = buff.get("tooltip", "")
 	var stacks = buff.get("stacks", 0)
-	_tooltip_label.text    = "%s ×%d\n%s" % [title, stacks, tip]
+	_tooltip_label.text    = "%s ×%d\n%s" % [title, int(stacks), tip]
 	_tooltip_panel.visible = true
 	var pos = anchor.get_global_rect().position
 	_tooltip_panel.position = Vector2(clamp(pos.x - 60, 4, 1080), max(pos.y - 72, 4))

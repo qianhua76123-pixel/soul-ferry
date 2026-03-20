@@ -175,7 +175,7 @@ func _on_leave() -> void:
 func _update_status() -> void:
 	var hp_lbl = get_node_or_null("UI/HPStatus")
 	if hp_lbl:
-		hp_lbl.text = "HP: %d / %d" % [GameState.hp, GameState.max_hp]
+		hp_lbl.text = "HP: %d / %d" % [int(GameState.hp), int(GameState.max_hp)]
 	status_label.text = "• 回复HP：恢复最大HP的30%%\n• 升级牌卡：费用-1 + 效果值+25%%\n\n当前HP：%d / %d" % [
 		GameState.hp, GameState.max_hp]
 

@@ -218,10 +218,10 @@ func _collect_stats(ending_type: String) -> Array:
 	stats.append({"key": "牌库规模", "value": "%d 张" % (len(DeckManager.deck) + len(DeckManager.hand) + len(DeckManager.discard_pile))})
 	var ach_count = AchievementManager.get_achievement_count()
 	var ach_total = AchievementManager.ACHIEVEMENTS.size()
-	stats.append({"key": "成就进度", "value": "%d / %d" % [ach_count, ach_total]})
+	stats.append({"key": "成就进度", "value": "%d / %d" % [int(ach_count), int(ach_total)]})
 	var gs = AchievementManager.get_stats()
-	stats.append({"key": "累计游玩", "value": "%d 局" % gs.get("total_runs", 0)})
-	stats.append({"key": "累计渡化", "value": "%d 次" % gs.get("total_du_hua", 0)})
+	stats.append({"key": "累计游玩", "value": "%d 局" % int(gs.get("total_runs", 0))})
+	stats.append({"key": "累计渡化", "value": "%d 次" % int(gs.get("total_du_hua", 0))})
 	if ending_type == "success":
 		stats.append({"key": "通关类型", "value": "✓ 渡魂成功"})
 	elif ending_type == "lost":

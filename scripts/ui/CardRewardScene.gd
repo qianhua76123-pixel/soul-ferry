@@ -56,4 +56,4 @@ func _on_skip() -> void:
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _update_gold() -> void:
-	gold_label.text = "💰 %d" % GameState.gold
+	gold_label.text = "💰 %d" % int(GameState.gold)
