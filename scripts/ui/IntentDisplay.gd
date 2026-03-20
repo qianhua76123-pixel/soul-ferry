@@ -90,21 +90,21 @@ func _build_description(action: Dictionary) -> String:
 	var val   = int(action.get("value", 0))
 	var atype = action.get("type", "unknown")
 	match atype:
-		"attack":            return "造成 %d 点伤害" % val
-		"attack_all":        return "对全体造成 %d 伤害" % val
-		"attack_all_triple": return "三连击各 %d 伤害" % val
-		"dot_fire":          return "施加灼烧 ×%d（%d回合）" % [val, int(action.get("duration", 3))]
-		"dot":               return "施加中毒 ×%d" % val
-		"all_field_heat_dot":return "全场灼烧 ×%d" % val
-		"shield":            return "获得 %d 护盾" % val
+		"attack":            return "造成 %d 点伤害" % int(val)
+		"attack_all":        return "对全体造成 %d 伤害" % int(val)
+		"attack_all_triple": return "三连击各 %d 伤害" % int(val)
+		"dot_fire":          return "施加灼烧 ×%d（%d回合）" % [int(val), int(action.get("duration", 3))]
+		"dot":               return "施加中毒 ×%d" % int(val)
+		"all_field_heat_dot":return "全场灼烧 ×%d" % int(val)
+		"shield":            return "获得 %d 护盾" % int(val)
 		"emotion_push":
 			var emo_cn = {"rage":"怒","fear":"惧","grief":"悲","joy":"喜","calm":"定"}
 			var en = action.get("emotion", "")
-			return "使你%s +%d" % [emo_cn.get(en, en), val]
-		"summon_tide":       return "召唤潮汐 %d×%d段" % [val, int(action.get("hits", 3))]
+			return "使你%s +%d" % [emo_cn.get(en, en), int(val)]
+		"summon_tide":       return "召唤潮汐 %d×%d段" % [int(val), int(action.get("hits", 3))]
 		"rage_card_storm":   return "狂暴（随手牌数增伤）"
-		"draw_player":       return "强迫摸 %d 张牌" % val
-		"status_seal":       return "封印 %d 回合" % val
+		"draw_player":       return "强迫摸 %d 张牌" % int(val)
+		"status_seal":       return "封印 %d 回合" % int(val)
 		_:                   return "蓄势待发"
 
 func _play_icon_shake(dmg_value: int) -> void:

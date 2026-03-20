@@ -210,10 +210,10 @@ func _build_stat_panel(title: String, color: Color, ending_type: String) -> VBox
 
 func _collect_stats(ending_type: String) -> Array:
 	var stats = []
-	stats.append({"key": "渡化亡魂", "value": "%d 个" % GameState.get_meta("du_hua_count", 0)})
-	stats.append({"key": "镇压亡魂", "value": "%d 个" % GameState.get_meta("zhenya_count", 0)})
-	stats.append({"key": "到达楼层", "value": "第 %d 层" % GameState.current_layer})
-	stats.append({"key": "剩余HP",   "value": "%d / %d" % [GameState.hp, GameState.max_hp]})
+	stats.append({"key": "渡化亡魂", "value": "%d 个" % int(GameState.get_meta("du_hua_count", 0))})
+	stats.append({"key": "镇压亡魂", "value": "%d 个" % int(GameState.get_meta("zhenya_count", 0))})
+	stats.append({"key": "到达楼层", "value": "第 %d 层" % int(GameState.current_layer)})
+	stats.append({"key": "剩余HP",   "value": "%d / %d" % [int(GameState.hp), int(GameState.max_hp)]})
 	stats.append({"key": "持有遗物", "value": "%d 件" % len(GameState.relics)})
 	stats.append({"key": "牌库规模", "value": "%d 张" % (len(DeckManager.deck) + len(DeckManager.hand) + len(DeckManager.discard_pile))})
 	var ach_count = AchievementManager.get_achievement_count()
