@@ -1,4 +1,4 @@
-extends Node2D
+extends Node
 
 ## BattleStateMachine.gd - 战斗状态机
 

@@ -533,7 +533,8 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 		var tr = TextureRect.new()
 		tr.name              = "EnemySprite"
 		tr.texture_filter    = CanvasItem.TEXTURE_FILTER_NEAREST   # 保持像素感
-		tr.expand_mode       = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		# Godot 4.4+ expand_mode 枚举改名，用 stretch_mode 替代更稳定
+		tr.stretch_mode      = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		tr.custom_minimum_size = Vector2(80, 112)
 		tr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		parent.add_child(tr)

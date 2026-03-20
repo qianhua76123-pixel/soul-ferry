@@ -142,7 +142,7 @@ func play_bgm(track_name: String, fade_time: float = 0.5) -> void:
 	bgm_changed.emit(track_name)
 
 	var path = BGM_TRACKS[track_name]
-	if path == "" or not ResourceLoader.exists(path):
+	if path == "" or not ResourceLoader.exists(path, ""):
 		# 占位符模式：静默跳过，不报错
 		_log_stub("BGM", track_name)
 		return
@@ -191,7 +191,7 @@ func play_sfx(sfx_name: String, pitch_scale: float = 1.0) -> void:
 	sfx_played.emit(sfx_name)
 
 	var path = SFX_CLIPS[sfx_name]
-	if path == "" or not ResourceLoader.exists(path):
+	if path == "" or not ResourceLoader.exists(path, ""):
 		_log_stub("SFX", sfx_name)
 		return
 
