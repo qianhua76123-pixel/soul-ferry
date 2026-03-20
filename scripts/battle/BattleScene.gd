@@ -26,6 +26,9 @@ extends Node2D
 var _card_scene:   PackedScene = preload("res://scenes/CardUI.tscn")
 var _dmgnum_scene: PackedScene = preload("res://scenes/DamageNumber.tscn")
 
+## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
+const EnemyPixelArtClass = preload("res://scripts/ui/EnemyPixelArt.gd")
+
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
 
@@ -542,7 +545,7 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 		sprite_node = tr
 
 	# 生成像素纹理
-	var tex = EnemyPixelArt.create_texture(enemy_id)
+	var tex = EnemyPixelArtClass.create_texture(enemy_id)
 	if sprite_node is TextureRect:
 		sprite_node.texture = tex
 
