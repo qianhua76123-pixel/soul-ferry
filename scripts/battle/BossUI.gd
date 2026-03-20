@@ -1,5 +1,7 @@
 extends Node
 
+class_name BossUI
+
 ## BossUI.gd - Boss 专属战斗 UI 控制器
 ## 在 BattleScene._on_battle_started() 中检测到 Boss 时调用 activate()
 ## 功能：
@@ -240,20 +242,14 @@ func _update_intent_display(turn: int) -> void:
 	var aval  = predicted.get("value", 0)
 	var desc  = _action_desc(atype, aval)
 
-	# 愤怒阶段标记
-	var phase_mark = " [color=red]【怒】[/color]" if _current_phase == 2 else ""
-
-	_intent_label.bbcode_enabled = true
-	_intent_label.text = ""
-	_intent_label.set("text", "%s %s%s" % [icon, desc, phase_mark])
-	# Label 不原生支持 BBCode，用 RichTextLabel 替代逻辑时再处理；
-	# 这里简化为普通文字（愤怒阶段通过颜色已体现）
+	# 颜色：愤怒阶段橙红，正常暗金
 	if _current_phase == 2:
 		_intent_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.1))
 	else:
 		_intent_label.add_theme_color_override("font_color", Color(0.85, 0.80, 0.70))
 
-	_intent_label.text = "%s %s%s" % [icon, desc, "  【愤怒】" if _current_phase == 2 else ""]
+	var rage_mark = "  【愤怒】" if _current_phase == 2 else ""
+	_intent_label.text = "%s %s%s" % [icon, desc, rage_mark]
 
 func _predict_next_action(actions: Array, turn: int) -> Dictionary:
 	# 简单预测：按 turn 轮转（可替换为更复杂的 AI 预测）

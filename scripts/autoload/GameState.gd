@@ -252,8 +252,5 @@ func trigger_ending(ending_type: String) -> void:
 	set_meta("du_hua_count", du_hua_count)
 	set_meta("zhenya_count", zhen_ya_count)
 	delete_save()   # 通关/失败后清档
-	# 延迟一帧再切换，避免在信号回调内切换场景
-	Engine.get_main_loop().process_frame.connect(
-		func(): Engine.get_main_loop().change_scene_to_file("res://scenes/EndingScene.tscn"),
-		CONNECT_ONE_SHOT
-	)
+	# call_deferred 延迟切换，避免在信号回调内直接切换场景引发崩溃
+	get_tree().call_deferred("change_scene_to_file", "res://scenes/EndingScene.tscn")

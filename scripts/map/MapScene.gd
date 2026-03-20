@@ -49,6 +49,11 @@ func _ready() -> void:
 	_render_map()
 	_render_relics()
 
+	# 通关检测（每次进入地图都检测一次）
+	# 注意：_check_layer_done 内部已保护防重复推进
+	if not GameState.check_victory_condition():
+		_check_layer_done()
+
 func _generate_map() -> void:
 	_map_data = []
 	for layer_idx in 3:
@@ -170,18 +175,28 @@ func _random_enemy_for_layer(layer: int) -> String:
 	return pool[randi() % len(pool)].get("id","yuan_gui")
 
 func _check_layer_done() -> void:
+	# current_layer 已经超过 _map_data 层数 → 已推进过了，跳过
 	var idx = GameState.current_layer - 1
-	if idx >= len(_map_data): return
+	if idx < 0 or idx >= len(_map_data): return
+
+	# 检查当前层所有节点是否全部已访问
 	var all_visited = true
 	for nd in _map_data[idx]:
-		if not nd.get("visited",false): all_visited = false; break
-	if all_visited:
-		GameState.advance_layer()
-		# 通关判定：超过第三层 → 触发成功结局
-		if GameState.check_victory_condition():
-			GameState.trigger_ending("success")
-			return
-		layer_label.text = LAYER_NAMES.get(GameState.current_layer, "通关！")
+		if not nd.get("visited", false):
+			all_visited = false
+			break
+	if not all_visited: return
+
+	# 推进层（内部会 reset current_node，防止重复推进）
+	GameState.advance_layer()
+	# 同步地图数据到 GameState（生成下一层或清空）
+	GameState.set_meta("map_data", _map_data)
+	# 通关判定：超过第三层 → 触发成功结局
+	if GameState.check_victory_condition():
+		GameState.trigger_ending("success")
+		return
+	# 刷新地图显示（新层）
+	_render_map()
 
 func _render_relics() -> void:
 	for child in relic_bar.get_children(): child.queue_free()
