@@ -26,6 +26,10 @@ extends Node2D
 var _card_scene:   PackedScene = preload("res://scenes/CardUI.tscn")
 var _dmgnum_scene: PackedScene = preload("res://scenes/DamageNumber.tscn")
 
+## B-02 双层残影血条组件实例
+var _player_hbar: Control = null
+var _enemy_hbar:  Control = null
+
 ## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
 const EnemyPixelArtClass  = preload("res://scripts/ui/EnemyPixelArt.gd")
 const PlayerPixelArtClass = preload("res://scripts/ui/PlayerPixelArt.gd")
@@ -76,12 +80,18 @@ func _ready() -> void:
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
 
+	# B-01 布局优化
+	_setup_layout_improvements()
+
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
 	RelicManager.on_battle_start(enemy_data)
 	enemy_hp_bar.max_value  = enemy_data.get("hp", 100)
 	enemy_hp_bar.value      = enemy_data.get("hp", 100)
 	_setup_enemy_sprite(enemy_data)
+	# B-02 敌人新血条初始化
+	if _enemy_hbar and _enemy_hbar.has_method("set_hp"):
+		_enemy_hbar.set_hp(int(enemy_data.get("hp", 100)), int(enemy_data.get("hp", 100)))
 	enemy_shield_label.text = "🛡 0"
 	enemy_intent_label.text = "意图：..."
 	du_hua_hint_label.text  = ""
@@ -345,6 +355,9 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	player_hp_bar.max_value = GameState.max_hp
 	player_hp_bar.value     = new_hp
 	player_hp_label.text    = "%d / %d" % [int(new_hp), int(GameState.max_hp)]
+	# B-02 同步新双层血条
+	if _player_hbar and _player_hbar.has_method("set_hp"):
+		_player_hbar.set_hp(new_hp, GameState.max_hp)
 	# 浮字：受伤/回血
 	var diff = new_hp - old_hp
 	if diff < 0:
@@ -467,6 +480,19 @@ func _setup_buff_ui() -> void:
 		_tooltip_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		ui.add_child(_tooltip_panel)
 		_tooltip_panel.visible = false
+
+	## B-02 新增双层血条组件（覆盖在原血条上方）
+	var PlayerHealthBarClass = preload("res://scripts/ui/PlayerHealthBar.gd")
+	var EnemyHealthBarClass  = preload("res://scripts/ui/EnemyHealthBar.gd")
+	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var enemy_area  = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if player_area:
+		_player_hbar = PlayerHealthBarClass.new()
+		player_area.add_child(_player_hbar)
+		_player_hbar.set_hp(GameState.hp, GameState.max_hp)
+	if enemy_area:
+		_enemy_hbar = EnemyHealthBarClass.new()
+		enemy_area.add_child(_enemy_hbar)
 
 func _on_buff_changed(target: String, _buff_id: String, _stacks: int) -> void:
 	_rebuild_buff_bar(target)
@@ -675,3 +701,26 @@ func _start_idle_float(node: Control, amp: float = 4.0, period: float = 2.0) -> 
 		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	tw.tween_property(node, "position:y", base_y + amp * 0.3, period * 0.5)\
 		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+## ══════════════════════════════════════════════════════
+## B-01 布局优化
+## ══════════════════════════════════════════════════════
+
+func _setup_layout_improvements() -> void:
+	# 地面线（BattleGround）：深墨绿细条，衬托立绘站位
+	var ground = ColorRect.new()
+	ground.name = "BattleGround"
+	ground.color = Color(0.05, 0.10, 0.06, 0.6)
+	ground.set_anchors_preset(Control.PRESET_WIDE)   # 全宽
+	ground.custom_minimum_size = Vector2(0, 4)
+	ground.size = Vector2(1216, 4)
+	ground.position = Vector2(0, 484)
+	ground.z_index = 2
+	var ui = get_node_or_null("UI")
+	if ui: ui.add_child(ground)
+
+	# HandContainer：居中对齐 + 卡牌间距
+	if hand_container:
+		hand_container.add_theme_constant_override("separation", 12)
+		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
+		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
