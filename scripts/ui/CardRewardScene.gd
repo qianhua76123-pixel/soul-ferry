@@ -48,12 +48,12 @@ func _build_slot(card: Dictionary) -> VBoxContainer:
 func _on_card_chosen(card: Dictionary) -> void:
 	DeckManager.add_card_to_deck(card)
 	reward_taken.emit(card)
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _on_skip() -> void:
 	# 跳过奖励：补偿金币
 	GameState.gain_gold(40)
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _update_gold() -> void:
 	gold_label.text = "💰 %d" % GameState.gold

@@ -34,6 +34,7 @@ const PlayerPixelArtClass = preload("res://scripts/ui/PlayerPixelArt.gd")
 var _boss_ui: BossUI = null
 
 func _ready() -> void:
+	TransitionManager.fade_in_only()
 	result_panel.visible = false
 	du_hua_btn.visible   = false
 
@@ -77,19 +78,21 @@ func _ready() -> void:
 
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
-	# 遗物：战斗开始触发
 	RelicManager.on_battle_start(enemy_data)
 	enemy_hp_bar.max_value  = enemy_data.get("hp", 100)
 	enemy_hp_bar.value      = enemy_data.get("hp", 100)
-	# 像素立绘：替换 ColorRect
 	_setup_enemy_sprite(enemy_data)
 	enemy_shield_label.text = "🛡 0"
 	enemy_intent_label.text = "意图：..."
 	du_hua_hint_label.text  = ""
 	_update_hud()
-	# 音效：按楼层/Boss 选择战斗 BGM
 	var is_boss = enemy_data.get("type", "") == "boss"
 	SoundManager.play_battle_bgm(GameState.current_layer, is_boss)
+	# 成就：Boss 战开始追踪
+	if is_boss:
+		AchievementManager.on_boss_battle_start(GameState.hp)
+	# 成就：牌库检查
+	AchievementManager.check_deck_achievements()
 	# Boss UI：仅 Boss 战时激活
 	if is_boss:
 		_setup_boss_ui(enemy_data)
@@ -167,6 +170,14 @@ func _on_battle_ended(result: String) -> void:
 	if result == "victory":
 		RelicManager.on_victory_zhenya()
 		if _boss_ui: _boss_ui.on_boss_defeated()
+	# 成就追踪
+	var is_boss = state_machine.enemy_data.get("type","") == "boss"
+	if is_boss:
+		AchievementManager.on_boss_battle_end(result, GameState.hp)
+	elif result == "du_hua":
+		AchievementManager.record_du_hua()
+	elif result == "victory":
+		AchievementManager.record_zhen_ya()
 	match result:
 		"victory":
 			result_label.text = "镇压成功\n\n亡魂已被强行驱散。"
@@ -272,7 +283,7 @@ func _on_result_continue() -> void:
 	var result = _last_battle_result
 	if result == "victory" or result == "du_hua":
 		# 胜利/渡化 → 选牌奖励
-		get_tree().change_scene_to_file("res://scenes/CardRewardScene.tscn")
+		TransitionManager.change_scene("res://scenes/CardRewardScene.tscn")
 	else:
 		# 失败 → 结局场景（魂魄消散）
 		GameState.trigger_ending("defeat")
@@ -337,13 +348,15 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	var diff = new_hp - old_hp
 	if diff < 0:
 		_spawn_player_number(-diff, "damage")
-		# 主角立绘切换受伤状态（0.4s 后恢复 idle）
 		_set_player_sprite_state("hurt")
 		get_tree().create_timer(0.4).timeout.connect(
 			func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
+		# 成就：Boss战伤害追踪
+		var is_boss = state_machine.enemy_data.get("type","") == "boss"
+		if is_boss:
+			AchievementManager.on_player_damaged(-diff)
 	elif diff > 0:
 		_spawn_player_number(diff, "heal")
-	# 死亡
 	if new_hp <= 0:
 		_set_player_sprite_state("dead")
 

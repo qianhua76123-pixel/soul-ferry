@@ -20,6 +20,7 @@ var _all_events: Array = []
 
 # ========== 初始化 ==========
 func _ready() -> void:
+	TransitionManager.fade_in_only()
 	result_panel.visible = false
 	result_continue_btn.pressed.connect(_on_continue_pressed)
 	_load_events()
@@ -212,4 +213,4 @@ func _show_result(result: Dictionary) -> void:
 
 func _on_continue_pressed() -> void:
 	event_completed.emit(_current_event)
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	TransitionManager.change_scene("res://scenes/MapScene.tscn")

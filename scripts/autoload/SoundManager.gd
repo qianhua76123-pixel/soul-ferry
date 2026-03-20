@@ -261,3 +261,10 @@ var _stub_log_enabled: bool = true   # 改为 false 可静默
 func _log_stub(kind: String, name: String) -> void:
 	if _stub_log_enabled:
 		print("[SoundManager] 占位符 %s: %s（文件未加载）" % [kind, name])
+
+## 暂停菜单音量调节接口
+func set_bgm_volume(v: float) -> void:
+	bgm_volume = v
+
+func set_sfx_volume(v: float) -> void:
+	sfx_volume = v

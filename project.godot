@@ -25,6 +25,9 @@ GameState="*res://scripts/autoload/GameState.gd"
 RelicManager="*res://scripts/autoload/RelicManager.gd"
 BuffManager="*res://scripts/autoload/BuffManager.gd"
 SoundManager="*res://scripts/autoload/SoundManager.gd"
+TransitionManager="*res://scripts/autoload/TransitionManager.gd"
+PauseMenu="*res://scripts/autoload/PauseMenu.gd"
+AchievementManager="*res://scripts/autoload/AchievementManager.gd"
 
 [display]
 

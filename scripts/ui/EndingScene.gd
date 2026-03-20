@@ -213,13 +213,19 @@ func _collect_stats(ending_type: String) -> Array:
 	stats.append({"key": "渡化亡魂", "value": "%d 个" % GameState.get_meta("du_hua_count", 0)})
 	stats.append({"key": "镇压亡魂", "value": "%d 个" % GameState.get_meta("zhenya_count", 0)})
 	stats.append({"key": "到达楼层", "value": "第 %d 层" % GameState.current_layer})
-	stats.append({"key": "剩余HP", "value": "%d / %d" % [GameState.hp, GameState.max_hp]})
+	stats.append({"key": "剩余HP",   "value": "%d / %d" % [GameState.hp, GameState.max_hp]})
 	stats.append({"key": "持有遗物", "value": "%d 件" % len(GameState.relics)})
 	stats.append({"key": "牌库规模", "value": "%d 张" % (len(DeckManager.deck) + len(DeckManager.hand) + len(DeckManager.discard_pile))})
+	var ach_count = AchievementManager.get_achievement_count()
+	var ach_total = AchievementManager.ACHIEVEMENTS.size()
+	stats.append({"key": "成就进度", "value": "%d / %d" % [ach_count, ach_total]})
+	var gs = AchievementManager.get_stats()
+	stats.append({"key": "累计游玩", "value": "%d 局" % gs.get("total_runs", 0)})
+	stats.append({"key": "累计渡化", "value": "%d 次" % gs.get("total_du_hua", 0)})
 	if ending_type == "success":
-		stats.append({"key": "清醒结局", "value": "✓ 渡化成功"})
+		stats.append({"key": "通关类型", "value": "✓ 渡魂成功"})
 	elif ending_type == "lost":
-		stats.append({"key": "隐藏结局", "value": "迷失轮回"})
+		stats.append({"key": "隐藏结局", "value": "迷失轮回 🌀"})
 	return stats
 
 # ══════════════════════════════════════════════════════
@@ -276,13 +282,13 @@ func _on_restart() -> void:
 	SoundManager.play_sfx("menu_confirm")
 	GameState.new_run()
 	DeckManager.init_starter_deck()
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _on_menu() -> void:
 	SoundManager.play_sfx("menu_cancel")
 	GameState.new_run()
 	DeckManager.init_starter_deck()
-	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+	TransitionManager.change_scene("res://scenes/MainMenu.tscn")
 
 # ══════════════════════════════════════════════════════
 #  工具函数

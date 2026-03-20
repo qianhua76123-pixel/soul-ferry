@@ -251,6 +251,7 @@ func trigger_ending(ending_type: String) -> void:
 	set_meta("ending_type",  ending_type)
 	set_meta("du_hua_count", du_hua_count)
 	set_meta("zhenya_count", zhen_ya_count)
-	delete_save()   # 通关/失败后清档
-	# call_deferred 延迟切换，避免在信号回调内直接切换场景引发崩溃
-	get_tree().call_deferred("change_scene_to_file", "res://scenes/EndingScene.tscn")
+	delete_save()
+	# 成就：结局记录
+	AchievementManager.on_ending(ending_type)
+	TransitionManager.change_scene.call_deferred("res://scenes/EndingScene.tscn")

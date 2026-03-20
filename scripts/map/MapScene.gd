@@ -29,6 +29,7 @@ const NODE_CN    = {"battle":"战斗","event":"事件","shop":"商店","rest":"�
 var _map_data: Array = []
 
 func _ready() -> void:
+	TransitionManager.fade_in_only()
 	# 首次进入
 	if GameState.hp <= 0 or DeckManager.get_total_card_count() == 0:
 		GameState.new_run()
@@ -215,7 +216,7 @@ func _on_node_pressed(nd: Dictionary) -> void:
 
 	var path = SCENE_PATHS.get(ntype,"")
 	if path != "":
-		get_tree().change_scene_to_file(path)
+		TransitionManager.change_scene(path, _get_scene_title(path))
 
 func _random_enemy_for_layer(layer: int) -> String:
 	var file = FileAccess.open("res://data/enemies.json", FileAccess.READ)
@@ -303,3 +304,19 @@ func _make_layer_connector(is_active: bool) -> Control:
 
 	c.add_child(lbl)
 	return c
+
+## 根据目标场景路径返回过场字幕
+func _get_scene_title(path: String) -> String:
+	var layer = GameState.current_layer
+	var layer_names = {1: "第一层·望乡", 2: "第二层·焦土", 3: "第三层·幽冥"}
+	match path:
+		"res://scenes/BattleScene.tscn":
+			return layer_names.get(layer, "战斗")
+		"res://scenes/EventScene.tscn":
+			return "奇遇"
+		"res://scenes/ShopScene.tscn":
+			return "幽冥集市"
+		"res://scenes/RestScene.tscn":
+			return "古庙休息"
+		_:
+			return ""

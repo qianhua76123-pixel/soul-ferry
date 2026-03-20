@@ -24,6 +24,7 @@ var _card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
 
 # ========== 初始化 ==========
 func _ready() -> void:
+	TransitionManager.fade_in_only()
 	remove_panel.visible = false
 	leave_btn.pressed.connect(_on_leave_pressed)
 	remove_btn.pressed.connect(_on_remove_pressed)
@@ -124,4 +125,4 @@ func _update_gold_label() -> void:
 	gold_label.text = "金币: %d" % GameState.gold
 
 func _on_leave_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+	TransitionManager.change_scene("res://scenes/MapScene.tscn")
