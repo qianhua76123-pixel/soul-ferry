@@ -121,6 +121,9 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_shield_label.text = "🛡 0"
 	enemy_intent_label.text = "意图：..."
 	du_hua_hint_label.text  = ""
+	# B-06 渡化条件面板初始化
+	if _purif_panel and _purif_panel.has_method("setup_conditions"):
+		_purif_panel.setup_conditions(enemy_data)
 	_update_hud()
 	var is_boss = enemy_data.get("type", "") == "boss"
 	SoundManager.play_battle_bgm(GameState.current_layer, is_boss)
@@ -308,6 +311,8 @@ func _show_relic_popup(desc: String) -> void:
 func _on_du_hua_available(desc: String) -> void:
 	du_hua_btn.visible     = true
 	du_hua_hint_label.text = "💡 " + desc
+	if _purif_panel and _purif_panel.has_method("on_du_hua_available"):
+		_purif_panel.on_du_hua_available(desc)
 
 func _on_end_turn_pressed() -> void:
 	end_turn_btn.disabled = true
@@ -808,3 +813,20 @@ func show_card_preview(card: Dictionary, pos: Vector2) -> void:
 
 func hide_card_preview() -> void:
 	if _card_preview: _card_preview.hide_preview()
+
+## ══════════════════════════════════════════════════════
+## B-06 渡化条件面板
+## ══════════════════════════════════════════════════════
+
+func _setup_purification_panel() -> void:
+	# 挂在五情祭坛中央区域下方
+	var altar_center = get_node_or_null("UI/AltarLayout/AltarCenter")
+	if not altar_center: return
+	_purif_panel = PurificationPanelClass.new()
+	_purif_panel.name = "PurificationPanel"
+	altar_center.add_child(_purif_panel)
+	# 渡化按钮点击 → 触发状态机
+	_purif_panel.purify_requested.connect(func():
+		if state_machine.du_hua_triggered:
+			state_machine.confirm_du_hua()
+	)
