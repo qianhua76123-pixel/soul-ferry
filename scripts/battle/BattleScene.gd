@@ -2,6 +2,8 @@ extends Node2D
 
 ## BattleScene.gd - 战斗场景主控（祭坛式布局）
 
+const UIC = preload("res://scripts/ui/UIConstants.gd")
+
 @onready var state_machine       = $BattleStateMachine
 @onready var hand_container      = $UI/HandContainer
 @onready var turn_label          = $UI/HUD/TurnLabel
@@ -435,11 +437,15 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 
 func _update_hud() -> void:
 	cost_label.text          = "费用: %d" % int(DeckManager.current_cost)
-	deck_count_label.text    = "牌库: %d" % int(len(DeckManager.deck))
-	discard_count_label.text = "弃牌: %d" % int(len(DeckManager.discard_pile))
+	deck_count_label.text    = "▤ %d" % int(len(DeckManager.deck))
+	discard_count_label.text = "↓ %d" % int(len(DeckManager.discard_pile))
 	player_hp_bar.max_value  = GameState.max_hp
 	player_hp_bar.value      = GameState.hp
 	player_hp_label.text     = "%d / %d" % [int(GameState.hp), int(GameState.max_hp)]
+	# 结束回合按钮样式
+	if end_turn_btn:
+		end_turn_btn.text = "结束回合 [E]"
+		end_turn_btn.add_theme_color_override("font_color", Color(0.784, 0.663, 0.431))
 
 func _refresh_hand() -> void:
 	for card_ui in hand_container.get_children():
@@ -768,7 +774,8 @@ func _setup_layout_improvements() -> void:
 	# 地面线（BattleGround）：深墨绿细条，衬托立绘站位
 	var ground = ColorRect.new()
 	ground.name = "BattleGround"
-	ground.color = Color(0.05, 0.10, 0.06, 0.6)
+	ground.color = UIC.COLORS["ding"].darkened(0.7)
+	ground.color.a = 0.6
 	# 全宽固定高度：anchor 左右拉满，高度固定 4px
 	ground.set_anchor_and_offset(SIDE_LEFT,  0.0, 0)
 	ground.set_anchor_and_offset(SIDE_RIGHT, 1.0, 0)
@@ -781,12 +788,42 @@ func _setup_layout_improvements() -> void:
 	# HandContainer：居中对齐 + 卡牌间距
 	if hand_container:
 		hand_container.add_theme_constant_override("separation", 12)
-		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
 
 	# 卡牌悬停预览层（复用上方已声明的 ui）
 	_card_preview = CardPreviewClass.new()
 	if ui: ui.add_child(_card_preview)
+
+	# 五情祭坛外部标题：[细线]———— 五情祭坛 ————[细线]
+	var altar_center = get_node_or_null("UI/AltarLayout/AltarCenter")
+	if altar_center:
+		# 移除旧有的祭坛标题（如果已存在，避免重复）
+		var old_title = altar_center.get_node_or_null("AltarTitleRow")
+		if old_title:
+			old_title.queue_free()
+		var title_row = HBoxContainer.new()
+		title_row.name = "AltarTitleRow"
+		title_row.add_theme_constant_override("separation", 4)
+		title_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		# 左侧细线
+		var line_left = ColorRect.new()
+		line_left.custom_minimum_size = Vector2(60, 1)
+		line_left.color = UIC.COLORS["gold_dim"]
+		title_row.add_child(line_left)
+		# 标题文字
+		var altar_lbl = Label.new()
+		altar_lbl.text = "五情祭坛"
+		altar_lbl.add_theme_font_size_override("font_size", 11)
+		altar_lbl.add_theme_color_override("font_color", UIC.COLORS["gold_dim"])
+		altar_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title_row.add_child(altar_lbl)
+		# 右侧细线
+		var line_right = ColorRect.new()
+		line_right.custom_minimum_size = Vector2(60, 1)
+		line_right.color = UIC.COLORS["gold_dim"]
+		title_row.add_child(line_right)
+		altar_center.add_child(title_row)
+		altar_center.move_child(title_row, 0)
 
 ## ══════════════════════════════════════════════════════
 ## B-04 敌人意图预告
