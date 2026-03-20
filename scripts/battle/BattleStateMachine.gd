@@ -9,6 +9,7 @@ signal card_effect_applied(card: Dictionary, result: Dictionary)
 signal battle_ended(result: String)
 signal du_hua_available(condition: String)
 signal du_hua_succeeded(enemy_id: String)
+signal intent_updated(intent: Dictionary)
 
 # 状态常量（替代 enum，避免外部引用问题）
 const STATE_IDLE         = 0
@@ -21,6 +22,7 @@ const STATE_BATTLE_END   = 6
 
 var current_state: int = 0
 var current_turn: int = 0
+var next_intent: Dictionary = {}   # 下一回合敌人意图（供 UI 读取）
 
 var enemy_data: Dictionary = {}
 var enemy_hp: int = 0
@@ -82,6 +84,7 @@ func _begin_player_turn() -> void:
 	if EmotionManager.is_disorder("fear"):
 		DeckManager.discard_random()
 	player_turn_started.emit(current_turn)
+	intent_updated.emit(next_intent)
 
 func play_card(card: Dictionary) -> bool:
 	if current_state != STATE_PLAYER_TURN:
@@ -125,6 +128,8 @@ func _begin_enemy_turn() -> void:
 	# 记录行动类型供 BattleScene UI 读取
 	enemy_data["_last_action_type"] = action.get("type", "")
 	_execute_enemy_action(action)
+	# 预告下一回合意图（选完本轮动作后，再预选下轮）
+	next_intent = _choose_enemy_action()
 	if GameState.hp > 0:
 		_begin_player_turn()
 	else:

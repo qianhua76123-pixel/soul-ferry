@@ -30,6 +30,10 @@ var _dmgnum_scene: PackedScene = preload("res://scenes/DamageNumber.tscn")
 var _player_hbar: Control = null
 var _enemy_hbar:  Control = null
 
+## B-04 敌人意图预告组件
+var _intent_display: Control = null
+const IntentDisplayClass = preload("res://scripts/ui/IntentDisplay.gd")
+
 ## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
 const EnemyPixelArtClass  = preload("res://scripts/ui/EnemyPixelArt.gd")
 const PlayerPixelArtClass = preload("res://scripts/ui/PlayerPixelArt.gd")
@@ -48,6 +52,7 @@ func _ready() -> void:
 	state_machine.card_effect_applied.connect(_on_card_effect)
 	state_machine.battle_ended.connect(_on_battle_ended)
 	state_machine.du_hua_available.connect(_on_du_hua_available)
+	state_machine.intent_updated.connect(_on_intent_updated)
 
 	EmotionManager.emotion_changed.connect(_on_emotion_changed)
 	EmotionManager.disorder_triggered.connect(_on_disorder_triggered)
@@ -76,6 +81,9 @@ func _ready() -> void:
 
 	# 主角立绘初始化
 	_setup_player_sprite()
+
+	# B-04 意图预告组件初始化
+	_setup_intent_display()
 
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
@@ -724,3 +732,19 @@ func _setup_layout_improvements() -> void:
 		hand_container.add_theme_constant_override("separation", 12)
 		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
+
+## ══════════════════════════════════════════════════════
+## B-04 敌人意图预告
+## ══════════════════════════════════════════════════════
+
+func _setup_intent_display() -> void:
+	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if not enemy_area: return
+	_intent_display = IntentDisplayClass.new()
+	enemy_area.add_child(_intent_display)
+	# 初始显示"蓄势待发"
+	_intent_display.show_intent({})
+
+func _on_intent_updated(intent: Dictionary) -> void:
+	if _intent_display:
+		_intent_display.show_intent(intent)
