@@ -395,11 +395,10 @@ func _execute_enemy_action(action: Dictionary) -> void:
 	var atype = action.get("type", "")
 	match atype:
 		"attack":
-			# 先检查闪避
+			# 先检查玩家闪避
 			if _dodge_charges > 0:
 				_dodge_charges -= 1
-				result["dodged"] = true
-				result.value = 0
+				# 闪避成功，不扣血，播放浮字由 BattleScene 通过 hp_changed 无变化判断
 			else:
 				var raw = int(action.get("value", 0) * mul)
 				var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
