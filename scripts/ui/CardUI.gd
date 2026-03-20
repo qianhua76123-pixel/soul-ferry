@@ -15,6 +15,9 @@ signal card_clicked(card_data: Dictionary)
 var card_data: Dictionary = {}
 var is_playable: bool = true
 
+## B-05 悬停动画基准 Y
+var _base_y: float = 0.0
+
 ## 初始化牌卡显示
 func setup(data: Dictionary) -> void:
 	card_data = data
@@ -47,9 +50,35 @@ func set_playable(playable: bool) -> void:
 	is_playable = playable
 	modulate = Color.WHITE if playable else Color(0.5, 0.5, 0.5, 0.8)
 
+func _ready() -> void:
+	_base_y = position.y
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+
 ## 点击事件
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			if is_playable:
 				card_clicked.emit(card_data)
+
+## B-05 鼠标悬停：上移 + 轻微放大 + 显示预览
+func _on_mouse_entered() -> void:
+	if not is_playable: return
+	# 上移 + 轻微放大
+	var tw = create_tween()
+	tw.tween_property(self, "position:y", position.y - 10, 0.12)
+	tw.parallel().tween_property(self, "scale", Vector2(1.05, 1.05), 0.12)
+	# 触发 BattleScene 显示预览
+	var battle = get_tree().root.find_child("BattleScene", true, false)
+	if battle and battle.has_method("show_card_preview"):
+		battle.show_card_preview(card_data, get_global_rect().get_center())
+
+## B-05 鼠标离开：恢复位置 + 隐藏预览
+func _on_mouse_exited() -> void:
+	var tw = create_tween()
+	tw.tween_property(self, "position:y", _base_y, 0.10)
+	tw.parallel().tween_property(self, "scale", Vector2(1.0, 1.0), 0.10)
+	var battle = get_tree().root.find_child("BattleScene", true, false)
+	if battle and battle.has_method("hide_card_preview"):
+		battle.hide_card_preview()

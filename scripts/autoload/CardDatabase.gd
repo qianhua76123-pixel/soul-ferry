@@ -20,6 +20,7 @@ func _load_cards() -> void:
 		push_error("CardDatabase: JSON 解析失败"); file.close(); return
 	file.close()
 	for card in json.get_data().get("cards", []):
+		card["cost"] = int(card.get("cost", 1))
 		_cards[card.get("id", "")] = card
 	_loaded = true
 

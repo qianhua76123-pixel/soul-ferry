@@ -31,8 +31,20 @@ var _player_hbar: Control = null
 var _enemy_hbar:  Control = null
 
 ## B-04 敌人意图预告组件
-var _intent_display: Control = null
-const IntentDisplayClass = preload("res://scripts/ui/IntentDisplay.gd")
+var _intent_display:    Control = null
+var _purif_panel:       Control = null
+const IntentDisplayClass    = preload("res://scripts/ui/IntentDisplay.gd")
+const PurificationPanelClass = preload("res://scripts/ui/PurificationPanel.gd")
+
+## B-05 卡牌悬停预览组件
+var _card_preview: Control = null
+const CardPreviewClass = preload("res://scripts/ui/CardPreview.gd")
+
+## B-07 战场氛围背景 + 费用圆点HUD
+var _bg_node:        Node2D  = null
+var _energy_display: Control = null
+const BattleBackgroundClass = preload("res://scripts/battle/BattleBackground.gd")
+const EnergyDisplayClass    = preload("res://scripts/ui/EnergyDisplay.gd")
 
 ## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
 const EnemyPixelArtClass  = preload("res://scripts/ui/EnemyPixelArt.gd")
@@ -84,12 +96,18 @@ func _ready() -> void:
 
 	# B-04 意图预告组件初始化
 	_setup_intent_display()
+	# B-06 渡化条件面板初始化
+	_setup_purification_panel()
 
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
 
 	# B-01 布局优化
 	_setup_layout_improvements()
+
+	# B-07 战场氛围背景 + 费用圆点HUD
+	_setup_battle_background()
+	_setup_energy_display()
 
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
@@ -116,7 +134,9 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 		_setup_boss_ui(enemy_data)
 
 func _on_player_turn_started(turn: int) -> void:
-	turn_label.text       = "第 %d 回合" % int(turn)
+	var moon_icons = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
+	var moon = moon_icons[int(turn - 1) % 8]
+	turn_label.text       = "%s 第 %d 回合" % [moon, int(turn)]
 	end_turn_btn.disabled = false
 	du_hua_btn.visible    = false
 	disorder_warning.text = ""
@@ -322,6 +342,12 @@ func _on_hand_updated(hand: Array) -> void:
 			card_ui.set_playable(can_afford and EmotionManager.can_play_card(card_data))
 		card_ui.card_clicked.connect(_on_card_clicked)
 		hand_container.add_child(card_ui)
+	# 根据手牌数量动态调整间距，最多7张不溢出
+	var card_count = hand_container.get_child_count()
+	var sep = 12
+	if card_count > 5:
+		sep = max(4, 12 - (card_count - 5) * 3)
+	hand_container.add_theme_constant_override("separation", sep)
 
 func _on_card_clicked(card_data: Dictionary) -> void:
 	if state_machine.current_state != 2: # STATE_PLAYER_TURN
@@ -733,6 +759,11 @@ func _setup_layout_improvements() -> void:
 		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
 
+	# 卡牌悬停预览层
+	_card_preview = CardPreviewClass.new()
+	var ui = get_node_or_null("UI")
+	if ui: ui.add_child(_card_preview)
+
 ## ══════════════════════════════════════════════════════
 ## B-04 敌人意图预告
 ## ══════════════════════════════════════════════════════
@@ -748,3 +779,13 @@ func _setup_intent_display() -> void:
 func _on_intent_updated(intent: Dictionary) -> void:
 	if _intent_display:
 		_intent_display.show_intent(intent)
+
+## ══════════════════════════════════════════════════════
+## B-05 卡牌悬停预览公开接口
+## ══════════════════════════════════════════════════════
+
+func show_card_preview(card: Dictionary, pos: Vector2) -> void:
+	if _card_preview: _card_preview.show_preview(card, pos)
+
+func hide_card_preview() -> void:
+	if _card_preview: _card_preview.hide_preview()
