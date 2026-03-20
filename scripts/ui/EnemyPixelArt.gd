@@ -1,5 +1,7 @@
 extends Node
 
+class_name EnemyPixelArt
+
 ## EnemyPixelArt.gd - 程序化生成8个敌人的像素立绘
 ## 调用 create_texture(enemy_id) → ImageTexture
 ## BattleScene 在 _setup_enemy() 时调用，赋给 TextureRect

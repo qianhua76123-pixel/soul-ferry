@@ -1,5 +1,7 @@
 extends Control
 
+class_name CardUINode
+
 ## CardUINode.gd - 牌卡UI（_draw渲染，像素民俗风占位符）
 
 signal card_clicked(card_data: Dictionary)
