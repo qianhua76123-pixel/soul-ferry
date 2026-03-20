@@ -186,7 +186,13 @@ func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
 		tw.tween_property(btn, "modulate", Color.WHITE, 0.8)
 
 	var cap = nd
-	btn.pressed.connect(func(): _on_node_pressed(cap))
+	btn.pressed.connect(func():
+		# 点击缩放反馈
+		var tw = btn.create_tween()
+		tw.tween_property(btn, "scale", Vector2(0.90, 0.90), 0.08)
+		tw.tween_property(btn, "scale", Vector2(1.0,  1.0),  0.12)
+		tw.tween_callback(func(): _on_node_pressed(cap))
+	)
 	return btn
 
 func _on_node_pressed(nd: Dictionary) -> void:

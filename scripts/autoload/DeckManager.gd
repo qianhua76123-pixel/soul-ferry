@@ -8,6 +8,7 @@ signal card_discarded(card: Dictionary)
 signal hand_updated(hand: Array)
 signal deck_shuffled()
 signal hand_full()
+signal cost_changed(new_cost: int)   # 费用变化（供 EnergyDisplay 使用）
 
 const MAX_HAND_SIZE  = 10
 const BASE_DRAW      = 5
@@ -70,6 +71,7 @@ func draw_cards(count: int) -> void:
 func on_turn_start() -> void:
 	max_cost = BASE_COST - EmotionManager.get_cost_reduction()
 	current_cost = max_cost
+	cost_changed.emit(current_cost)
 	var draw_n = BASE_DRAW + EmotionManager.get_draw_bonus()
 	if EmotionManager.is_disorder("fear"): draw_n -= 1
 	draw_cards(max(1, draw_n))
@@ -89,6 +91,7 @@ func play_card(card: Dictionary) -> bool:
 	if not EmotionManager.can_play_card(card): return false
 	hand.remove_at(idx)
 	current_cost -= cost
+	cost_changed.emit(current_cost)   # 更新费用圆点
 	# 应用情绪偏移
 	var shift = card.get("emotion_shift", {})
 	if not shift.is_empty():
