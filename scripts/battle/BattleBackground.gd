@@ -11,7 +11,7 @@ const SCREEN_H = 684.0
 
 func _ready() -> void:
 	z_index = -10
-	_apply_chapter_theme(GameState.current_chapter)
+	_apply_chapter_theme(GameState.current_layer)
 
 func _draw() -> void:
 	# 渐变背景（20条横线模拟）
