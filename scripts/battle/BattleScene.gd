@@ -516,11 +516,10 @@ func _setup_buff_ui() -> void:
 	# 敌人 Buff 栏：插入 EnemyArea 顶部（名字下方）
 	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if enemy_area:
-		var bar = HBoxContainer.new()
-		bar.name = "EnemyBuffBar"
-		# 插到敌人名字下面（index 1）
-		enemy_area.add_child(bar)
-		enemy_area.move_child(bar, 1)
+		var enemy_bar = HBoxContainer.new()
+		enemy_bar.name = "EnemyBuffBar"
+		enemy_area.add_child(enemy_bar)
+		enemy_area.move_child(enemy_bar, 1)
 
 	# 全局 Tooltip（Panel 包 Label，挂到 UI 最顶层）
 	var ui = get_node_or_null("UI")
@@ -540,18 +539,18 @@ func _setup_buff_ui() -> void:
 		ui.add_child(_tooltip_panel)
 		_tooltip_panel.visible = false
 
-	## B-02 新增双层血条组件（覆盖在原血条上方）
+	## B-02 新增双层血条组件（复用上方已声明的 player_area / enemy_area）
 	var PlayerHealthBarClass = preload("res://scripts/ui/PlayerHealthBar.gd")
 	var EnemyHealthBarClass  = preload("res://scripts/ui/EnemyHealthBar.gd")
-	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
-	var enemy_area  = get_node_or_null("UI/AltarLayout/EnemyArea")
-	if player_area:
+	var pa2 = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var ea2 = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if pa2:
 		_player_hbar = PlayerHealthBarClass.new()
-		player_area.add_child(_player_hbar)
+		pa2.add_child(_player_hbar)
 		_player_hbar.set_hp(GameState.hp, GameState.max_hp)
-	if enemy_area:
+	if ea2:
 		_enemy_hbar = EnemyHealthBarClass.new()
-		enemy_area.add_child(_enemy_hbar)
+		ea2.add_child(_enemy_hbar)
 
 func _on_buff_changed(target: String, _buff_id: String, _stacks: int) -> void:
 	_rebuild_buff_bar(target)
@@ -784,9 +783,8 @@ func _setup_layout_improvements() -> void:
 		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
 
-	# 卡牌悬停预览层
+	# 卡牌悬停预览层（复用上方已声明的 ui）
 	_card_preview = CardPreviewClass.new()
-	var ui = get_node_or_null("UI")
 	if ui: ui.add_child(_card_preview)
 
 ## ══════════════════════════════════════════════════════
