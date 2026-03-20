@@ -104,11 +104,7 @@ func _draw() -> void:
 	var border_pts = PackedVector2Array(fill_pts)
 	border_pts.append(border_pts[0])
 	draw_polyline(border_pts, fill_color.lightened(0.3), 2.0)
-	# 标题
-	draw_string(ThemeDB.fallback_font,
-		center + Vector2(-28, -(RADIUS + 14)),
-		"五情祭坛", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
-		Color(0.65, 0.52, 0.12))
+	# 标题由 BattleScene 外部祭坛标题行统一渲染，此处不绘制
 
 func _get_pentagon(center: Vector2, r: float) -> Array:
 	var pts = []
