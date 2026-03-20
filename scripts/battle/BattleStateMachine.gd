@@ -263,9 +263,20 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 				_deal_damage_to_enemy(removed)
 			result.value = removed
 
+		"reset_shield":
+			# 五情归一：护盾 = 五情总值 × base_val
+			var total = EmotionManager.get_total_value()
+			var sv = total * base_val
+			player_shield += sv
+			result.value = sv
+
 		"status_fear_all":
 			EmotionManager.modify("fear", base_val)
 			result.value = base_val
+
+		"dot_and_weaken":
+			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "dot", base_val, 3)
+			result["weaken_percent"] = base_val * 5
 
 		"status_seal":
 			result["sealed_turns"] = base_val
@@ -301,10 +312,6 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"peek_enemy":
 			result["peek"] = true
-
-		"status_fear_all", "dot_and_weaken":
-			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "dot", base_val, 3)
-			result["weaken_percent"] = base_val * 5
 
 		_:
 			pass

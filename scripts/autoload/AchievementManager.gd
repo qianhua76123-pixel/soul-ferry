@@ -59,9 +59,8 @@ var _session: Dictionary = {
 
 func _ready() -> void:
 	_load_stats()
-	# 连接 GameState 信号
-	GameState.connect("game_saved",  _on_run_end)
-	# 连接 EmotionManager（战斗胜利时检查五情平衡）
+	# Godot 4 信号连接语法
+	GameState.game_saved.connect(_on_run_end)
 
 func _load_stats() -> void:
 	if not FileAccess.file_exists(STATS_PATH): return
@@ -123,11 +122,13 @@ func check_deck_achievements() -> void:
 	# 传说牌数量
 	var legend_count = deck.filter(func(c): return c.get("rarity","") == "legendary").size()
 	_check_achievement("legend_3", legend_count >= 3)
-	# 遗物数量
-	_check_achievement("relic_5", len(RelicManager.get_owned_relics()) >= 5)
+	# 遗物数量（直接读 GameState.relics）
+	_check_achievement("relic_5", len(GameState.relics) >= 5)
 	# 五情平衡
 	var vals = EmotionManager.values
-	var balanced = vals.values().all(func(v): return v >= 3)
+	var balanced = true
+	for v in vals.values():
+		if v < 3: balanced = false
 	_check_achievement("five_balance", balanced)
 	_save_stats()
 
@@ -156,7 +157,10 @@ func _check_achievement(id: String, condition: bool) -> void:
 	_show_achievement_toast(id)
 	# 检查全成就
 	var all_ids = ACHIEVEMENTS.keys().filter(func(k): return k != "completionist")
-	if all_ids.all(func(k): return stats["achievements"].has(k)):
+	var all_done = true
+	for k in all_ids:
+		if not stats["achievements"].has(k): all_done = false
+	if all_done:
 		_check_achievement("completionist", true)
 
 func _show_achievement_toast(id: String) -> void:
@@ -185,11 +189,9 @@ func _spawn_toast(msg: String) -> void:
 	bg.add_child(lbl)
 
 	# 挂在当前场景根节点
-	var root = Engine.get_main_loop().current_scene
-	if root: root.add_child(bg)
-	else: return
-
-	bg.position = Vector2(20, 560)
+	# 挂在 AchievementManager 自身（常驻场景树，不会为 null）
+	add_child(bg)
+	bg.position = Vector2(20, 520)
 	bg.modulate.a = 0.0
 	var tw = bg.create_tween()
 	tw.tween_property(bg, "modulate:a", 1.0, 0.3)

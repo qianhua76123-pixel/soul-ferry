@@ -79,16 +79,15 @@ static func make_shield(stacks: int) -> Dictionary:
 #  公共 API
 # ════════════════════════════════════════════
 
-func add_buff(target: String, buff_id: String, stacks: int = 1) -> void:
+func add_buff(target: String, buff_id: String, stacks: int = 1, duration: int = -1) -> void:
 	var buffs = _get_target_buffs(target)
 	if buff_id in buffs:
-		# 已有同类 Buff：叠加层数
 		buffs[buff_id]["stacks"] += stacks
-		# 执念刷新持续时间
+		if duration > 0:
+			buffs[buff_id]["duration"] = max(buffs[buff_id].get("duration", 0), duration)
 		if buff_id == "obsession":
 			buffs[buff_id]["duration"] = buffs[buff_id]["stacks"]
 	else:
-		# 新建 Buff 实例
 		var new_buff = _make_buff(buff_id, stacks)
 		if new_buff.is_empty():
 			push_warning("BuffManager: 未知 buff_id: " + buff_id)

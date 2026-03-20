@@ -14,7 +14,8 @@ var _title_lbl:  Label
 var _is_fading:  bool = false
 
 func _ready() -> void:
-	# CanvasLayer 始终在最顶层
+	# 过场动画在暂停时也要继续运行
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 128
 
 	_overlay = ColorRect.new()

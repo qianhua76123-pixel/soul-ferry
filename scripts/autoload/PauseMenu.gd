@@ -13,9 +13,10 @@ var _sfx_slider:  HSlider
 
 func _ready() -> void:
 	layer = PAUSE_LAYER
+	# 暂停时自身仍需运行（处理输入和动画）
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
 	visible = false
-	# 注册全局输入监听
 	set_process_unhandled_key_input(true)
 
 func _unhandled_key_input(event: InputEvent) -> void:
