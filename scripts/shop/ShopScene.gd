@@ -33,6 +33,7 @@ func _ready() -> void:
 	GameState.gold_changed.connect(_on_gold_changed)
 	_update_gold_label()
 	_generate_shop()
+	_setup_shop_visual()
 
 func _generate_shop() -> void:
 	_shop_cards = CardDatabase.get_reward_cards(3)

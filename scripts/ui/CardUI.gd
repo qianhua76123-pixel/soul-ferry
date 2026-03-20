@@ -60,7 +60,11 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			if is_playable:
-				card_clicked.emit(card_data)
+				# 出牌消失动画
+				var tw = create_tween()
+				tw.tween_property(self, "scale", Vector2(0.0, 0.0), 0.15)\
+					.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
+				tw.tween_callback(func(): card_clicked.emit(card_data))
 
 ## B-05 鼠标悬停：上移 + 轻微放大 + 显示预览
 func _on_mouse_entered() -> void:

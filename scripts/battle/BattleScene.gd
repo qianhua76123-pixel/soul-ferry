@@ -353,15 +353,35 @@ func _on_hand_updated(hand: Array) -> void:
 	if card_count > 5:
 		sep = max(4, 12 - (card_count - 5) * 3)
 	hand_container.add_theme_constant_override("separation", sep)
+	# 手牌滑入动画：每张牌从下方 +30px 位移滑入
+	var delay = 0.0
+	for card_ui in hand_container.get_children():
+		card_ui.modulate.a = 0.0
+		var orig_y = card_ui.position.y
+		card_ui.position.y = orig_y + 30
+		var tw = card_ui.create_tween()
+		tw.tween_interval(delay)
+		tw.tween_property(card_ui, "position:y", orig_y, 0.18)\
+			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+		tw.parallel().tween_property(card_ui, "modulate:a", 1.0, 0.18)
+		delay += 0.04
 
 func _on_card_clicked(card_data: Dictionary) -> void:
 	if state_machine.current_state != 2: # STATE_PLAYER_TURN
 		return
 	SoundManager.play_sfx("card_play")
-	# 出牌时切换施法立绘（0.5s 后恢复 idle）
+	# 出牌时切换施法立绘
 	_set_player_sprite_state("attack")
 	get_tree().create_timer(0.5).timeout.connect(
 		func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
+	# 根据牌型播放不同的命中动画，然后触发效果
+	var effect_type = card_data.get("effect_type", "")
+	var is_attack = effect_type in ["attack","attack_all","attack_lifesteal","attack_dot",
+		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
+		"shield_attack","remove_enemy_shield","dodge_attack"]
+	if is_attack:
+		_play_attack_flash()
+		await get_tree().create_timer(0.12).timeout
 	state_machine.play_card(card_data)
 
 func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
@@ -830,3 +850,18 @@ func _setup_purification_panel() -> void:
 		if state_machine.du_hua_triggered:
 			state_machine.confirm_du_hua()
 	)
+
+func _play_attack_flash() -> void:
+	## 攻击牌命中闪光：在敌人区域叠加白色闪光
+	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if not enemy_area: return
+	var flash = ColorRect.new()
+	flash.color = Color(1, 1, 1, 0.0)
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.z_index = 20
+	enemy_area.add_child(flash)
+	var tw = flash.create_tween()
+	tw.tween_property(flash, "color:a", 0.55, 0.06)
+	tw.tween_property(flash, "color:a", 0.0,  0.18)
+	tw.tween_callback(flash.queue_free)
