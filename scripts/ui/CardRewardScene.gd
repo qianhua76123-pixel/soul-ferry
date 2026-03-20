@@ -14,6 +14,7 @@ var _card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
 var _reward_cards: Array = []
 
 func _ready() -> void:
+	TransitionManager.fade_in_only()
 	skip_btn.pressed.connect(_on_skip)
 	_show_rewards()
 	_update_gold()

@@ -6,12 +6,32 @@
       "type": "normal",
       "layer": 1,
       "hp": 30,
-      "emotion_pressure": [{"emotion": "fear", "value": 1}],
-      "actions": [
-        {"type": "attack", "value": 6, "weight": 60},
-        {"type": "emotion_push", "emotion": "fear", "value": 1, "weight": 40}
+      "emotion_pressure": [
+        {
+          "emotion": "fear",
+          "value": 1
+        }
       ],
-      "du_hua_condition": null,
+      "actions": [
+        {
+          "type": "attack",
+          "value": 6,
+          "weight": 60
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "fear",
+          "value": 1,
+          "weight": 40
+        }
+      ],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {
+          "grief": 2
+        },
+        "description": "悲≥2：用悲悯之心安抚孤魂"
+      },
       "description": "无家可归的弱小亡魂，游荡于幽夹之间"
     },
     {
@@ -20,13 +40,42 @@
       "type": "normal",
       "layer": 1,
       "hp": 40,
-      "emotion_pressure": [{"emotion": "grief", "value": 1}, {"emotion": "rage", "value": 1}],
-      "actions": [
-        {"type": "attack", "value": 10, "weight": 50},
-        {"type": "emotion_push", "emotion": "rage", "value": 1, "weight": 30},
-        {"type": "weaken", "value": 15, "weight": 20}
+      "emotion_pressure": [
+        {
+          "emotion": "grief",
+          "value": 1
+        },
+        {
+          "emotion": "rage",
+          "value": 1
+        }
       ],
-      "du_hua_condition": null,
+      "actions": [
+        {
+          "type": "attack",
+          "value": 10,
+          "weight": 50
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "rage",
+          "value": 1,
+          "weight": 30
+        },
+        {
+          "type": "weaken",
+          "value": 15,
+          "weight": 20
+        }
+      ],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {
+          "grief": 2,
+          "calm": 1
+        },
+        "description": "悲≥2且定≥1：听他诉说执念，引导放下"
+      },
       "description": "带着怨恨死去的普通人，情绪激烈但执念单一"
     },
     {
@@ -35,13 +84,37 @@
       "type": "normal",
       "layer": 2,
       "hp": 45,
-      "emotion_pressure": [{"emotion": "fear", "value": 2}],
-      "actions": [
-        {"type": "attack", "value": 8, "weight": 40},
-        {"type": "emotion_push", "emotion": "fear", "value": 2, "weight": 40},
-        {"type": "draw_player", "value": -1, "weight": 20}
+      "emotion_pressure": [
+        {
+          "emotion": "fear",
+          "value": 2
+        }
       ],
-      "du_hua_condition": null,
+      "actions": [
+        {
+          "type": "attack",
+          "value": 8,
+          "weight": 40
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "fear",
+          "value": 2,
+          "weight": 40
+        },
+        {
+          "type": "draw_player",
+          "value": -1,
+          "weight": 20
+        }
+      ],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {
+          "fear": 2
+        },
+        "description": "惧≥2：以同理之惧触动摄魅眼的内心"
+      },
       "description": "以恐惧为食的诡异存在，专门扰乱玩家手牌"
     },
     {
@@ -50,13 +123,39 @@
       "type": "normal",
       "layer": 2,
       "hp": 55,
-      "emotion_pressure": [{"emotion": "grief", "value": 1}],
-      "actions": [
-        {"type": "attack", "value": 12, "weight": 50},
-        {"type": "emotion_push", "emotion": "grief", "value": 2, "weight": 30},
-        {"type": "dot", "value": 4, "duration": 2, "weight": 20}
+      "emotion_pressure": [
+        {
+          "emotion": "grief",
+          "value": 1
+        }
       ],
-      "du_hua_condition": null,
+      "actions": [
+        {
+          "type": "attack",
+          "value": 12,
+          "weight": 50
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "grief",
+          "value": 2,
+          "weight": 30
+        },
+        {
+          "type": "dot",
+          "value": 4,
+          "duration": 2,
+          "weight": 20
+        }
+      ],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {
+          "rage": 2,
+          "grief": 1
+        },
+        "description": "怒≥2且悲≥1：释放积压的愤怒与悲哀"
+      },
       "description": "背负过多悲伤的执念体，每次攻击都带着哭声"
     },
     {
@@ -65,12 +164,32 @@
       "type": "normal",
       "layer": 3,
       "hp": 50,
-      "emotion_pressure": [{"emotion": "rage", "value": 2}],
-      "actions": [
-        {"type": "attack", "value": 15, "weight": 60},
-        {"type": "emotion_push", "emotion": "rage", "value": 2, "weight": 40}
+      "emotion_pressure": [
+        {
+          "emotion": "rage",
+          "value": 2
+        }
       ],
-      "du_hua_condition": null,
+      "actions": [
+        {
+          "type": "attack",
+          "value": 15,
+          "weight": 60
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "rage",
+          "value": 2,
+          "weight": 40
+        }
+      ],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {
+          "joy": 2
+        },
+        "description": "喜≥2：以喜乐之心驱散虚妄的闪火"
+      },
       "description": "被愤怒彻底扭曲的灵体，只剩本能的暴力冲动"
     },
     {
@@ -79,17 +198,45 @@
       "type": "boss",
       "layer": 1,
       "hp": 80,
-      "emotion_pressure": [{"emotion": "grief", "value": 2}, {"emotion": "fear", "value": 1}],
+      "emotion_pressure": [
+        {
+          "emotion": "grief",
+          "value": 2
+        },
+        {
+          "emotion": "fear",
+          "value": 1
+        }
+      ],
       "actions": [
-        {"type": "attack", "value": 12, "weight": 40},
-        {"type": "emotion_push", "emotion": "grief", "value": 2, "weight": 30},
-        {"type": "summon_tide", "value": 8, "weight": 20},
-        {"type": "shield", "value": 15, "weight": 10}
+        {
+          "type": "attack",
+          "value": 12,
+          "weight": 40
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "grief",
+          "value": 2,
+          "weight": 30
+        },
+        {
+          "type": "summon_tide",
+          "value": 8,
+          "weight": 20
+        },
+        {
+          "type": "shield",
+          "value": 15,
+          "weight": 10
+        }
       ],
       "du_hua_condition": {
         "type": "card_play",
         "card_id": "yin_du",
-        "emotion_requirement": {"grief": 3},
+        "emotion_requirement": {
+          "grief": 3
+        },
         "description": "悲≥3时打出「引渡」牌"
       },
       "du_hua_success_text": "七年了……我以为等待本身没有意义，但你告诉我——等待本身就是答案。谢谢你。",
@@ -103,17 +250,46 @@
       "type": "boss",
       "layer": 2,
       "hp": 100,
-      "emotion_pressure": [{"emotion": "rage", "value": 2}, {"emotion": "grief", "value": 1}],
+      "emotion_pressure": [
+        {
+          "emotion": "rage",
+          "value": 2
+        },
+        {
+          "emotion": "grief",
+          "value": 1
+        }
+      ],
       "actions": [
-        {"type": "attack", "value": 15, "weight": 30},
-        {"type": "dot_fire", "value": 5, "duration": 3, "weight": 30},
-        {"type": "emotion_push", "emotion": "rage", "value": 2, "weight": 20},
-        {"type": "all_field_heat_dot", "value": 3, "weight": 20}
+        {
+          "type": "attack",
+          "value": 15,
+          "weight": 30
+        },
+        {
+          "type": "dot_fire",
+          "value": 5,
+          "duration": 3,
+          "weight": 30
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "rage",
+          "value": 2,
+          "weight": 20
+        },
+        {
+          "type": "all_field_heat_dot",
+          "value": 3,
+          "weight": 20
+        }
       ],
       "du_hua_condition": {
         "type": "dialogue_choice",
         "dialogue_id": "believe_you",
-        "emotion_requirement": {"calm": 3},
+        "emotion_requirement": {
+          "calm": 3
+        },
         "description": "定≥3，选择「我相信你」对话选项"
       },
       "du_hua_success_text": "有人……终于有人相信我了……我等了太久了……",
@@ -127,17 +303,46 @@
       "type": "boss",
       "layer": 3,
       "hp": 120,
-      "emotion_pressure": [{"emotion": "grief", "value": 2}, {"emotion": "fear", "value": 2}],
+      "emotion_pressure": [
+        {
+          "emotion": "grief",
+          "value": 2
+        },
+        {
+          "emotion": "fear",
+          "value": 2
+        }
+      ],
       "actions": [
-        {"type": "attack", "value": 18, "weight": 30},
-        {"type": "emotion_push", "emotion": "grief", "value": 2, "weight": 25},
-        {"type": "emotion_push", "emotion": "fear", "value": 2, "weight": 25},
-        {"type": "rage_card_storm", "value": 5, "weight": 20}
+        {
+          "type": "attack",
+          "value": 18,
+          "weight": 30
+        },
+        {
+          "type": "emotion_push",
+          "emotion": "grief",
+          "value": 2,
+          "weight": 25
+        },
+        {
+          "type": "status_seal",
+          "emotion": "fear",
+          "value": 1,
+          "weight": 25
+        },
+        {
+          "type": "rage_card_storm",
+          "value": 5,
+          "weight": 20
+        }
       ],
       "du_hua_condition": {
         "type": "consecutive_joy_cards",
         "count": 3,
-        "emotion_requirement": {"joy": 3},
+        "emotion_requirement": {
+          "joy": 3
+        },
         "description": "喜≥3，连续打出3张喜类牌"
       },
       "du_hua_success_text": "这……这就是喜悦吗……原来是这种感觉……我从来不知道……",

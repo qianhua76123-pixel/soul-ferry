@@ -78,13 +78,15 @@ func _begin_player_turn() -> void:
 	current_turn += 1
 	joy_cards_played_this_turn = 0
 	current_state = STATE_PLAYER_TURN
-	# Buff 系统：回合开始处理（执念锁定在 DeckManager.on_turn_start 之前）
+	# Buff 系统：回合开始处理
 	BuffManager.process_turn_start(BuffManager.TARGET_PLAYER)
 	DeckManager.on_turn_start()
 	if EmotionManager.is_disorder("fear"):
 		DeckManager.discard_random()
 	player_turn_started.emit(current_turn)
 	intent_updated.emit(next_intent)
+	# 回合开始时也检查渡化条件（emotion_threshold 型不依赖出牌）
+	_check_du_hua({})
 
 func play_card(card: Dictionary) -> bool:
 	if current_state != STATE_PLAYER_TURN:
@@ -346,15 +348,22 @@ func _check_du_hua(played_card: Dictionary) -> void:
 	if not cond: return
 	var emotion_req = cond.get("emotion_requirement", {})
 	for emotion in emotion_req:
-		if EmotionManager.values[emotion] < emotion_req[emotion]:
+		if EmotionManager.values.get(emotion, 0) < emotion_req[emotion]:
 			return
+	# 情绪条件已满足，按 type 进一步检查
 	match cond.get("type", ""):
+		"emotion_threshold":
+			# 纯情绪阈值型：情绪条件满足即触发
+			_trigger_du_hua()
 		"card_play":
 			if played_card.get("id", "") == cond.get("card_id", ""):
 				_trigger_du_hua()
 		"consecutive_joy_cards":
 			if joy_cards_played_this_turn >= cond.get("count", 3):
 				_trigger_du_hua()
+		_:
+			# 未知类型：情绪条件满足即触发（宽容处理）
+			_trigger_du_hua()
 
 func _trigger_du_hua() -> void:
 	du_hua_triggered = true
