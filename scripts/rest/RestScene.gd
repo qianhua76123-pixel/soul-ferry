@@ -25,6 +25,7 @@ func _ready() -> void:
 	leave_btn.pressed.connect(_on_leave)
 	_update_status()
 	_build_bg_candles()
+	_setup_rest_visual()
 
 func _on_heal() -> void:
 	if _healed: return
@@ -196,3 +197,57 @@ func _build_bg_candles() -> void:
 			.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 		tw.tween_property(candle, "rotation_degrees", -3.0 * (1 if i%2==0 else -1), 0.6 + i*0.1)\
 			.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+func _setup_rest_visual() -> void:
+	## 休息场景氛围：古庙烛台 + 温暖色调背景
+
+	# 背景（深青灰）
+	var bg = ColorRect.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.04, 0.06, 0.08, 1.0)
+	bg.z_index = -10
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bg)
+	move_child(bg, 0)
+
+	# 标题
+	var title_lbl = Label.new()
+	title_lbl.text = "古 祠 小 憩"
+	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_color_override("font_color", Color(0.75, 0.62, 0.35))
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title_lbl.position.y = 24
+	add_child(title_lbl)
+
+	# 3支烛台
+	for i in 3:
+		var candle = Label.new()
+		candle.text = "🕯"
+		candle.add_theme_font_size_override("font_size", 24)
+		candle.position = Vector2(460 + i * 148, 520 + (i % 2) * 20)
+		add_child(candle)
+		var tw = candle.create_tween().set_loops()
+		var period = 1.1 + i * 0.18
+		tw.tween_property(candle, "modulate:a", 0.55, period)
+		tw.tween_property(candle, "modulate:a", 1.0,  period)
+
+	# 强化按钮样式（heal/upgrade）
+	for btn in [heal_btn, upgrade_btn]:
+		var sty = StyleBoxFlat.new()
+		sty.bg_color     = Color(0.08, 0.12, 0.10)
+		sty.border_color = Color(0.30, 0.55, 0.35)
+		sty.set_border_width_all(2)
+		sty.set_corner_radius_all(5)
+		btn.add_theme_stylebox_override("normal", sty)
+		btn.add_theme_color_override("font_color", Color(0.80, 0.90, 0.75))
+		btn.add_theme_font_size_override("font_size", 14)
+
+	# 离开按钮
+	var leave_sty = StyleBoxFlat.new()
+	leave_sty.bg_color     = Color(0.10, 0.07, 0.05)
+	leave_sty.border_color = Color(0.40, 0.30, 0.15)
+	leave_sty.set_border_width_all(1)
+	leave_sty.set_corner_radius_all(4)
+	leave_btn.add_theme_stylebox_override("normal", leave_sty)
+	leave_btn.add_theme_color_override("font_color", Color(0.65, 0.55, 0.38))

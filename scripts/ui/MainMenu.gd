@@ -68,10 +68,11 @@ func _on_continue() -> void:
 		continue_btn.disabled = true
 
 func _transition_to(scene_path: String) -> void:
-	# 淡出动画后切换
-	var tw = create_tween()
-	tw.tween_property(self, "modulate:a", 0.0, 0.35)
-	tw.tween_callback(func(): get_tree().change_scene_to_file(scene_path))
+	# 使用 TransitionManager 统一过场体验
+	var title_map = {
+		"res://scenes/MapScene.tscn": "踏上渡魂之路"
+	}
+	TransitionManager.change_scene(scene_path, title_map.get(scene_path, ""))
 
 ## 程序化水墨背景 ─────────────────────────────
 

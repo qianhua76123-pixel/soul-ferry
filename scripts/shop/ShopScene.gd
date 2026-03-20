@@ -121,9 +121,65 @@ func _on_remove_card_selected(card: Dictionary) -> void:
 
 func _on_gold_changed(_old: int, _new: int) -> void:
 	_update_gold_label()
+	_update_gold_display()
 
 func _update_gold_label() -> void:
-	gold_label.text = "金币: %d" % GameState.gold
+	gold_label.text = "💰 %d" % int(GameState.gold)
 
 func _on_leave_pressed() -> void:
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
+
+func _update_gold_display() -> void:
+	gold_label.text = "💰 %d" % int(GameState.gold)
+	# 金色闪光反馈
+	var tw = gold_label.create_tween()
+	tw.tween_property(gold_label, "modulate", Color(1.5, 1.3, 0.5), 0.1)
+	tw.tween_property(gold_label, "modulate", Color(1.0, 1.0, 1.0), 0.4)
+
+func _setup_shop_visual() -> void:
+	## 商店场景氛围：烛光面板 + 金币高亮
+
+	# 背景色（深棕暖色）
+	var bg = ColorRect.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.08, 0.05, 0.02, 1.0)
+	bg.z_index = -10
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bg)
+	move_child(bg, 0)
+
+	# 标题面板
+	var title_lbl = Label.new()
+	title_lbl.text = "渡 魂 商 店"
+	title_lbl.add_theme_font_size_override("font_size", 24)
+	title_lbl.add_theme_color_override("font_color", Color(0.95, 0.76, 0.08))
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title_lbl.position.y = 24
+	add_child(title_lbl)
+
+	# 烛火装饰（两侧各一）
+	for side in [-1, 1]:
+		var candle = Label.new()
+		candle.text = "🕯"
+		candle.add_theme_font_size_override("font_size", 28)
+		candle.position = Vector2(608 + side * 180, 20)
+		add_child(candle)
+		# 烛光闪烁动画
+		var tw = candle.create_tween().set_loops()
+		tw.tween_property(candle, "modulate:a", 0.65, 0.9 + side * 0.15)
+		tw.tween_property(candle, "modulate:a", 1.0,  0.9 + side * 0.15)
+
+	# 金币标签样式增强
+	gold_label.add_theme_font_size_override("font_size", 16)
+	gold_label.add_theme_color_override("font_color", Color(0.95, 0.76, 0.08))
+
+	# 离开按钮样式
+	var leave_style = StyleBoxFlat.new()
+	leave_style.bg_color     = Color(0.12, 0.08, 0.04)
+	leave_style.border_color = Color(0.55, 0.42, 0.08)
+	leave_style.set_border_width_all(2)
+	leave_style.set_corner_radius_all(4)
+	leave_btn.add_theme_stylebox_override("normal", leave_style)
+	leave_btn.add_theme_color_override("font_color", Color(0.85, 0.72, 0.45))
+	leave_btn.add_theme_font_size_override("font_size", 14)

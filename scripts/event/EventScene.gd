@@ -30,6 +30,7 @@ func _ready() -> void:
 		eid = str(GameState.get_meta("pending_event_id"))
 		GameState.remove_meta("pending_event_id")
 	load_event(eid)
+	_setup_event_visual()
 
 func _load_events() -> void:
 	var file = FileAccess.open("res://data/events.json", FileAccess.READ)
@@ -214,3 +215,31 @@ func _show_result(result: Dictionary) -> void:
 func _on_continue_pressed() -> void:
 	event_completed.emit(_current_event)
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
+
+func _setup_event_visual() -> void:
+	## 事件场景氛围：深色面板 + 标题金色
+
+	var bg = ColorRect.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.03, 0.04, 0.06, 1.0)
+	bg.z_index = -10
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bg)
+	move_child(bg, 0)
+
+	# 顶部金色装饰线
+	var deco = ColorRect.new()
+	deco.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	deco.size.y = 3
+	deco.color  = Color(0.65, 0.50, 0.10, 0.8)
+	deco.z_index = 5
+	add_child(deco)
+
+	# 底部装饰线
+	var deco2 = ColorRect.new()
+	deco2.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	deco2.size.y   = 3
+	deco2.position.y = -3
+	deco2.color    = Color(0.65, 0.50, 0.10, 0.8)
+	deco2.z_index  = 5
+	add_child(deco2)
