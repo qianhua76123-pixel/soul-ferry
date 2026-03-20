@@ -140,10 +140,10 @@ func load_from_file() -> bool:
 		DeckManager.init_deck(card_ids)
 		# 应用升级等级
 		for card in DeckManager.deck:
-			var cid = card.get("id","")
-			if cid in upgrades:
-				card["level"] = upgrades[cid]
-				card["cost"]  = max(0, card.get("cost",1) - upgrades[cid])
+			var cid_2 = card.get("id","")
+			if cid_2 in upgrades:
+				card["level"] = upgrades[cid_2]
+				card["cost"]  = max(0, card.get("cost",1) - upgrades[cid_2])
 	else:
 		DeckManager.init_starter_deck()
 

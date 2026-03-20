@@ -173,9 +173,9 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 					Color(0.98, 0.88, 0.20, 0.6 - i * 0.02), 1.5)
 			# 花瓣（4片）
 			for i in 4:
-				var a = i * PI / 2.0 + PI/4.0
+				var a_2 = i * PI / 2.0 + PI/4.0
 				draw_circle(
-					Vector2(cx + cos(a)*9, cy + sin(a)*9), 6.0,
+					Vector2(cx + cos(a_2)*9, cy + sin(a_2)*9), 6.0,
 					Color(0.95, 0.75, 0.10, 0.55))
 			# 中心金圆
 			draw_circle(Vector2(cx, cy), 7.0, Color(0.98, 0.88, 0.20, 0.95))
@@ -191,16 +191,16 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			draw_arc(Vector2(cx, cy), 16.0, 0, TAU, 64, Color(c.r,c.g,c.b,0.35), 1.0)
 			# 八方分割线
 			for i in 8:
-				var a = i * PI / 4.0
+				var a_2_2 = i * PI / 4.0
 				draw_line(
-					Vector2(cx + cos(a) * 10, cy + sin(a) * 10),
-					Vector2(cx + cos(a) * 19, cy + sin(a) * 19),
+					Vector2(cx + cos(a_2_2) * 10, cy + sin(a_2_2) * 10),
+					Vector2(cx + cos(a_2_2) * 19, cy + sin(a_2_2) * 19),
 					Color(c.r, c.g, c.b, 0.5), 1.0)
 			# 八卦爻（外圈）
 			for i in 8:
-				var a = i * PI / 4.0
-				var bx = cx + cos(a) * 13
-				var by = cy + sin(a) * 13
+				var a_2_2_2 = i * PI / 4.0
+				var bx = cx + cos(a_2_2_2) * 13
+				var by = cy + sin(a_2_2_2) * 13
 				# 实线或虚线（阴阳）
 				if i % 2 == 0:
 					draw_line(Vector2(bx-3,by), Vector2(bx+3,by), Color(c.r,c.g,c.b,0.7), 1.5)

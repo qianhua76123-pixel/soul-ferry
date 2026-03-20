@@ -159,31 +159,31 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			result.value = total
 
 		"attack_lifesteal":
-			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
-			_deal_damage_to_enemy(dmg)
-			GameState.heal(dmg)
-			result.value = dmg
-			result["healed"] = dmg
+			var dmg_2 = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg_2)
+			GameState.heal(dmg_2)
+			result.value = dmg_2
+			result["healed"] = dmg_2
 
 		"attack_dot":
-			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
-			_deal_damage_to_enemy(dmg)
+			var dmg_2_2 = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg_2_2)
 			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "dot_fire", 4, 3)
-			result.value = dmg
+			result.value = dmg_2_2
 
 		"attack_scaling_rage":
 			# 伤害 = base_val × 当前怒值
 			var rage_val = EmotionManager.values.get("rage", 0)
-			var dmg = int((base_val * max(1, rage_val)) * EmotionManager.get_attack_multiplier())
-			_deal_damage_to_enemy(dmg)
-			result.value = dmg
+			var dmg_2_2_2 = int((base_val * max(1, rage_val)) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg_2_2_2)
+			result.value = dmg_2_2_2
 
 		"attack_and_weaken_all":
-			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
-			_deal_damage_to_enemy(dmg)
+			var dmg_2_2_2_2 = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg_2_2_2_2)
 			result["weaken_percent"] = 50
 			result["defense_break"]  = 50
-			result.value = dmg
+			result.value = dmg_2_2_2_2
 
 		"shield":
 			var sv = base_val + bonus
@@ -192,16 +192,16 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"shield_attack":
 			# 护盾 + 造成等量伤害
-			var sv = base_val + bonus
-			player_shield += sv
-			_deal_damage_to_enemy(sv)
-			result.value = sv
+			var sv_2 = base_val + bonus
+			player_shield += sv_2
+			_deal_damage_to_enemy(sv_2)
+			result.value = sv_2
 
 		"shield_and_draw":
-			var sv = base_val + bonus
-			player_shield += sv
+			var sv_2_2 = base_val + bonus
+			player_shield += sv_2_2
 			DeckManager.draw_cards(2)
-			result.value = sv
+			result.value = sv_2_2
 
 		"heal", "heal_all_buffs":
 			var hv = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
@@ -209,24 +209,24 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			result.value = hv
 
 		"heal_and_draw":
-			var hv = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
-			GameState.heal(hv)
+			var hv_2 = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv_2)
 			DeckManager.draw_cards(2)
-			result.value = hv
+			result.value = hv_2
 
 		"heal_scale_grief":
 			# 回复 = base_val × 悲情绪值
 			var grief_val = EmotionManager.values.get("grief", 0)
-			var hv = int(base_val * max(1, grief_val) * EmotionManager.get_heal_multiplier())
-			GameState.heal(hv)
-			result.value = hv
+			var hv_2_2 = int(base_val * max(1, grief_val) * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv_2_2)
+			result.value = hv_2_2
 
 		"mass_heal_shield":
-			var hv = int(base_val * EmotionManager.get_heal_multiplier())
-			GameState.heal(hv)
+			var hv_2_2_2 = int(base_val * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv_2_2_2)
 			player_shield += base_val
 			result.value = base_val
-			result["healed"] = hv
+			result["healed"] = hv_2_2_2
 
 		"draw":
 			DeckManager.draw_cards(base_val)
@@ -234,9 +234,9 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"draw_shield":
 			DeckManager.draw_cards(base_val)
-			var sv = bonus if bonus > 0 else 5
-			player_shield += sv
-			result.value = sv
+			var sv_2_2_2 = bonus if bonus > 0 else 5
+			player_shield += sv_2_2_2
+			result.value = sv_2_2_2
 
 		"weaken":
 			result["weaken_percent"] = base_val
@@ -258,9 +258,9 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 		"dodge_attack":
 			# 格挡并反击
 			_dodge_charges += 1
-			var dmg = int(base_val * EmotionManager.get_attack_multiplier())
-			_deal_damage_to_enemy(dmg)
-			result.value = dmg
+			var dmg_2_2_2_2_2 = int(base_val * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg_2_2_2_2_2)
+			result.value = dmg_2_2_2_2_2
 
 		"remove_enemy_shield":
 			# 清除敌人护盾并转化为伤害
@@ -272,10 +272,10 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"reset_shield":
 			# 五情归一：护盾 = 五情总值 × base_val
-			var total = EmotionManager.get_total_value()
-			var sv = total * base_val
-			player_shield += sv
-			result.value = sv
+			var total_2 = EmotionManager.get_total_value()
+			var sv_2_2_2_2 = total_2 * base_val
+			player_shield += sv_2_2_2_2
+			result.value = sv_2_2_2_2
 
 		"status_fear_all":
 			EmotionManager.modify("fear", base_val)
@@ -446,14 +446,14 @@ func _execute_enemy_action(action: Dictionary) -> void:
 			var hit_count = action.get("hits", 3)
 			var hit_val   = action.get("value", 8)
 			for _i in hit_count:
-				var raw  = int(hit_val * mul)
-				var dmg  = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
+				var raw_2  = int(hit_val * mul)
+				var dmg_2  = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw_2)
 				if player_shield > 0:
-					var blocked = min(player_shield, dmg)
-					player_shield -= blocked
-					dmg -= blocked
-				if dmg > 0:
-					GameState.take_damage(dmg)
+					var blocked_2 = min(player_shield, dmg_2)
+					player_shield -= blocked_2
+					dmg_2 -= blocked_2
+				if dmg_2 > 0:
+					GameState.take_damage(dmg_2)
 				if GameState.hp <= 0: break
 			# 潮汐附带：玩家情绪「悲」+1
 			EmotionManager.modify("grief", 1)
@@ -464,13 +464,13 @@ func _execute_enemy_action(action: Dictionary) -> void:
 			var hand_size = len(DeckManager.hand)
 			# 每张手牌+2额外伤害，模拟"花嫁之怒吞噬一切"
 			var total_dmg = int((base_dmg + hand_size * 2) * mul)
-			var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
+			var dmg_2_2 = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
 			if player_shield > 0:
-				var blocked = min(player_shield, dmg)
-				player_shield -= blocked
-				dmg -= blocked
-			if dmg > 0:
-				GameState.take_damage(dmg)
+				var blocked_2_2 = min(player_shield, dmg_2_2)
+				player_shield -= blocked_2_2
+				dmg_2_2 -= blocked_2_2
+			if dmg_2_2 > 0:
+				GameState.take_damage(dmg_2_2)
 			# 狂暴风暴附带：让玩家「惧」「悲」各+1
 			EmotionManager.modify("fear", 1)
 			EmotionManager.modify("grief", 1)

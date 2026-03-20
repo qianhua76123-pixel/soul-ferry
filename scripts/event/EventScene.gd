@@ -163,10 +163,10 @@ func _apply_result(result: Dictionary) -> void:
 			else: GameState.spend_gold(-gv)
 
 		"curse_card":
-			var card = CardDatabase.get_card(result.get("card_id", ""))
-			if not card.is_empty():
-				card["is_curse"] = true
-				DeckManager.add_card_to_deck(card)
+			var card_2 = CardDatabase.get_card(result.get("card_id", ""))
+			if not card_2.is_empty():
+				card_2["is_curse"] = true
+				DeckManager.add_card_to_deck(card_2)
 
 func _apply_single_effect(effect: Dictionary) -> void:
 	match effect.get("type", ""):
@@ -195,10 +195,10 @@ func _apply_single_effect(effect: Dictionary) -> void:
 				var target = full_deck[randi() % len(full_deck)]
 				target["cost"] = max(0, target.get("cost", 1) - 1)
 		"curse_card":
-			var card = CardDatabase.get_card(effect.get("card_id", ""))
-			if not card.is_empty():
-				card["is_curse"] = true
-				DeckManager.add_card_to_deck(card)
+			var card_2 = CardDatabase.get_card(effect.get("card_id", ""))
+			if not card_2.is_empty():
+				card_2["is_curse"] = true
+				DeckManager.add_card_to_deck(card_2)
 		"narrative":
 			pass  # 叙事效果只在 result 文本中展示
 

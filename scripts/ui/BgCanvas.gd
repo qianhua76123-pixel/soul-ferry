@@ -54,5 +54,5 @@ func _draw() -> void:
 
 	# 中央竖向光晕（标题后面）
 	for r in range(200, 0, -20):
-		var a = (200.0 - r) / 200.0 * 0.025
-		draw_circle(Vector2(W/2, H * 0.3), float(r), Color(0.545, 0.102, 0.102, a))
+		var a_2 = (200.0 - r) / 200.0 * 0.025
+		draw_circle(Vector2(W/2, H * 0.3), float(r), Color(0.545, 0.102, 0.102, a_2))

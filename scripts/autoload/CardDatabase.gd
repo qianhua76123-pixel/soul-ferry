@@ -131,65 +131,65 @@ func _build_desc(etype: String, vs: String, bs: String,
 			if cond != "" and bs != "0": d += "，%s额外+%s" % [cond, bs]
 			return d
 		"attack_all":
-			var d = "对所有敌人造成 %s 点伤害" % vs
-			if cond != "" and bs != "0": d += "，%s额外+%s" % [cond, bs]
-			return d
+			var d_2 = "对所有敌人造成 %s 点伤害" % vs
+			if cond != "" and bs != "0": d_2 += "，%s额外+%s" % [cond, bs]
+			return d_2
 		"attack_lifesteal":
 			return "造成 %s 点伤害，吸取一半为HP" % vs
 		"shield":
-			var d = "获得 %s 点护盾" % vs
-			if cond != "" and bs != "0": d += "，%s额外+%s" % [cond, bs]
-			return d
+			var d_2_2 = "获得 %s 点护盾" % vs
+			if cond != "" and bs != "0": d_2_2 += "，%s额外+%s" % [cond, bs]
+			return d_2_2
 		"shield_attack":
 			return "获得 %s 点护盾并造成 %s 点伤害%s" % [vs, vs,
 				"，%s效果翻倍" % cond if cond != "" else ""]
 		"reset_shield":
 			return "【传说】将所有情绪归零，获得情绪总和×%s的护盾" % vs
 		"heal":
-			var d = "回复 %s HP" % vs
-			if cond != "" and bs != "0": d += "，%s额外+%s" % [cond, bs]
+			var d_2_2_2 = "回复 %s HP" % vs
+			if cond != "" and bs != "0": d_2_2_2 += "，%s额外+%s" % [cond, bs]
 			elif cond != "" and card.get("condition_bonus_type","") != "":
-				d += "，%s额外效果" % cond
-			return d
+				d_2_2_2 += "，%s额外效果" % cond
+			return d_2_2_2
 		"heal_all_buffs":
-			var d = "回复 %s HP" % vs
-			if cond != "" and bs != "0": d += "，%s额外+%s并施加祝福" % [cond, bs]
-			return d
+			var d_2_2_2_2 = "回复 %s HP" % vs
+			if cond != "" and bs != "0": d_2_2_2_2 += "，%s额外+%s并施加祝福" % [cond, bs]
+			return d_2_2_2_2
 		"draw":
-			var d = "摸 %s 张牌" % vs
-			if cond != "": d += "，%s改为摸 %s 张" % [cond, bs if bs != "0" else "3"]
-			return d
+			var d_2_2_2_2_2 = "摸 %s 张牌" % vs
+			if cond != "": d_2_2_2_2_2 += "，%s改为摸 %s 张" % [cond, bs if bs != "0" else "3"]
+			return d_2_2_2_2_2
 		"weaken":
-			var d = "目标下回合伤害-%s%%" % vs
+			var d_2_2_2_2_2_2 = "目标下回合伤害-%s%%" % vs
 			if card.get("condition_bonus_type","") != "":
-				d += "，%s施加执念" % cond
-			return d
+				d_2_2_2_2_2_2 += "，%s施加执念" % cond
+			return d_2_2_2_2_2_2
 		"dodge_attack":
-			var d = "造成 %s 点伤害+获得闪避" % vs
-			if cond != "" and bs != "0": d += "，%s额外+%s" % [cond, bs]
-			return d
+			var d_2_2_2_2_2_2_2 = "造成 %s 点伤害+获得闪避" % vs
+			if cond != "" and bs != "0": d_2_2_2_2_2_2_2 += "，%s额外+%s" % [cond, bs]
+			return d_2_2_2_2_2_2_2
 		"dot_and_weaken":
-			var d = "【传说】对目标施加执念DOT %s 回合" % vs
-			if cond != "" and bs != "0": d += "，%s每回合+%s" % [cond, bs]
-			return d
+			var d_2_2_2_2_2_2_2_2 = "【传说】对目标施加执念DOT %s 回合" % vs
+			if cond != "" and bs != "0": d_2_2_2_2_2_2_2_2 += "，%s每回合+%s" % [cond, bs]
+			return d_2_2_2_2_2_2_2_2
 		"draw_discard_enemy":
-			var d = "令敌人弃置 %s 张意图" % vs
-			if cond != "" and bs != "0": d += "，%s额外+%s层执念" % [cond, bs]
-			return d
+			var d_2_2_2_2_2_2_2_2_2 = "令敌人弃置 %s 张意图" % vs
+			if cond != "" and bs != "0": d_2_2_2_2_2_2_2_2_2 += "，%s额外+%s层执念" % [cond, bs]
+			return d_2_2_2_2_2_2_2_2_2
 		"buff_all_cards":
-			var d = "【传说】本回合所有牌效果+%s" % vs
-			if cond != "": d += "，%s翻倍" % cond
-			return d
+			var d_2_2_2_2_2_2_2_2_2_2 = "【传说】本回合所有牌效果+%s" % vs
+			if cond != "": d_2_2_2_2_2_2_2_2_2_2 += "，%s翻倍" % cond
+			return d_2_2_2_2_2_2_2_2_2_2
 		"status_fear_all":
-			var d = "对所有敌人施加「恐惧」%s层" % vs
-			if cond != "" and bs != "0": d += "，%s持续+%s回合" % [cond, bs]
-			return d
+			var d_2_2_2_2_2_2_2_2_2_2_2 = "对所有敌人施加「恐惧」%s层" % vs
+			if cond != "" and bs != "0": d_2_2_2_2_2_2_2_2_2_2_2 += "，%s持续+%s回合" % [cond, bs]
+			return d_2_2_2_2_2_2_2_2_2_2_2
 		"status_seal":
 			return "对目标施加「封印」%s层" % vs
 		"reduce_enemy_emotion":
-			var d = "降低目标情绪压力 %s 点" % vs
-			if cond != "" and bs != "0": d += "，%s额外-%s并回血" % [cond, bs]
-			return d
+			var d_2_2_2_2_2_2_2_2_2_2_2_2 = "降低目标情绪压力 %s 点" % vs
+			if cond != "" and bs != "0": d_2_2_2_2_2_2_2_2_2_2_2_2 += "，%s额外-%s并回血" % [cond, bs]
+			return d_2_2_2_2_2_2_2_2_2_2_2_2
 		"peek_enemy":
 			return "预览敌人下回合意图"
 		"du_hua_progress":

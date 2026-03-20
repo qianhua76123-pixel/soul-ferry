@@ -96,8 +96,8 @@ func _draw() -> void:
 	for emotion in EMOTIONS:
 		var val   = EmotionManager.values.get(emotion, 0)
 		var ratio = float(val) / float(MAX_VAL)
-		var angle = deg_to_rad(EMOTION_ANGLES[emotion])
-		fill_pts.append(center + Vector2(cos(angle), sin(angle)) * RADIUS * max(ratio, 0.04))
+		var angle_2 = deg_to_rad(EMOTION_ANGLES[emotion])
+		fill_pts.append(center + Vector2(cos(angle_2), sin(angle_2)) * RADIUS * max(ratio, 0.04))
 	var fill_color = _get_fill_color()
 	draw_colored_polygon(fill_pts, fill_color)
 	# 填充边线

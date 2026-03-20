@@ -188,10 +188,10 @@ func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
 	var cap = nd
 	btn.pressed.connect(func():
 		# 点击缩放反馈
-		var tw = btn.create_tween()
-		tw.tween_property(btn, "scale", Vector2(0.90, 0.90), 0.08)
-		tw.tween_property(btn, "scale", Vector2(1.0,  1.0),  0.12)
-		tw.tween_callback(func(): _on_node_pressed(cap))
+		var tw_2 = btn.create_tween()
+		tw_2.tween_property(btn, "scale", Vector2(0.90, 0.90), 0.08)
+		tw_2.tween_property(btn, "scale", Vector2(1.0,  1.0),  0.12)
+		tw_2.tween_callback(func(): _on_node_pressed(cap))
 	)
 	return btn
 
@@ -217,8 +217,8 @@ func _on_node_pressed(nd: Dictionary) -> void:
 		GameState.set_meta("pending_enemy_id", eid)
 
 	if ntype == "event":
-		var eid = nd.get("event_id","")
-		if eid != "": GameState.set_meta("pending_event_id", eid)
+		var eid_2 = nd.get("event_id","")
+		if eid_2 != "": GameState.set_meta("pending_event_id", eid_2)
 
 	var path = SCENE_PATHS.get(ntype,"")
 	if path != "":

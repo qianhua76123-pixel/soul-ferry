@@ -27,11 +27,11 @@ func _draw() -> void:
 	rng.seed = 1337
 	for _i in 28:
 		var x     = rng.randf_range(0.0, SCREEN_W)
-		var y     = rng.randf_range(0.0, SCREEN_H * 0.75)
+		var y_2     = rng.randf_range(0.0, SCREEN_H * 0.75)
 		var h     = rng.randf_range(55.0, 190.0)
 		var alpha = rng.randf_range(0.025, 0.075)
 		var w     = rng.randf_range(0.4, 1.6)
-		draw_line(Vector2(x, y), Vector2(x, y + h), Color(0.8, 0.82, 0.85, alpha), w)
+		draw_line(Vector2(x, y_2), Vector2(x, y_2 + h), Color(0.8, 0.82, 0.85, alpha), w)
 
 	# 玩家侧：左边淡青绿暗角
 	var left_color = Color(0.04, 0.18, 0.12, 0.045)
