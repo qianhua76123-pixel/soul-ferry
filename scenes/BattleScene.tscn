@@ -128,7 +128,7 @@ custom_minimum_size = Vector2(220, 220)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="EmotionRadar" type="Node2D" parent="UI/AltarLayout/AltarCenter/RadarContainer"]
+[node name="EmotionRadar" type="Control" parent="UI/AltarLayout/AltarCenter/RadarContainer"]
 script = ExtResource("3_radar")
 position = Vector2(110, 110)
 
