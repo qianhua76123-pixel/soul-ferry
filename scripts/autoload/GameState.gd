@@ -235,3 +235,25 @@ func advance_layer() -> void:
 
 func get_full_deck() -> Array:
 	return DeckManager.get_full_deck()
+
+# ════════════════════════════════════════════
+#  结局触发
+# ════════════════════════════════════════════
+
+## 检查是否满足胜利条件（通关第三层 Boss）
+## 在 MapScene 节点完成后调用
+func check_victory_condition() -> bool:
+	return current_layer > 3
+
+## 触发结局场景
+## ending_type: "success" / "defeat" / "lost"
+func trigger_ending(ending_type: String) -> void:
+	set_meta("ending_type",  ending_type)
+	set_meta("du_hua_count", du_hua_count)
+	set_meta("zhenya_count", zhen_ya_count)
+	delete_save()   # 通关/失败后清档
+	# 延迟一帧再切换，避免在信号回调内切换场景
+	Engine.get_main_loop().process_frame.connect(
+		func(): Engine.get_main_loop().change_scene_to_file("res://scenes/EndingScene.tscn"),
+		CONNECT_ONE_SHOT
+	)

@@ -24,6 +24,7 @@ DeckManager="*res://scripts/autoload/DeckManager.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 RelicManager="*res://scripts/autoload/RelicManager.gd"
 BuffManager="*res://scripts/autoload/BuffManager.gd"
+SoundManager="*res://scripts/autoload/SoundManager.gd"
 
 [display]
 

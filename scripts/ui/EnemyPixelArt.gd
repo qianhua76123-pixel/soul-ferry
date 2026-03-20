@@ -7,6 +7,15 @@ extends Node
 ## 全部8个敌人像素数据（32×48 格式，用调色板索引编码）
 ## 0=透明, 1=主色1, 2=主色2, 3=高光, 4=阴影, 5=轮廓, 6=眼/特征色
 
+## 固定种子 RNG，保证每次渲染结果一致（不随帧变化）
+static var _rng: RandomNumberGenerator = null
+
+static func _get_rng(seed_val: int = 12345) -> RandomNumberGenerator:
+	if _rng == null:
+		_rng = RandomNumberGenerator.new()
+	_rng.seed = seed_val
+	return _rng
+
 static func create_texture(enemy_id: String) -> ImageTexture:
 	var img = Image.create(32, 48, false, Image.FORMAT_RGBA8)
 	img.fill(Color.TRANSPARENT)
@@ -152,7 +161,8 @@ static func _draw_lv_tou(img: Image) -> void:
 
 	# 头
 	_rect(img, 9, 8, 14, 18, c_skin)
-	# 长发（从头顶到腰）
+	# 长发（从头顶到腰）- 使用固定种子 RNG 保证一致性
+	var rng = _get_rng(77331)
 	for x in range(9, 23):
 		var hair_len = 28 + abs(x - 16) * 2
 		for y in range(6, min(hair_len, 46)):
@@ -160,7 +170,7 @@ static func _draw_lv_tou(img: Image) -> void:
 				_px(img, x, y, c_hair)
 			elif y < 14:
 				# 刘海（遮住上半部分脸）
-				if randf() > 0.35:
+				if rng.randf() > 0.35:
 					_px(img, x, y, c_hair)
 	# 露出的眼睛（发缝间）
 	_rect(img, 13, 17, 3, 2, c_eye)
@@ -180,9 +190,10 @@ static func _draw_shan_huo(img: Image) -> void:
 	var c_shadow = Color(0.20, 0.08, 0.02, 1.0)
 	var c_eye    = Color(0.98, 0.95, 0.30, 1.0)
 
-	# 火焰外轮廓（不规则三角上冲）
+	# 火焰外轮廓（不规则三角上冲）- 使用固定种子 RNG
+	var rng = _get_rng(55512)
 	for x in range(8, 24):
-		var h = 20 - abs(x-16)*2 + randi()%4
+		var h = 20 - abs(x-16)*2 + rng.randi() % 4
 		for y in range(max(4, 14-h), 38):
 			if y >= 14 - h:
 				_px(img, x, y, c_fire1)

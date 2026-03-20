@@ -26,6 +26,9 @@ extends Node2D
 var _card_scene:   PackedScene = preload("res://scenes/CardUI.tscn")
 var _dmgnum_scene: PackedScene = preload("res://scenes/DamageNumber.tscn")
 
+## Boss UI 控制器（仅 Boss 战时激活）
+var _boss_ui: BossUI = null
+
 func _ready() -> void:
 	result_panel.visible = false
 	du_hua_btn.visible   = false
@@ -76,6 +79,12 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_intent_label.text = "意图：..."
 	du_hua_hint_label.text  = ""
 	_update_hud()
+	# 音效：按楼层/Boss 选择战斗 BGM
+	var is_boss = enemy_data.get("type", "") == "boss"
+	SoundManager.play_battle_bgm(GameState.current_layer, is_boss)
+	# Boss UI：仅 Boss 战时激活
+	if is_boss:
+		_setup_boss_ui(enemy_data)
 
 func _on_player_turn_started(turn: int) -> void:
 	turn_label.text       = "第 %d 回合" % turn
@@ -85,6 +94,10 @@ func _on_player_turn_started(turn: int) -> void:
 	# 遗物：回合开始触发（DeckManager.on_turn_start 之后，手牌已摸完）
 	RelicManager.on_turn_start()
 	_update_hud()
+	SoundManager.play_sfx("card_draw")
+	# Boss UI：回合开始刷新意图预告
+	if _boss_ui:
+		_boss_ui.on_turn_start(state_machine.enemy_hp, turn)
 
 func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	enemy_hp_bar.value       = state_machine.enemy_hp
@@ -96,10 +109,19 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	var rval  = result.get("value", 0)
 	if rval > 0:
 		match rtype:
-			"attack","attack_all": _spawn_enemy_damage(rval, "damage")
-			"heal","heal_all_buffs": _spawn_player_number(rval, "heal")
-			"shield": _spawn_player_number(rval, "shield")
+			"attack","attack_all":
+				_spawn_enemy_damage(rval, "damage")
+				SoundManager.play_sfx("attack_hit")
+			"heal","heal_all_buffs":
+				_spawn_player_number(rval, "heal")
+				SoundManager.play_sfx("heal")
+			"shield":
+				_spawn_player_number(rval, "shield")
+				SoundManager.play_sfx("shield_block")
 	_show_popup(result)
+	# Boss UI：卡牌效果后更新 Boss 状态
+	if _boss_ui:
+		_boss_ui.on_card_played(_card, result, state_machine.enemy_hp, state_machine.current_turn)
 
 func _on_battle_ended(result: String) -> void:
 	_last_battle_result = result
@@ -108,16 +130,20 @@ func _on_battle_ended(result: String) -> void:
 	# 遗物：镇压胜利触发烧骨片等
 	if result == "victory":
 		RelicManager.on_victory_zhenya()
+		if _boss_ui: _boss_ui.on_boss_defeated()
 	match result:
 		"victory":
 			result_label.text = "镇压成功\n\n亡魂已被强行驱散。"
 			result_btn.text   = "继续前行"
+			SoundManager.play_sfx("battle_victory")
 		"du_hua":
 			result_label.text = "渡化完成\n\n你帮他说清楚了那件事。\n他终于可以走了。"
 			result_btn.text   = "目送他离去"
+			SoundManager.play_sfx("du_hua_success")
 		"defeat":
 			result_label.text = "你也困在这里了\n\n渡魂人，渡人先渡己。"
 			result_btn.text   = "重新开始"
+			SoundManager.play_sfx("battle_defeat")
 
 ## ── 战斗场内迷你遗物栏 ──────────────────────────────
 ## 在 _ready() 末尾调用 _build_relic_bar()，渲染玩家持有的遗物图标
@@ -199,6 +225,7 @@ func _on_du_hua_available(desc: String) -> void:
 
 func _on_end_turn_pressed() -> void:
 	end_turn_btn.disabled = true
+	SoundManager.play_sfx("turn_end")
 	state_machine.end_player_turn()
 
 func _on_du_hua_pressed() -> void:
@@ -211,10 +238,8 @@ func _on_result_continue() -> void:
 		# 胜利/渡化 → 选牌奖励
 		get_tree().change_scene_to_file("res://scenes/CardRewardScene.tscn")
 	else:
-		# 失败 → 回主菜单（以后做存档）
-		GameState.new_run()
-		DeckManager.init_starter_deck()
-		get_tree().change_scene_to_file("res://scenes/MapScene.tscn")
+		# 失败 → 结局场景（魂魄消散）
+		GameState.trigger_ending("defeat")
 
 var _last_battle_result: String = ""
 
@@ -235,6 +260,7 @@ func _on_hand_updated(hand: Array) -> void:
 func _on_card_clicked(card_data: Dictionary) -> void:
 	if state_machine.current_state != 2: # STATE_PLAYER_TURN
 		return
+	SoundManager.play_sfx("card_play")
 	state_machine.play_card(card_data)
 
 func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
@@ -255,6 +281,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 
 func _on_disorder_triggered(emotion: String) -> void:
 	disorder_warning.text = "⚠ %s 失调！" % EmotionManager.get_emotion_name(emotion)
+	SoundManager.play_sfx("disorder_trigger")
 	var tween = create_tween()
 	tween.tween_property(self, "modulate", Color(1.0, 0.3, 0.3), 0.08)
 	tween.tween_property(self, "modulate", Color.WHITE, 0.25)
@@ -490,7 +517,6 @@ func _spawn_player_number(value: int, type: String) -> void:
 					   rect.position.y + rect.size.y * 0.4)
 	spawn_damage_number(value, type, pos)
 
-## ══════════════════════════════════════════════════════
 ## 敌人像素立绘
 ## ══════════════════════════════════════════════════════
 func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
@@ -527,3 +553,24 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 			Color(1.2, 1.0, 0.8, 1.0), 1.0).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_property(sprite_node, "modulate",
 			Color.WHITE, 1.0).set_ease(Tween.EASE_IN_OUT)
+
+## ══════════════════════════════════════════════════════
+## Boss UI 初始化
+## ══════════════════════════════════════════════════════
+func _setup_boss_ui(enemy_data: Dictionary) -> void:
+	_boss_ui = BossUI.new()
+	_boss_ui.name = "BossUI"
+	add_child(_boss_ui)
+	_boss_ui.boss_phase_changed.connect(_on_boss_phase_changed)
+	_boss_ui.activate(self, enemy_data)
+
+func _on_boss_phase_changed(new_phase: int) -> void:
+	# 阶段2：愤怒警告文字
+	if new_phase == 2 and disorder_warning:
+		disorder_warning.text = "⚡ Boss 进入愤怒阶段！"
+		var tw = create_tween()
+		tw.tween_interval(3.0)
+		tw.tween_callback(func():
+			if disorder_warning.text == "⚡ Boss 进入愤怒阶段！":
+				disorder_warning.text = ""
+		)

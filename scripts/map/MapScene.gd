@@ -177,6 +177,10 @@ func _check_layer_done() -> void:
 		if not nd.get("visited",false): all_visited = false; break
 	if all_visited:
 		GameState.advance_layer()
+		# 通关判定：超过第三层 → 触发成功结局
+		if GameState.check_victory_condition():
+			GameState.trigger_ending("success")
+			return
 		layer_label.text = LAYER_NAMES.get(GameState.current_layer, "通关！")
 
 func _render_relics() -> void:
