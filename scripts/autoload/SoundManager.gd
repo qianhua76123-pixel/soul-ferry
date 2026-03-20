@@ -123,7 +123,7 @@ func _ready() -> void:
 		_sfx_players.append(p)
 
 	# 连接场景切换信号，自动切换 BGM
-	get_tree().connect("node_added", _on_node_added)
+	get_tree().node_added.connect(_on_node_added)
 
 # ══════════════════════════════════════════════════════
 #  公开 API

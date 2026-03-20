@@ -103,7 +103,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 func _animate_hover(on: bool) -> void:
 	var tween = create_tween()
 	tween.tween_property(self,"_hover_offset",14.0 if on else 0.0,0.12)
-	tween.connect("step_finished",func(_n): queue_redraw())
+	tween.step_finished.connect(func(_n): queue_redraw())
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
