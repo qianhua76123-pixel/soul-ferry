@@ -421,7 +421,8 @@ func _on_wenlu_pressed() -> void:
 ## Buff 图标栏系统
 ## ══════════════════════════════════════════════════════
 
-# 全局 Tooltip Label（鼠标悬停显示）
+# 全局 Tooltip（Panel 包 Label，鼠标悬停显示）
+var _tooltip_panel: Panel = null
 var _tooltip_label: Label = null
 
 func _setup_buff_ui() -> void:
@@ -445,25 +446,23 @@ func _setup_buff_ui() -> void:
 		enemy_area.add_child(bar)
 		enemy_area.move_child(bar, 1)
 
-	# 全局 Tooltip Label（挂到 CanvasLayer 最顶层）
+	# 全局 Tooltip（Panel 包 Label，挂到 UI 最顶层）
 	var ui = get_node_or_null("UI")
 	if ui:
 		_tooltip_label = Label.new()
-		_tooltip_label.name             = "BuffTooltip"
-		_tooltip_label.visible          = false
-		_tooltip_label.z_index          = 100
-		_tooltip_label.autowrap_mode    = TextServer.AUTOWRAP_WORD_SMART
+		_tooltip_label.name            = "BuffTooltip"
+		_tooltip_label.z_index         = 100
+		_tooltip_label.autowrap_mode   = TextServer.AUTOWRAP_WORD_SMART
 		_tooltip_label.custom_minimum_size = Vector2(180, 0)
 		_tooltip_label.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
 		_tooltip_label.add_theme_font_size_override("font_size", 12)
-		# 添加半透明背景 Panel
-		var panel = Panel.new()
-		panel.name = "TooltipPanel"
-		panel.add_child(_tooltip_label)
+		# 背景 Panel
+		_tooltip_panel = Panel.new()
+		_tooltip_panel.name = "TooltipPanel"
+		_tooltip_panel.add_child(_tooltip_label)
 		_tooltip_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		ui.add_child(panel)
-		panel.visible = false
-		_tooltip_label = panel   # 让 _tooltip_label 指向 Panel（一起显示/隐藏）
+		ui.add_child(_tooltip_panel)
+		_tooltip_panel.visible = false
 
 func _on_buff_changed(target: String, _buff_id: String, _stacks: int) -> void:
 	_rebuild_buff_bar(target)
@@ -529,21 +528,17 @@ func _make_buff_icon(buff: Dictionary) -> Control:
 	return slot
 
 func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
-	if not _tooltip_label: return
-	var title = buff.get("display_name","???")
-	var tip   = buff.get("tooltip","")
-	var stacks= buff.get("stacks", 0)
-	# 找到 Panel 内的 Label
-	var lbl = _tooltip_label.get_node_or_null("BuffTooltip")
-	if not lbl: return
-	lbl.text = "%s ×%d\n%s" % [title, stacks, tip]
-	_tooltip_label.visible  = true
-	# 定位在图标上方
+	if not _tooltip_panel or not _tooltip_label: return
+	var title  = buff.get("display_name", "???")
+	var tip    = buff.get("tooltip", "")
+	var stacks = buff.get("stacks", 0)
+	_tooltip_label.text    = "%s ×%d\n%s" % [title, stacks, tip]
+	_tooltip_panel.visible = true
 	var pos = anchor.get_global_rect().position
-	_tooltip_label.position = Vector2(clamp(pos.x - 60, 4, 1080), max(pos.y - 72, 4))
+	_tooltip_panel.position = Vector2(clamp(pos.x - 60, 4, 1080), max(pos.y - 72, 4))
 
 func _hide_tooltip() -> void:
-	if _tooltip_label: _tooltip_label.visible = false
+	if _tooltip_panel: _tooltip_panel.visible = false
 
 ## ══════════════════════════════════════════════════════
 ## 浮字数字系统
