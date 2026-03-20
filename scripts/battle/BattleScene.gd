@@ -144,20 +144,20 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	player_shield_label.text = "🛡 %d" % int(state_machine.player_shield)
 	_update_hud()
 	var rtype = result.get("type","")
-	var rval  = int(result.get("value", 0))   # 强制 int，防止 float % int 崩溃
+	var rval  = int(result.get("value", 0))
 	if rval > 0:
-		match rtype:
-			"attack","attack_all","attack_lifesteal","attack_dot",
-			"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
-			"shield_attack","remove_enemy_shield":
-				_spawn_enemy_damage(rval, "damage")
-				SoundManager.play_sfx("attack_hit")
-			"heal","heal_all_buffs","heal_and_draw","heal_scale_grief","mass_heal_shield":
-				_spawn_player_number(rval, "heal")
-				SoundManager.play_sfx("heal")
-			"shield","shield_and_draw","reset_shield","balance_emotions":
-				_spawn_player_number(rval, "shield")
-				SoundManager.play_sfx("shield_block")
+		var dmg_types   = ["attack","attack_all","attack_lifesteal","attack_dot","attack_scaling_rage","attack_all_triple","attack_and_weaken_all","shield_attack","remove_enemy_shield"]
+		var heal_types  = ["heal","heal_all_buffs","heal_and_draw","heal_scale_grief","mass_heal_shield"]
+		var shield_types= ["shield","shield_and_draw","reset_shield","balance_emotions"]
+		if rtype in dmg_types:
+			_spawn_enemy_damage(rval, "damage")
+			SoundManager.play_sfx("attack_hit")
+		elif rtype in heal_types:
+			_spawn_player_number(rval, "heal")
+			SoundManager.play_sfx("heal")
+		elif rtype in shield_types:
+			_spawn_player_number(rval, "shield")
+			SoundManager.play_sfx("shield_block")
 	_show_popup(result)
 	# Boss UI：卡牌效果后更新 Boss 状态
 	if _boss_ui:
