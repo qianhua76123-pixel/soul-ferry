@@ -781,6 +781,25 @@ func _on_intent_updated(intent: Dictionary) -> void:
 		_intent_display.show_intent(intent)
 
 ## ══════════════════════════════════════════════════════
+## B-07 战场氛围背景 + 费用圆点HUD
+## ══════════════════════════════════════════════════════
+
+func _setup_battle_background() -> void:
+	_bg_node = BattleBackgroundClass.new()
+	_bg_node.name = "BattleBackground"
+	add_child(_bg_node)
+	move_child(_bg_node, 0)   # 移到最底层
+
+func _setup_energy_display() -> void:
+	var hud = get_node_or_null("UI/HUD")
+	if not hud: return
+	_energy_display = EnergyDisplayClass.new()
+	_energy_display.name = "EnergyDots"
+	hud.add_child(_energy_display)
+	# 隐藏原来的纯文字费用标签（保留节点，只隐藏）
+	if cost_label: cost_label.visible = false
+
+## ══════════════════════════════════════════════════════
 ## B-05 卡牌悬停预览公开接口
 ## ══════════════════════════════════════════════════════
 
