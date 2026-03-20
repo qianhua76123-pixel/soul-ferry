@@ -156,7 +156,9 @@ func _apply_result(result: Dictionary) -> void:
 			GameState.increase_max_hp(result.get("value", 0))
 
 		"gold":
-			GameState.gain_gold(result.get("value", 0))
+			var gv = result.get("value", 0)
+			if gv >= 0: GameState.gain_gold(gv)
+			else: GameState.spend_gold(-gv)
 
 		"curse_card":
 			var card = CardDatabase.get_card(result.get("card_id", ""))
@@ -177,7 +179,9 @@ func _apply_single_effect(effect: Dictionary) -> void:
 		"hp_gain":
 			GameState.heal(effect.get("value", 0))
 		"gold":
-			GameState.gain_gold(effect.get("value", 0))
+			var ev = effect.get("value", 0)
+				if ev >= 0: GameState.gain_gold(ev)
+				else: GameState.spend_gold(-ev)
 		"relic_reward":
 			GameState.add_relic(effect.get("relic_id", ""))
 		"max_hp_gain":

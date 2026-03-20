@@ -39,6 +39,7 @@ func _ready() -> void:
 
 	state_machine.battle_started.connect(_on_battle_started)
 	state_machine.player_turn_started.connect(_on_player_turn_started)
+	state_machine.enemy_turn_started.connect(_on_enemy_turn_started)
 	state_machine.card_effect_applied.connect(_on_card_effect)
 	state_machine.battle_ended.connect(_on_battle_ended)
 	state_machine.du_hua_available.connect(_on_du_hua_available)
@@ -105,6 +106,34 @@ func _on_player_turn_started(turn: int) -> void:
 	# Boss UI：回合开始刷新意图预告
 	if _boss_ui:
 		_boss_ui.on_turn_start(state_machine.enemy_hp, turn)
+
+func _on_enemy_turn_started() -> void:
+	# 敌人行动时锁定结束回合按钮
+	end_turn_btn.disabled = true
+	# 特殊行动UI反馈：摸牌陷阱提示
+	var last_action = state_machine.enemy_data.get("_last_action_type", "")
+	match last_action:
+		"draw_player":
+			_spawn_special_text("💀 摄魅凝视！强迫摸牌", Color(0.55, 0.10, 0.75))
+		"summon_tide":
+			_spawn_special_text("🌊 召唤潮汐！连续冲击", Color(0.25, 0.55, 0.78))
+		"rage_card_storm":
+			_spawn_special_text("💢 花嫁之怒！手牌越多伤越高", Color(0.88, 0.15, 0.18))
+
+func _spawn_special_text(msg: String, color: Color) -> void:
+	var lbl = Label.new()
+	lbl.text = msg
+	lbl.add_theme_color_override("font_color", color)
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var ui = get_node_or_null("UI")
+	if ui: ui.add_child(lbl)
+	else: add_child(lbl)
+	lbl.position = Vector2(576 - 160, 260)
+	var tw = lbl.create_tween()
+	tw.tween_property(lbl, "position:y", lbl.position.y - 60, 1.5)
+	tw.parallel().tween_property(lbl, "modulate:a", 0.0, 1.5)
+	tw.tween_callback(lbl.queue_free)
 
 func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	enemy_hp_bar.value       = state_machine.enemy_hp
@@ -584,6 +613,8 @@ func _setup_boss_ui(enemy_data: Dictionary) -> void:
 	_boss_ui.activate(self, enemy_data)
 
 func _on_boss_phase_changed(new_phase: int) -> void:
+	# 同步到状态机：愤怒阶段行动权重倍增
+	state_machine.boss_phase = new_phase
 	# 阶段2：愤怒警告文字
 	if new_phase == 2 and disorder_warning:
 		disorder_warning.text = "⚡ Boss 进入愤怒阶段！"

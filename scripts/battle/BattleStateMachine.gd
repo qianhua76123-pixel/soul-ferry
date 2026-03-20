@@ -114,10 +114,15 @@ func end_player_turn() -> void:
 	BuffManager.process_turn_end(BuffManager.TARGET_ENEMY)
 	_begin_enemy_turn()
 
+## Boss 当前阶段（1=正常, 2=愤怒），由 BossUI.boss_phase_changed 信号更新
+var boss_phase: int = 1
+
 func _begin_enemy_turn() -> void:
 	current_state = STATE_ENEMY_TURN
 	enemy_turn_started.emit()
 	var action = _choose_enemy_action()
+	# 记录行动类型供 BattleScene UI 读取
+	enemy_data["_last_action_type"] = action.get("type", "")
 	_execute_enemy_action(action)
 	if GameState.hp > 0:
 		_begin_player_turn()
@@ -202,38 +207,96 @@ func confirm_du_hua() -> void:
 func _choose_enemy_action() -> Dictionary:
 	var actions = enemy_data.get("actions", [])
 	if actions.is_empty(): return {}
+
+	# 愤怒阶段（Boss HP≤50%）：提升攻击/dot权重，降低辅助权重
+	var weighted = actions.duplicate(true)
+	if boss_phase == 2:
+		for a in weighted:
+			var t = a.get("type", "")
+			if t in ["attack", "attack_all", "dot_fire", "dot", "all_field_heat_dot",
+					 "summon_tide", "rage_card_storm"]:
+				a["weight"] = int(a.get("weight", 1) * 2.5)   # 攻击性行动权重×2.5
+			elif t in ["shield", "heal"]:
+				a["weight"] = max(1, int(a.get("weight", 1) * 0.3))  # 防御性行动权重×0.3
+
 	var total = 0
-	for a in actions: total += a.get("weight", 1)
+	for a in weighted: total += a.get("weight", 1)
 	var roll = randi() % total
 	var cum  = 0
-	for a in actions:
+	for a in weighted:
 		cum += a.get("weight", 1)
 		if roll < cum: return a
-	return actions[0]
+	return weighted[0]
 
 func _execute_enemy_action(action: Dictionary) -> void:
 	if action.is_empty(): return
 	var mul   = EmotionManager.get_enemy_damage_multiplier()
+	# 愤怒阶段：敌人伤害额外×1.3
+	if boss_phase == 2:
+		mul *= 1.3
 	var atype = action.get("type", "")
 	match atype:
 		"attack":
 			var raw = int(action.get("value", 0) * mul)
-			# BuffManager 护盾拦截（玩家护盾 Buff）
 			var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
-			# BattleStateMachine 自身的 player_shield（卡牌产生的）
 			if player_shield > 0:
 				var blocked = min(player_shield, dmg)
 				player_shield -= blocked
 				dmg -= blocked
 			if dmg > 0:
 				GameState.take_damage(dmg)
+
 		"emotion_push":
 			EmotionManager.modify(action.get("emotion", ""), action.get("value", 1))
+
 		"dot", "dot_fire", "all_field_heat_dot":
-			# 统一走 BuffManager 解析，转化为 Buff 而非直接扣血
 			BuffManager.parse_dot_action(action)
+
 		"shield":
 			enemy_shield += action.get("value", 0)
+
+		"draw_player":
+			# 摄魅眼：强迫玩家摸牌（手牌超上限会被迫弃牌，陷阱效果）
+			var draw_count = action.get("value", 2)
+			DeckManager.draw_cards(draw_count)
+			# 若手牌数超过上限(7)，强制弃置最新摸的牌
+			var max_hand = 7
+			while len(DeckManager.hand) > max_hand:
+				DeckManager.discard_from_hand(DeckManager.hand[-1])
+
+		"summon_tide":
+			# 水鬼·望归：召唤潮汐连击（连续造成多次小伤害，每次固定值）
+			var hit_count = action.get("hits", 3)
+			var hit_val   = action.get("value", 8)
+			for _i in hit_count:
+				var raw  = int(hit_val * mul)
+				var dmg  = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
+				if player_shield > 0:
+					var blocked = min(player_shield, dmg)
+					player_shield -= blocked
+					dmg -= blocked
+				if dmg > 0:
+					GameState.take_damage(dmg)
+				if GameState.hp <= 0: break
+			# 潮汐附带：玩家情绪「悲」+1
+			EmotionManager.modify("grief", 1)
+
+		"rage_card_storm":
+			# 鬼新娘·素锦：狂暴连击（伤害随玩家手牌数量递增）
+			var base_dmg  = action.get("value", 5)
+			var hand_size = len(DeckManager.hand)
+			# 每张手牌+2额外伤害，模拟"花嫁之怒吞噬一切"
+			var total_dmg = int((base_dmg + hand_size * 2) * mul)
+			var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
+			if player_shield > 0:
+				var blocked = min(player_shield, dmg)
+				player_shield -= blocked
+				dmg -= blocked
+			if dmg > 0:
+				GameState.take_damage(dmg)
+			# 狂暴风暴附带：让玩家「惧」「悲」各+1
+			EmotionManager.modify("fear", 1)
+			EmotionManager.modify("grief", 1)
 
 func _deal_damage_to_enemy(amount: int) -> void:
 	if enemy_shield > 0:
