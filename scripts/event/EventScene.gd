@@ -181,8 +181,8 @@ func _apply_single_effect(effect: Dictionary) -> void:
 			GameState.heal(effect.get("value", 0))
 		"gold":
 			var ev = effect.get("value", 0)
-				if ev >= 0: GameState.gain_gold(ev)
-				else: GameState.spend_gold(-ev)
+			if ev >= 0: GameState.gain_gold(ev)
+			else: GameState.spend_gold(-ev)
 		"relic_reward":
 			GameState.add_relic(effect.get("relic_id", ""))
 		"max_hp_gain":
