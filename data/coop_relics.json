@@ -1,0 +1,43 @@
+{
+  "coop_relics": [
+    {
+      "id": "duohun_erjuan",
+      "name": "渡魂二人券",
+      "rarity": "special",
+      "mode": "coop_only",
+      "description": "任意一人触发共鸣时，另一人获得+1能量（每回合两人各最多3次）。",
+      "effect_type": "coop_resonance_energy",
+      "effect_params": {
+        "energy_bonus": 1,
+        "max_per_character_per_turn": 3
+      }
+    },
+    {
+      "id": "tie_yin_tongxin",
+      "name": "铁印同心",
+      "rarity": "special",
+      "mode": "coop_only",
+      "description": "锁链总层数>10时，阮如月印记共鸣+20%；印记总层数>15时，沈铁钧锁链溅射+15%。",
+      "effect_type": "coop_threshold_bonus",
+      "effect_params": {
+        "chain_threshold": 10,
+        "ruan_resonance_bonus": 0.20,
+        "mark_threshold": 15,
+        "shen_splash_bonus": 0.15
+      }
+    },
+    {
+      "id": "bingjian_duhun",
+      "name": "并肩渡魂",
+      "rarity": "legendary",
+      "mode": "coop_only",
+      "obtain_condition": "两人各触发过一次五情共鸣且本场战斗无人HP归零",
+      "description": "渡化进度直接填满至100%，触发协同渡化。",
+      "effect_type": "coop_legendary_purify",
+      "effect_params": {
+        "purification_fill": 1.0,
+        "trigger_coop_dialogue": true
+      }
+    }
+  ]
+}
