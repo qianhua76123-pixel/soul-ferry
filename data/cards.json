@@ -753,6 +753,516 @@
       },
       "rarity": "rare",
       "description": "获得10护盾并造成等量伤害，定主导+8，定-1"
+    },
+    {
+      "id": "xi_dao",
+      "name": "喜祷",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 1,
+      "effect_type": "apply_mark_and_heal",
+      "effect_value": 5,
+      "condition": "joy_mark >= 1",
+      "condition_bonus": 3,
+      "marks_to_apply": {
+        "joy": 2
+      },
+      "rarity": "common",
+      "description": "对目标施加喜印×2，自身回复5点HP。若目标已有喜印，改为回复8点HP。",
+      "desc": "[color=#b7770d]喜印[/color]×2，回血5（目标已有喜印时回血8）"
+    },
+    {
+      "id": "ding_cheng",
+      "name": "定澄",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "calm",
+      "cost": 0,
+      "effect_type": "emotion_and_mark",
+      "effect_value": 1,
+      "condition": "calm >= 2",
+      "condition_bonus": 0,
+      "marks_to_apply": {
+        "calm": 1
+      },
+      "emotion_shift": {
+        "calm": 1
+      },
+      "marks_condition_upgrade": {
+        "calm": 2,
+        "threshold": "calm >= 2"
+      },
+      "rarity": "common",
+      "description": "定+1，对目标施加定印×1。若当前定≥2，定印改为×2。",
+      "desc": "[color=#1d6a54]定[/color]+1，定印×1（定≥2时×2）"
+    },
+    {
+      "id": "hua_kai",
+      "name": "花开",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 1,
+      "effect_type": "trigger_resonance_if_marks",
+      "effect_value": 0,
+      "condition": "joy_mark >= 2",
+      "marks_required": {
+        "joy": 2
+      },
+      "resonance_type": "joy",
+      "on_resonance_bonus": "next_card_free",
+      "rarity": "uncommon",
+      "description": "若目标身上喜印≥2，触发喜共鸣（回复8HP+下一张牌免费）。若喜印<2此牌无效。",
+      "desc": "喜印≥2时触发[color=#b7770d]喜共鸣[/color]，回血8，下一张牌免费"
+    },
+    {
+      "id": "ding_xin_jiejie",
+      "name": "定心结界",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "shield_and_mark",
+      "effect_value": 12,
+      "shield_no_expire": true,
+      "marks_to_apply": {
+        "calm": 3
+      },
+      "on_mark_resonance": {
+        "calm": "cost_reduction_this_turn"
+      },
+      "rarity": "uncommon",
+      "description": "获得护盾12点（不清零），对目标施加定印×3（直接触发定共鸣：本回合所有牌费用-1）。",
+      "desc": "护盾12（不清零），定印×3→触发[color=#1d6a54]定共鸣[/color]，本回合降费"
+    },
+    {
+      "id": "xi_yi",
+      "name": "喜溢",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 1,
+      "effect_type": "multiply_marks_and_heal",
+      "effect_value": 2,
+      "mark_type": "joy",
+      "mark_cap": 10,
+      "heal_equal_to": "joy_mark_after",
+      "rarity": "uncommon",
+      "description": "对目标身上喜印层数×2（最高10层），自身回复等于喜印当前层数点HP。",
+      "desc": "喜印×2（上限10），回血=当前喜印层数"
+    },
+    {
+      "id": "kongling_huti",
+      "name": "空灵护体",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "shield_equal_to_emotion",
+      "effect_value": 4,
+      "shield_base_emotion": "calm",
+      "emotion_shift": {
+        "joy": 1
+      },
+      "rarity": "common",
+      "description": "获得护盾等于当前定情绪值×4点，喜+1。",
+      "desc": "护盾=定×4，[color=#b7770d]喜[/color]+1"
+    },
+    {
+      "id": "shuang_yin_huiliu",
+      "name": "双印汇流",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 2,
+      "effect_type": "multi_mark_and_trigger",
+      "effect_value": 0,
+      "marks_to_apply": {
+        "joy": 2,
+        "calm": 2
+      },
+      "trigger_condition": {
+        "total_joy_calm_marks": 6
+      },
+      "on_trigger": "both_resonance",
+      "rarity": "rare",
+      "description": "对目标同时施加喜印×2和定印×2，若两种印记总层数≥6，立即触发喜共鸣和定共鸣。",
+      "desc": "喜印×2+定印×2，总层数≥6时触发[color=#b7770d]喜[/color]和[color=#1d6a54]定[/color]共鸣"
+    },
+    {
+      "id": "xi_quan",
+      "name": "喜泉",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 0,
+      "effect_type": "emotion_and_heal",
+      "effect_value": 2,
+      "emotion_shift": {
+        "joy": 1
+      },
+      "condition": "joy >= 2",
+      "max_per_turn": 2,
+      "rarity": "common",
+      "description": "喜+1，若当前喜≥2，额外回复2点HP。每回合最多打出2次。",
+      "desc": "[color=#b7770d]喜[/color]+1，喜≥2时额外回血2（每回合最多2次）"
+    },
+    {
+      "id": "yu_ling_jue",
+      "name": "愈灵诀",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 1,
+      "effect_type": "heal_by_marks_and_draw",
+      "effect_value": 4,
+      "heal_from_marks": [
+        "joy",
+        "calm"
+      ],
+      "heal_cap": 15,
+      "draw": 1,
+      "rarity": "uncommon",
+      "description": "回复HP等于场上喜印+定印总层数（最少4最高15），抽1张牌。",
+      "desc": "回血=喜印+定印总数（4-15），抽1张"
+    },
+    {
+      "id": "ding_nian_fengyin",
+      "name": "定念封印",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "mark_and_delay",
+      "effect_value": 0,
+      "marks_to_apply": {
+        "calm": 2
+      },
+      "enemy_action_delay": 1,
+      "rarity": "uncommon",
+      "description": "对目标施加定印×2，该目标本回合行动延迟（你行动结束后敌人才行动）。",
+      "desc": "定印×2，目标本回合行动延迟"
+    },
+    {
+      "id": "xi_ding_tongliu",
+      "name": "喜定同流",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 2,
+      "effect_type": "convert_marks_and_resonate",
+      "effect_value": 0,
+      "convert_from": "calm",
+      "convert_to": "joy",
+      "trigger_resonance_before": "calm",
+      "trigger_resonance_after": "joy",
+      "rarity": "rare",
+      "description": "将目标身上所有定印转化为喜印（层数不变），触发一次喜共鸣。",
+      "desc": "所有定印→喜印，触发[color=#b7770d]喜共鸣[/color]"
+    },
+    {
+      "id": "guang_yu_he",
+      "name": "光与愈",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 3,
+      "effect_type": "heal_and_purify_and_mark",
+      "effect_value": 20,
+      "purification_bonus": 0.2,
+      "marks_to_apply": {
+        "joy": 5
+      },
+      "condition": "joy_mark >= 3",
+      "condition_bonus_purification": 0.1,
+      "rarity": "rare",
+      "description": "回复20点HP，渡化进度+20%，对目标施加喜印×5。若目标喜印已≥3，渡化进度追加+10%。",
+      "desc": "回血20，渡化进度+20%，喜印×5（已有≥3时再+10%进度）"
+    },
+    {
+      "id": "jing_hua_a",
+      "name": "镜花",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 0,
+      "effect_type": "repeat_last_resonance",
+      "effect_value": 0,
+      "rarity": "rare",
+      "description": "将本回合已触发的最后一次印记共鸣效果再触发一次（不消耗印记）。",
+      "desc": "复制本回合最后一次共鸣效果",
+      "copies": 2
+    },
+    {
+      "id": "jing_hua_b",
+      "name": "镜花",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "joy",
+      "cost": 0,
+      "effect_type": "repeat_last_resonance",
+      "effect_value": 0,
+      "rarity": "rare",
+      "description": "将本回合已触发的最后一次印记共鸣效果再触发一次（不消耗印记）。",
+      "desc": "复制本回合最后一次共鸣效果",
+      "is_copy": true
+    },
+    {
+      "id": "wu_wei_guangyu",
+      "name": "无为",
+      "character": "ruan_ruyue",
+      "variant": "guangyu",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "persistent_mark_and_purify",
+      "effect_value": 3,
+      "duration_turns": 3,
+      "per_turn_marks": {
+        "joy": 1,
+        "calm": 1
+      },
+      "per_turn_heal": 3,
+      "on_end_check_purification": true,
+      "rarity": "epic",
+      "description": "持续3回合：每回合开始对目标施加喜印×1和定印×1，并回复3点HP。3回合结束时若渡化条件满足自动触发渡化判定。",
+      "desc": "持续3回合：每回合喜印+定印各×1+回血3；结束时自动触发渡化判定"
+    },
+    {
+      "id": "tie_qu",
+      "name": "铁躯",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "shield_and_emotion",
+      "effect_value": 12,
+      "condition": "shield > 0",
+      "condition_bonus": 4,
+      "emotion_shift": {
+        "calm": 1
+      },
+      "rarity": "common",
+      "description": "获得护盾12点，定+1。若打出前已有护盾，额外获得护盾4点。",
+      "desc": "护盾12，[color=#1d6a54]定[/color]+1（已有护盾时额外+4）"
+    },
+    {
+      "id": "ding_xin_ru_shan",
+      "name": "定心如山",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "emotion_and_shield_by_emotion",
+      "effect_value": 3,
+      "emotion_shift": {
+        "calm": 3
+      },
+      "shield_multiplier_emotion": "calm",
+      "rarity": "uncommon",
+      "description": "定+3，获得护盾等于定情绪值×3点（定+3后计算）。",
+      "desc": "[color=#1d6a54]定[/color]+3，护盾=定×3"
+    },
+    {
+      "id": "dun_fan",
+      "name": "盾反",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 0,
+      "effect_type": "reflect_next_damage",
+      "effect_value": 0.5,
+      "rarity": "uncommon",
+      "description": "本回合受到的下一次伤害，将50%以护盾伤害形式反弹给攻击者。",
+      "desc": "下一次受到伤害，50%反弹为护盾伤害"
+    },
+    {
+      "id": "tiejia_futi",
+      "name": "铁甲覆体",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "convert_shield_to_armor",
+      "effect_value": 0.4,
+      "shield_no_expire_this_turn": true,
+      "rarity": "rare",
+      "description": "将当前护盾值的40%转化为永久铁甲（固定减伤），本回合护盾不清零。",
+      "desc": "护盾40%→铁甲，本回合护盾不清零"
+    },
+    {
+      "id": "ding_zhen",
+      "name": "定阵",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "emotion_and_crowd_control",
+      "effect_value": 0,
+      "emotion_shift": {
+        "calm": 2
+      },
+      "all_enemies_debuff": "static_1_turn",
+      "rarity": "uncommon",
+      "description": "定+2，对所有敌人施加「静滞」1回合（无法获得护盾和增益技能）。",
+      "desc": "[color=#1d6a54]定[/color]+2，所有敌人静滞1回合"
+    },
+    {
+      "id": "shan_yue",
+      "name": "山岳",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "shield_and_reflect_buff",
+      "effect_value": 18,
+      "reflect_ratio": 0.4,
+      "reflect_max_times": 3,
+      "rarity": "uncommon",
+      "description": "获得护盾18点，激活「山岳反甲」：本回合受到的所有伤害将40%反弹（最多3次）。",
+      "desc": "护盾18，反甲40%（本回合最多3次）"
+    },
+    {
+      "id": "yi_rou_ke_gang",
+      "name": "以柔克刚",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "attack_by_armor",
+      "effect_value": 3,
+      "base_damage": 5,
+      "damage_multiplier_stat": "armor",
+      "rarity": "uncommon",
+      "description": "造成伤害等于当前铁甲值×3点（铁甲=0时造成5点基础伤害）。",
+      "desc": "伤害=铁甲×3（最低5）"
+    },
+    {
+      "id": "tiebi_tuzhi",
+      "name": "铁壁突刺",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "attack_by_shield",
+      "effect_value": 0.3,
+      "requires_shield": true,
+      "rarity": "rare",
+      "description": "造成伤害等于当前护盾值的30%（护盾=0时不可打出）。",
+      "desc": "伤害=护盾×30%（需有护盾）"
+    },
+    {
+      "id": "ning_ding",
+      "name": "凝定",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 0,
+      "effect_type": "emotion_with_condition_bonus",
+      "effect_value": 0,
+      "emotion_shift": {
+        "calm": 2
+      },
+      "condition": "calm >= 4",
+      "condition_bonus_energy": 1,
+      "condition_bonus_chain": 1,
+      "rarity": "common",
+      "description": "定+2。若当前定≥4，额外：下回合+1能量，并对血量最高的敌人施加锁链×1。",
+      "desc": "[color=#1d6a54]定[/color]+2（定≥4时：下回合+1能量+锁链×1）"
+    },
+    {
+      "id": "bai_lian_cheng_gang",
+      "name": "百炼成钢",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 3,
+      "effect_type": "convert_damage_taken_to_armor",
+      "effect_value": 1.0,
+      "clears_shield_after": true,
+      "rarity": "epic",
+      "description": "将本回合受到的所有伤害总和转化为等量永久铁甲（本局有效），打出后本回合防御归零。",
+      "desc": "本回合已受伤害→铁甲（1:1），护盾清零"
+    },
+    {
+      "id": "shou_tu",
+      "name": "守土",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "chain_and_shield",
+      "effect_value": 6,
+      "chain_to_apply": 1,
+      "condition": "target_chain >= 3",
+      "condition_bonus": 4,
+      "rarity": "common",
+      "description": "对目标施加锁链×1，获得护盾6点。若已有锁链≥3，护盾改为10点。",
+      "desc": "锁链×1，护盾6（目标锁链≥3时护盾10）"
+    },
+    {
+      "id": "wu_dong_yu_zhong",
+      "name": "无动于衷",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 0,
+      "effect_type": "emotion_and_immune_debuff",
+      "effect_value": 0,
+      "emotion_shift": {
+        "calm": 1
+      },
+      "immune_next_debuff": 1,
+      "rarity": "common",
+      "description": "定+1，免疫本回合的下一次状态效果（不免疫伤害）。",
+      "desc": "[color=#1d6a54]定[/color]+1，免疫下一次状态效果"
+    },
+    {
+      "id": "wan_fu_mo_kai",
+      "name": "万夫莫开",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 1,
+      "effect_type": "shield_regen_on_hit",
+      "effect_value": 0.2,
+      "duration_turns": 1,
+      "rarity": "rare",
+      "description": "本回合内，每次护盾被攻击减少时，立即回复减少量20%的护盾（等效护盾只损失80%）。",
+      "desc": "本回合护盾损失20%自动回复（损失=80%）"
+    },
+    {
+      "id": "jing_ruo_pan_shi",
+      "name": "静若磐石",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "persistent_shield",
+      "effect_value": 3,
+      "duration_turns": 3,
+      "shield_multiplier_emotion": "calm",
+      "shield_no_expire": true,
+      "rarity": "rare",
+      "description": "持续3回合：每回合开始时获得护盾等于定情绪值×3，该护盾本回合不清零。",
+      "desc": "持续3回合：每回合护盾+=定×3（不清零）"
+    },
+    {
+      "id": "ding_er_wu_ji",
+      "name": "定而无极",
+      "character": "shen_tiejun",
+      "variant": "tiebi",
+      "emotion_tag": "calm",
+      "cost": 2,
+      "effect_type": "armor_to_attack_bonus",
+      "effect_value": 4,
+      "clears_armor_after": true,
+      "emotion_shift": {
+        "calm": 3
+      },
+      "rarity": "epic",
+      "description": "将铁甲值转化为本回合攻击力加成（每1点铁甲=攻击力+4），使用后铁甲归零，定+3。",
+      "desc": "铁甲→攻击加成（×4），铁甲归零，[color=#1d6a54]定[/color]+3"
     }
   ]
 }

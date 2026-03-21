@@ -90,6 +90,483 @@
       "effect": "每当「悲」达到3时，自动回复5HP（每回合最多触发一次）",
       "flavor_text": "「思念可以是力量。」",
       "rarity": "common"
+    },
+    {
+      "id": "jiu_tong_ling",
+      "name": "旧铜铃",
+      "character": "ruan_ruyue",
+      "rarity": "common",
+      "description": "一只表面发黑的小铜铃，铃舌已断，但摇动时仍有隐约声响。",
+      "effect_type": "on_seal_card_played",
+      "effect": "打出施印牌时，触发对应印记的情绪亲和效果（悲回血1/惧减伤2/怒攻击+3/喜抽牌/定+1费）。同一回合同类印记只触发一次。",
+      "effect_params": {
+        "grief": {
+          "type": "heal",
+          "value": 1
+        },
+        "fear": {
+          "type": "reduce_next_damage",
+          "value": 2
+        },
+        "rage": {
+          "type": "attack_bonus_next",
+          "value": 3
+        },
+        "joy": {
+          "type": "draw",
+          "value": 1
+        },
+        "calm": {
+          "type": "gain_energy",
+          "value": 1
+        },
+        "once_per_type_per_turn": true
+      },
+      "flavor_text": "「她说她不会修铃了。铃断了就是断了，但铃声可以留在记忆里，比铃本身更长久。」",
+      "upgradable": true,
+      "upgrade_effect": "所有情绪亲和效果数值翻倍（HP+2，减伤-4，攻击+6，抽2张，+2费）。"
+    },
+    {
+      "id": "guan_yin_ni",
+      "name": "观音泥",
+      "character": "ruan_ruyue",
+      "rarity": "common",
+      "description": "一小块灰白色的香炉泥，用布包裹，已干硬。",
+      "effect_type": "battle_start",
+      "effect": "战斗开始时，随机一种印记的共鸣阈值从3层降低至2层（本场战斗有效）。",
+      "effect_params": {
+        "resonance_threshold_reduction": 1,
+        "target": "random_one_type"
+      },
+      "flavor_text": "「神像是泥做的，香火不旺的时候，泥里连神气都少，她就用指甲在背面刻个字——至少有一个字记得祂。」",
+      "upgradable": true,
+      "upgrade_effect": "改为玩家自选哪种印记的共鸣阈值降低（不再随机）。"
+    },
+    {
+      "id": "sui_jing_pian",
+      "name": "碎镜片",
+      "character": "ruan_ruyue",
+      "rarity": "common",
+      "description": "一片六角形铜镜碎片，约一枚铜钱大小，边缘锋利。",
+      "effect_type": "on_resonance",
+      "effect": "每次触发五情共鸣，永久获得最高情绪值对应印记的共鸣威力+5%（无上限叠加）。",
+      "effect_params": {
+        "resonance_power_bonus_per_trigger": 0.05,
+        "applies_to": "highest_emotion_type"
+      },
+      "flavor_text": "「陆晚照留下的那片铜镜，握久了会割手。但她每次都握着，直到手心热了，才放下。」",
+      "upgradable": true,
+      "upgrade_effect": "每次触发五情共鸣时，所有五种印记共鸣威力各+2%（而非只有最高的那种+5%）。"
+    },
+    {
+      "id": "wen_xiang_lu",
+      "name": "问香炉",
+      "character": "ruan_ruyue",
+      "rarity": "rare",
+      "description": "一只掌心大的青铜小香炉，三足，无盖，炉内灰烬未散。",
+      "effect_type": "on_resonance_count",
+      "effect": "每当某种印记触发共鸣累计达3次（本场战斗），该印记的共鸣效果永久强化（悲×3伤害/惧跳过2次行动/怒穿甲22/喜回复14HP/定全部牌降费）。",
+      "effect_params": {
+        "trigger_count": 3,
+        "upgrades": {
+          "grief": {
+            "resonance_damage_multiplier": 3
+          },
+          "fear": {
+            "skip_actions": 2
+          },
+          "rage": {
+            "penetration_damage": 22
+          },
+          "joy": {
+            "heal_value": 14
+          },
+          "calm": {
+            "cost_reduction": "all_this_turn"
+          }
+        }
+      },
+      "flavor_text": "「炉里的灰从不倒掉，她说那是许多人的香火余温，倒掉了就散了，留着还算聚。」",
+      "upgradable": true,
+      "upgrade_effect": "触发条件从3次降至2次。"
+    },
+    {
+      "id": "zouhun_ce_canye",
+      "name": "走魂册（残页）",
+      "character": "ruan_ruyue",
+      "rarity": "rare",
+      "description": "几页发黄的书页，上面密密麻麻写着名字，有些被划去，有些在名字旁边画了小符号。",
+      "effect_type": "battle_start",
+      "effect": "战斗开始时，根据起始手牌中施印牌数量，自动对敌人施加随机印记（1张→×2；2张→×2+×1；3张以上→五种各×1）。",
+      "effect_params": {
+        "seal_count_threshold": [
+          1,
+          2,
+          3
+        ],
+        "marks_to_apply": [
+          "random2",
+          "random2_plus1",
+          "all_five_1each"
+        ]
+      },
+      "flavor_text": "「册子上最后几页是空白的。她曾经想，空白的地方是她自己的位置，但后来想通了——空白是留给还没渡完的那些人的。」",
+      "upgradable": true,
+      "upgrade_effect": "效果改为：战斗开始时对所有敌人各施加随机印记×1。"
+    },
+    {
+      "id": "wucai_xianghui",
+      "name": "五彩香灰",
+      "character": "ruan_ruyue",
+      "rarity": "rare",
+      "description": "一只小瓷瓶，里面装着混合的五色香灰，轻轻摇动时颜色会缓慢旋转。",
+      "effect_type": "passive",
+      "effect": "敌人身上同时存在至少4种不同印记时，该敌人受到的所有伤害+15%。",
+      "effect_params": {
+        "mark_type_threshold": 4,
+        "damage_bonus": 0.15
+      },
+      "flavor_text": "「五色香灰是供奉五路神的，但她的庙只有一个神位，她说那个神位可以供五路神，只是五路神要挤一挤。」",
+      "upgradable": true,
+      "upgrade_effect": "触发条件从4种降至3种不同印记。"
+    },
+    {
+      "id": "miaozhu_fayi",
+      "name": "庙祝法衣（残片）",
+      "character": "ruan_ruyue",
+      "rarity": "epic",
+      "description": "一块月白色布料，上面绣有不完整的符文图案，布边已经毛了。",
+      "effect_type": "on_resonance",
+      "effect": "每当打出的牌触发了共鸣（无论何种），下一张打出的牌费用-1。",
+      "effect_params": {
+        "next_card_cost_reduction": 1,
+        "duration": "next_card_only"
+      },
+      "flavor_text": "「法衣是有灵性的，穿着它做的事，神是知道的。她后来不穿了，但带着一块，是提醒自己还记得什么。」",
+      "upgradable": true,
+      "upgrade_effect": "改为每次触发共鸣，本回合剩余能量+1（不超过初始能量上限）。"
+    },
+    {
+      "id": "canxiang_qi_shu",
+      "name": "残香（七束）",
+      "character": "ruan_ruyue",
+      "rarity": "epic",
+      "description": "七根点了一半的香，用红线绑在一起，香头已熄，但气味犹存。",
+      "effect_type": "on_resonance_sequential",
+      "effect": "每场战斗有7根残香计数，每次触发共鸣消耗1根，触发对应顺序奖励（1抽牌/2回血4/3+1能量/4全场施印/5渡化+8%/6共鸣×1.5/7强制五情共鸣）。",
+      "effect_params": {
+        "max_charges": 7,
+        "rewards": [
+          {
+            "type": "draw",
+            "value": 1
+          },
+          {
+            "type": "heal",
+            "value": 4
+          },
+          {
+            "type": "gain_energy",
+            "value": 1
+          },
+          {
+            "type": "apply_random_mark_all",
+            "value": 1
+          },
+          {
+            "type": "purification_progress",
+            "value": 0.08
+          },
+          {
+            "type": "resonance_multiplier",
+            "value": 1.5
+          },
+          {
+            "type": "force_five_resonance"
+          }
+        ]
+      },
+      "flavor_text": "「七，是祭祀的数字。七七四十九，但她没有四十九根，只有七根，够用一场。」",
+      "upgradable": true,
+      "upgrade_effect": "计数从7根改为不限次数，奖励按序号循环触发。"
+    },
+    {
+      "id": "shenxiang_suikuai",
+      "name": "神像碎块",
+      "character": "ruan_ruyue",
+      "rarity": "epic",
+      "description": "一块拳头大的泥塑碎块，可以隐约看出是某个神像的手部，手指已断了三根。",
+      "effect_type": "modify_resonance_rule",
+      "effect": "五情共鸣触发后，印记不清零（但渡化进度+50%降为+30%）。",
+      "effect_params": {
+        "five_resonance_no_clear_marks": true,
+        "purification_bonus_override": 0.3
+      },
+      "flavor_text": "「神像倒了，她没有扔碎块，而是一块块收起来。她说，哪怕是神像的手指，也曾经被人拜过，这份心意不该随便扔掉。」",
+      "upgradable": true,
+      "upgrade_effect": "渡化进度恢复至+50%（印记仍不清零）。"
+    },
+    {
+      "id": "guanchen_zhi_jing",
+      "name": "观尘之镜",
+      "character": "ruan_ruyue",
+      "rarity": "legendary",
+      "description": "一面完整的铜镜，表面有细微的裂纹，但每条裂纹里都透出微弱的光。",
+      "obtain_condition": "同一局连续成功完成3次渡化后触发特殊事件获得",
+      "effect_type": "legendary_passive",
+      "effect": "所有印记共鸣阈值永久降至2层；五情共鸣渡化进度+80%；每次触发任意共鸣时所有其他印记各+0.5层；渡化成功后下场战斗所有敌人施加随机印记×2。代价：持有时镇压路线完全不可用。",
+      "effect_params": {
+        "resonance_threshold_all": 2,
+        "five_resonance_purification_bonus": 0.8,
+        "other_mark_bonus_on_resonance": 0.5,
+        "after_purification_marks": 2,
+        "disable_zhenya_route": true
+      },
+      "flavor_text": "「镜里的那个人，她认识。或者说，她以为认识。但镜面不清，她只能看出来对方站得很稳，像是在等她，又像是早就打算好了离开。」"
+    },
+    {
+      "id": "yintang_zhusha",
+      "name": "印堂朱砂",
+      "character": "ruan_ruyue",
+      "rarity": "rare",
+      "description": "一个小陶碟，里面有少量已经凝固的朱砂，用于点印堂用，大半已用完。",
+      "effect_type": "on_resonance",
+      "effect": "每当印记触发共鸣，该共鸣的效果同时作用于自身一次（友方版本）。",
+      "effect_params": {
+        "mirror_resonance_to_self": true,
+        "self_effects": {
+          "grief": {
+            "type": "attack_bonus_next_x2"
+          },
+          "fear": {
+            "type": "immune_next_damage"
+          },
+          "rage": {
+            "type": "attack_penetration_bonus",
+            "value": 15
+          },
+          "joy": {
+            "type": "heal",
+            "value": 8
+          },
+          "calm": {
+            "type": "cost_reduction_this_turn",
+            "value": 1
+          }
+        }
+      },
+      "flavor_text": "「点印堂是庙祝入职的仪式。她给自己点，是因为已经没有别的庙祝了。」",
+      "upgradable": true,
+      "upgrade_effect": "自身版本的效果持续时间延长一回合。"
+    },
+    {
+      "id": "pomiao_menjian",
+      "name": "破庙门槛",
+      "character": "ruan_ruyue",
+      "rarity": "common",
+      "description": "一根从某处带来的旧木头，大约是门槛的残片，上面有很多踩踏留下的凹痕。",
+      "effect_type": "battle_end",
+      "effect": "每场战斗结束时，场上残留的印记层数总和转化为金币（每层1金币，上限15金币）。",
+      "effect_params": {
+        "marks_to_gold_ratio": 1,
+        "gold_cap": 15
+      },
+      "flavor_text": "「门槛踩的人多了，就会凹下去一块。那个凹痕，是许多人来过的证明，比任何碑文都诚实。」",
+      "upgradable": true,
+      "upgrade_effect": "每层印记改为转化2金币，上限提升至25金币。"
+    },
+    {
+      "id": "jiu_bujing_yaopai",
+      "name": "旧捕快腰牌",
+      "character": "shen_tiejun",
+      "rarity": "common",
+      "description": "一块磨损严重的铜制腰牌，字迹几乎看不清，背面刻着一个小小的「沈」字。",
+      "effect_type": "battle_start",
+      "effect": "战斗开始时，对血量最高的敌人自动施加锁链×2（叠加老手直觉被动，总计×3）。",
+      "effect_params": {
+        "target": "highest_hp",
+        "chain_stacks": 2
+      },
+      "flavor_text": "「腰牌他本来该还回去的，但后来觉得留着也没什么，就放在案底了。有时翻出来看看，想想那些年做的事。」",
+      "upgradable": true,
+      "upgrade_effect": "改为对所有敌人施加锁链×1。"
+    },
+    {
+      "id": "tielian_yi_duan",
+      "name": "铁链一段",
+      "character": "shen_tiejun",
+      "rarity": "common",
+      "description": "一段约三节的铁链，生了一些锈，但每一环都还完好。",
+      "effect_type": "passive",
+      "effect": "溅射伤害最低不低于3点（溅射比例过低时保底3点伤害）。",
+      "effect_params": {
+        "splash_damage_floor": 3
+      },
+      "flavor_text": "「这截铁链不是武器，是他案底的档案证物，某年某月某件案子留下的，他没有归还，带走了。」",
+      "upgradable": true,
+      "upgrade_effect": "溅射最低伤害提升至5点。"
+    },
+    {
+      "id": "nuqi_hu",
+      "name": "怒气壶",
+      "character": "shen_tiejun",
+      "rarity": "common",
+      "description": "一只陶壶，壶身烧得发黑，里面是空的，但对着壶口能感受到热气。",
+      "effect_type": "on_fury_burst",
+      "effect": "每次触发怒爆（怒≥4）后，下回合自动获得怒+1。",
+      "effect_params": {
+        "rage_bonus_next_turn": 1
+      },
+      "flavor_text": "「壶里是空的，他说壶里装的是气。什么气？就是气。」",
+      "upgradable": true,
+      "upgrade_effect": "下回合怒+2，且下回合第一次攻击额外+5点伤害。"
+    },
+    {
+      "id": "xianzhi_yi_juan",
+      "name": "县志一卷",
+      "character": "shen_tiejun",
+      "rarity": "rare",
+      "description": "一本薄薄的地方志，里面有手写的补注，大多数补注关于某类案件的处理经验。",
+      "effect_type": "on_chain_apply",
+      "effect": "每当对锁链敌人施加新一层锁链时，揭示敌人下一次行动意图，并使该行动威力-20%。",
+      "effect_params": {
+        "reveal_intent": true,
+        "intent_power_reduction": 0.2
+      },
+      "flavor_text": "「县志上说那年的案子是妖邪作乱，他在旁边补了一行字：不是妖邪，是人心。」",
+      "upgradable": true,
+      "upgrade_effect": "威力削弱从-20%提升至-35%，揭示延长至接下来2次行动。"
+    },
+    {
+      "id": "tie_suanpan",
+      "name": "铁算盘",
+      "character": "shen_tiejun",
+      "rarity": "rare",
+      "description": "一把小型铁制算盘，拨珠时发出清脆的声音，最右侧一排算珠的颜色和其他不同。",
+      "effect_type": "passive",
+      "effect": "每当造成溅射伤害，累计每10点溅射总伤害获得1金币（本场战斗有效）。",
+      "effect_params": {
+        "splash_gold_per_points": 10,
+        "gold_reward": 1
+      },
+      "flavor_text": "「做捕快的时候，破案是功，功劳要算成钱，他从来不算这个。退了以后才算，发现欠的比得的多。」",
+      "upgradable": true,
+      "upgrade_effect": "每8点溅射伤害获得1金币，余量保留到下场战斗。"
+    },
+    {
+      "id": "jiu_andu_weijie",
+      "name": "旧案牍（未结案）",
+      "character": "shen_tiejun",
+      "rarity": "rare",
+      "description": "一叠厚厚的案件档案，用麻绳绑着，最上面写着「悬而未决」，但有人在旁边写了「终究结了」。",
+      "effect_type": "on_kill_chained",
+      "effect": "击杀锁链敌人时，对所有存活锁链敌人造成「被击杀敌人锁链层数×4」的伤害，然后锁链正常继承。",
+      "effect_params": {
+        "aoe_damage_per_chain_stack": 4
+      },
+      "flavor_text": "「未结案的卷宗他都记着。他说，案子没结，但人来了，就还是有个了结。」",
+      "upgradable": true,
+      "upgrade_effect": "伤害系数从×4改为×6，并将被击杀敌人的所有状态效果转移给继承目标。"
+    },
+    {
+      "id": "tie_shoutao_left",
+      "name": "铁手套（左）",
+      "character": "shen_tiejun",
+      "rarity": "epic",
+      "description": "一只厚重的铁制护手，指节处有凸起的刺，左手专用，右手那只已经不知去向。",
+      "effect_type": "on_fury_burst",
+      "effect": "怒爆状态下的攻击牌额外附加「震慑」：造成伤害的同时，目标下回合行动优先级降至最低。",
+      "effect_params": {
+        "stun_action_priority": "lowest"
+      },
+      "flavor_text": "「右手那只不知道在哪场案子里丢了，他后来懒得配了，就戴了左手这只。习惯了只戴一只，就这样了。」",
+      "upgradable": true,
+      "upgrade_effect": "震慑改为：目标跳过下一次行动。"
+    },
+    {
+      "id": "qianjin_suo",
+      "name": "千斤锁",
+      "character": "shen_tiejun",
+      "rarity": "epic",
+      "description": "一把极重的铁锁，比正常锁大三倍，钥匙孔被焊死了。这把锁从来不用来锁东西，它本身就是武器。",
+      "effect_type": "passive",
+      "effect": "场上所有锁链层数总和每达到10层，对所有锁链敌人各造成8点伤害+定+1。每场战斗触发上限3次。",
+      "effect_params": {
+        "total_chain_threshold": 10,
+        "aoe_damage": 8,
+        "calm_bonus": 1,
+        "max_triggers_per_battle": 3
+      },
+      "flavor_text": "「这把锁锁过多少人，他自己也记不清了。他说，锁了人不一定是坏事，有时候锁住，是为了让人冷静一下。」",
+      "upgradable": true,
+      "upgrade_effect": "触发阈值降至8层，触发次数上限去除，但震地伤害降至6点。"
+    },
+    {
+      "id": "dinghai_shen_zhen_can",
+      "name": "定海神针（残）",
+      "character": "shen_tiejun",
+      "rarity": "epic",
+      "description": "一根折断的铁针，约手指长，笔直，断处磨圆了，拿在手里有奇异的沉重感。",
+      "effect_type": "passive",
+      "effect": "定情绪不受伤害减少，每回合自然衰减量减半（每2回合衰减1点）。",
+      "effect_params": {
+        "calm_immune_from_damage": true,
+        "calm_decay_halved": true
+      },
+      "flavor_text": "「针断了，但针的意思还在。沉住气，不是不动，是动的时候不乱。」",
+      "upgradable": true,
+      "upgrade_effect": "定情绪完全不衰减，每回合结束时定+1。"
+    },
+    {
+      "id": "fu_ya_feng_tiao",
+      "name": "府衙封条",
+      "character": "shen_tiejun",
+      "rarity": "rare",
+      "description": "一张黄纸封条，上面盖着已模糊的官印，有人在封条背面写了一行字，字迹不是官方体。",
+      "effect_type": "on_enemy_defend",
+      "effect": "敌人使用防御行动（获得护盾/减伤）时，对其施加的锁链层数+1（越防御锁链越深）。",
+      "effect_params": {
+        "chain_bonus_on_enemy_defense": 1,
+        "trigger_on": "enemy_shield_action"
+      },
+      "flavor_text": "「封条上写了什么官话他不在乎，背面那行字是他后来写的：『此处封存，非查不开。但查不查，由我说了算。』」",
+      "upgradable": true,
+      "upgrade_effect": "改为敌人使用任何非攻击行动时，锁链层数+1。"
+    },
+    {
+      "id": "nu_bao_jishuqi",
+      "name": "怒爆计数器",
+      "character": "shen_tiejun",
+      "rarity": "epic",
+      "description": "一块刻着数字的铁片，数字每次增加时会发出轻微的金属碰撞声。",
+      "effect_type": "passive",
+      "effect": "记录本局怒爆累计触发次数，每触发3次怒爆，永久获得怒爆攻击倍率+0.1（最高×2.5）。",
+      "effect_params": {
+        "fury_burst_per_bonus": 3,
+        "multiplier_bonus_per_milestone": 0.1,
+        "max_multiplier": 2.5
+      },
+      "flavor_text": "「他没有刻意计数，但这块铁片是他腰带上原本别着的，不知道什么时候开始自己动了。」",
+      "upgradable": true,
+      "upgrade_effect": "每触发2次怒爆增加+0.1倍率，倍率达到×2.0时怒爆溅射比例额外+15%。"
+    },
+    {
+      "id": "tian_wang_ling",
+      "name": "天网令",
+      "character": "shen_tiejun",
+      "rarity": "legendary",
+      "description": "一块六棱形的铁令牌，六面都刻着不同的字，合读是「天网恢恢，疏而不漏，缚而无形，锁而无声，断而无迹，定而无极」。",
+      "obtain_condition": "通过锁链溅射对单个敌人造成单次100点以上总伤害时触发获得",
+      "effect_type": "legendary_passive",
+      "effect": "锁链层数上限从5升至8；每层锁链溅射比例从8%升至12%；怒爆后怒减至1不清零；对所有精英以上敌人生效技能封锁。代价：渡化路线不可用。",
+      "effect_params": {
+        "chain_stack_cap": 8,
+        "chain_splash_per_stack": 0.12,
+        "fury_burst_rage_floor": 1,
+        "skill_lock_all_elite": true,
+        "disable_purification_route": true
+      },
+      "flavor_text": "「令牌的最后一面写的是「无极」，他不懂这个字怎么理解，只知道做一件事做到底，就没有极限。」"
     }
   ]
 }

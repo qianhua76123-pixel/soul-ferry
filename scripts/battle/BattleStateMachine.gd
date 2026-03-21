@@ -31,6 +31,27 @@ var enemy_shield: int = 0
 var player_shield: int = 0
 var _dodge_charges: int = 0   # 下次受击无效次数（dodge_next 牌效果）
 
+# ── 铁壁流新增：铁甲系统 ──────────────────────────
+var player_armor: int = 0          # 铁甲：固定减伤（每次受到伤害先消耗铁甲）
+var _armor_to_attack_bonus: int = 0  # 「定而无极」临时攻击加成（本回合）
+var _shield_regen_rate: float = 0.0  # 万夫莫开：护盾损失回复比例
+var _damage_taken_this_turn: int = 0  # 百炼成钢：本回合受伤总计
+var _reflect_charges: int = 0      # 盾反/山岳反甲：反弹次数
+var _reflect_ratio: float = 0.0    # 当前反弹比例
+var _persistent_shield_turns: int = 0  # 静若磐石剩余回合
+var _persistent_shield_per_turn: int = 0  # 静若磐石每回合盾值
+
+# ── 光愈流新增 ──────────────────────────────────
+var _last_resonance_triggered: String = ""  # 镜花：记录上一次共鸣
+var _next_card_free: bool = false           # 花开效果：下一张牌免费
+var _enemy_marks: Dictionary = {}          # 敌人身上的印记层数 {emotion: count}
+var _wu_wei_turns_remaining: int = 0       # 无为持续回合
+var _wu_wei_marks_per_turn: Dictionary = {}
+
+# ── 沈铁钧新增 ──────────────────────────────────
+var enemy_chains: int = 0           # 锁链层数（主目标）
+var _total_chains_this_battle: int = 0  # 千斤锁检测
+
 var joy_cards_played_this_turn: int = 0
 var du_hua_triggered: bool = false
 
@@ -44,6 +65,15 @@ func start_battle(enemy_id: String) -> void:
 	enemy_max_hp = enemy_hp
 	enemy_shield = 0
 	player_shield = 0
+	player_armor  = 0
+	enemy_chains  = 0
+	_total_chains_this_battle = 0
+	_damage_taken_this_turn = 0
+	_reflect_charges = 0
+	_reflect_ratio   = 0.0
+	_persistent_shield_turns = 0
+	_enemy_marks = {}
+	_wu_wei_turns_remaining = 0
 	current_turn = 0
 	joy_cards_played_this_turn = 0
 	du_hua_triggered = false
@@ -320,6 +350,279 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 		"peek_enemy":
 			result["peek"] = true
 
+		# ── 光愈流新卡牌效果 ──────────────────────────────
+		"apply_mark_and_heal":
+			# 喜祷：施加喜印+治疗
+			var mark_count: int = base_val  # effect_value=2（印记数）
+			var heal_val: int   = card.get("effect_value", 5)
+			var has_existing: bool = _enemy_marks.get("joy", 0) > 0
+			_apply_mark("joy", mark_count if not _check_condition(card) else mark_count)
+			var actual_heal: int = (8 + bonus) if has_existing else (5 + bonus)
+			GameState.heal(int(actual_heal * EmotionManager.get_heal_multiplier()))
+			result.value = actual_heal
+
+		"emotion_and_mark":
+			# 定澄：定+情绪，同时施印
+			var emo_shift: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_shift:
+				EmotionManager.modify(e, int(emo_shift[e]))
+			var marks: Dictionary = card.get("marks_to_apply", {})
+			var calm_bonus: int = 1 if _check_condition(card) else 0
+			for e: String in marks:
+				_apply_mark(e, int(marks[e]) + calm_bonus)
+			_check_resonances()
+			result.value = 0
+
+		"trigger_resonance_if_marks":
+			# 花开：满足印记条件时触发喜共鸣
+			var req_marks: Dictionary = card.get("marks_required", {})
+			var can_trigger: bool = true
+			for e: String in req_marks:
+				if _enemy_marks.get(e, 0) < int(req_marks[e]):
+					can_trigger = false
+			if can_trigger:
+				_trigger_resonance("joy")
+				_next_card_free = true
+				result["resonance_triggered"] = "joy"
+				result["next_card_free"] = true
+			result.value = 0
+
+		"shield_and_mark":
+			# 定心结界：护盾+施印+触发定共鸣
+			var sv: int = base_val + bonus
+			player_shield += sv
+			var marks2: Dictionary = card.get("marks_to_apply", {})
+			for e: String in marks2:
+				_apply_mark(e, int(marks2[e]))
+			_check_resonances()
+			result.value = sv
+
+		"multiply_marks_and_heal":
+			# 喜溢：喜印×2+回血
+			var cap: int = card.get("mark_cap", 10)
+			var old_count: int = _enemy_marks.get("joy", 0)
+			var new_count: int = min(old_count * 2, cap)
+			_enemy_marks["joy"] = new_count
+			var hv3: int = int(new_count * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv3)
+			result.value = hv3
+
+		"shield_equal_to_emotion":
+			# 空灵护体：护盾=定×N
+			var emo: String = card.get("shield_base_emotion", "calm")
+			var mul: int    = base_val
+			var sv3: int    = EmotionManager.values.get(emo, 0) * mul
+			player_shield += sv3
+			var emo_shift2: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_shift2:
+				EmotionManager.modify(e, int(emo_shift2[e]))
+			result.value = sv3
+
+		"multi_mark_and_trigger":
+			# 双印汇流：同时施加两种印记，满足条件触发两次共鸣
+			var marks3: Dictionary = card.get("marks_to_apply", {})
+			for e: String in marks3:
+				_apply_mark(e, int(marks3[e]))
+			var trigger_cond: Dictionary = card.get("trigger_condition", {})
+			var total_joy_calm: int = _enemy_marks.get("joy", 0) + _enemy_marks.get("calm", 0)
+			if total_joy_calm >= trigger_cond.get("total_joy_calm_marks", 6):
+				_trigger_resonance("joy")
+				_trigger_resonance("calm")
+				result["both_resonance"] = true
+			result.value = 0
+
+		"emotion_and_heal":
+			# 喜泉：定情绪+回血，每回合限次
+			var emo_s: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s:
+				EmotionManager.modify(e, int(emo_s[e]))
+			if _check_condition(card):
+				var hv4: int = int(2 * EmotionManager.get_heal_multiplier())
+				GameState.heal(hv4)
+				result.value = hv4
+
+		"heal_by_marks_and_draw":
+			# 愈灵诀：回血=喜印+定印总数，抽牌
+			var mark_types: Array = card.get("heal_from_marks", ["joy", "calm"])
+			var total_marks: int = 0
+			for e: String in mark_types:
+				total_marks += _enemy_marks.get(e, 0)
+			var min_heal: int = card.get("effect_value", 4)
+			var max_heal: int = card.get("heal_cap", 15)
+			var hv5: int = int(clamp(total_marks, min_heal, max_heal) * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv5)
+			DeckManager.draw_cards(card.get("draw", 1))
+			result.value = hv5
+
+		"mark_and_delay":
+			# 定念封印：施印+延迟敌人行动
+			var marks4: Dictionary = card.get("marks_to_apply", {})
+			for e: String in marks4:
+				_apply_mark(e, int(marks4[e]))
+			result["enemy_action_delay"] = 1
+			result.value = 0
+
+		"convert_marks_and_resonate":
+			# 喜定同流：定印→喜印，触发共鸣
+			var old_calm_marks: int = _enemy_marks.get("calm", 0)
+			if old_calm_marks > 0:
+				_enemy_marks["calm"] = 0
+				_apply_mark("joy", old_calm_marks)
+			_trigger_resonance("joy")
+			result["resonance_triggered"] = "joy"
+			result.value = 0
+
+		"heal_and_purify_and_mark":
+			# 光与愈：回血+渡化进度+施印
+			var hv6: int = int(base_val * EmotionManager.get_heal_multiplier())
+			GameState.heal(hv6)
+			var purif_base: float = card.get("purification_bonus", 0.20)
+			var purif_extra: float = card.get("condition_bonus_purification", 0.0) if _check_condition(card) else 0.0
+			result["du_hua_progress"] = purif_base + purif_extra
+			var marks5: Dictionary = card.get("marks_to_apply", {})
+			for e: String in marks5:
+				_apply_mark(e, int(marks5[e]))
+			result.value = hv6
+
+		"repeat_last_resonance":
+			# 镜花：重复上一次共鸣
+			if _last_resonance_triggered != "":
+				_trigger_resonance(_last_resonance_triggered)
+				result["repeated_resonance"] = _last_resonance_triggered
+			result.value = 0
+
+		"persistent_mark_and_purify":
+			# 无为：开启持续施印+回血
+			_wu_wei_turns_remaining = card.get("duration_turns", 3)
+			_wu_wei_marks_per_turn  = card.get("per_turn_marks", {"joy": 1, "calm": 1})
+			result["wu_wei_started"] = true
+			result.value = 0
+
+		# ── 铁壁流新卡牌效果 ──────────────────────────────
+		"shield_and_emotion":
+			# 铁躯：护盾+定
+			var sv4: int = base_val + bonus
+			player_shield += sv4
+			var emo_s4: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s4:
+				EmotionManager.modify(e, int(emo_s4[e]))
+			result.value = sv4
+
+		"emotion_and_shield_by_emotion":
+			# 定心如山：定+护盾=定×N
+			var emo_s5: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s5:
+				EmotionManager.modify(e, int(emo_s5[e]))
+			var mul2: int   = base_val
+			var sv5: int    = EmotionManager.values.get("calm", 0) * mul2
+			player_shield += sv5
+			result.value = sv5
+
+		"reflect_next_damage":
+			# 盾反：下次伤害反弹N%
+			_reflect_charges = 1
+			_reflect_ratio   = float(base_val)
+			result["reflect_active"] = true
+			result.value = 0
+
+		"convert_shield_to_armor":
+			# 铁甲覆体：护盾转铁甲
+			var ratio: float = float(base_val)
+			var converted: int = int(player_shield * ratio)
+			player_armor += converted
+			# 护盾本回合不清零：通过 shield_no_expire_this_turn 标记
+			result["armor_gained"] = converted
+			result.value = converted
+
+		"emotion_and_crowd_control":
+			# 定阵：定+群控
+			var emo_s6: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s6:
+				EmotionManager.modify(e, int(emo_s6[e]))
+			result["all_enemies_static"] = 1
+			result.value = 0
+
+		"shield_and_reflect_buff":
+			# 山岳：护盾+反甲Buff
+			player_shield += base_val
+			_reflect_charges = card.get("reflect_max_times", 3)
+			_reflect_ratio   = card.get("reflect_ratio", 0.40)
+			result["mountain_reflect"] = true
+			result.value = base_val
+
+		"attack_by_armor":
+			# 以柔克刚：伤害=铁甲×N
+			var dmg3: int = int((player_armor * float(base_val) + card.get("base_damage", 5)) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg3)
+			result.value = dmg3
+
+		"attack_by_shield":
+			# 铁壁突刺：伤害=护盾×%
+			if player_shield <= 0:
+				result.value = 0
+			else:
+				var dmg4: int = int(player_shield * float(base_val) * EmotionManager.get_attack_multiplier())
+				_deal_damage_to_enemy(dmg4)
+				result.value = dmg4
+
+		"emotion_with_condition_bonus":
+			# 凝定：定+条件奖励
+			var emo_s7: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s7:
+				EmotionManager.modify(e, int(emo_s7[e]))
+			if _check_condition(card):
+				result["bonus_energy_next_turn"] = card.get("condition_bonus_energy", 1)
+				result["bonus_chain"] = card.get("condition_bonus_chain", 1)
+			result.value = 0
+
+		"convert_damage_taken_to_armor":
+			# 百炼成钢：本回合受伤→铁甲
+			var armor_gained: int = int(_damage_taken_this_turn * float(base_val))
+			player_armor += armor_gained
+			player_shield = 0  # 护盾清零
+			result["armor_gained"] = armor_gained
+			result.value = armor_gained
+
+		"chain_and_shield":
+			# 守土：施锁+护盾
+			_apply_chain(card.get("chain_to_apply", 1))
+			var sv6: int = base_val + bonus
+			player_shield += sv6
+			result.value = sv6
+
+		"emotion_and_immune_debuff":
+			# 无动于衷：定+免疫状态
+			var emo_s8: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s8:
+				EmotionManager.modify(e, int(emo_s8[e]))
+			_dodge_charges += card.get("immune_next_debuff", 1)  # 复用 dodge 系统
+			result["immune_debuff"] = true
+			result.value = 0
+
+		"shield_regen_on_hit":
+			# 万夫莫开：护盾损失回复
+			_shield_regen_rate = float(base_val)
+			result["shield_regen_active"] = true
+			result.value = 0
+
+		"persistent_shield":
+			# 静若磐石：持续回合护盾
+			_persistent_shield_turns    = card.get("duration_turns", 3)
+			_persistent_shield_per_turn = EmotionManager.values.get("calm", 0) * base_val
+			player_shield += _persistent_shield_per_turn
+			result["persistent_shield_started"] = true
+			result.value = _persistent_shield_per_turn
+
+		"armor_to_attack_bonus":
+			# 定而无极：铁甲→攻击加成
+			_armor_to_attack_bonus = player_armor * base_val
+			player_armor = 0
+			var emo_s9: Dictionary = card.get("emotion_shift", {})
+			for e: String in emo_s9:
+				EmotionManager.modify(e, int(emo_s9[e]))
+			result["attack_bonus_this_turn"] = _armor_to_attack_bonus
+			result.value = _armor_to_attack_bonus
+
 		_:
 			pass
 	return result
@@ -480,11 +783,101 @@ func _execute_enemy_action(action: Dictionary) -> void:
 			EmotionManager.modify("grief", 1)
 
 func _deal_damage_to_enemy(amount: int) -> void:
+	# 五彩香灰：多印记类型加伤
+	var mark_type_count: int = 0
+	for e: String in _enemy_marks:
+		if _enemy_marks[e] > 0:
+			mark_type_count += 1
+	var mark_bonus: float = RelicManager.get_multi_mark_damage_bonus(mark_type_count)
+	if mark_bonus > 0.0:
+		amount = int(amount * (1.0 + mark_bonus))
+
+	# 定而无极：攻击加成
+	if _armor_to_attack_bonus > 0:
+		amount += _armor_to_attack_bonus
+
 	if enemy_shield > 0:
-		var blocked = min(enemy_shield, amount)
+		var blocked: int = min(enemy_shield, amount)
 		enemy_shield -= blocked
 		amount -= blocked
 	enemy_hp = max(0, enemy_hp - amount)
+
+# ── 印记系统辅助方法 ──────────────────────────────────
+
+func _apply_mark(emotion: String, count: int) -> void:
+	## 对敌人施加印记，并检查遗物触发
+	if count <= 0: return
+	_enemy_marks[emotion] = _enemy_marks.get(emotion, 0) + count
+	# 通知遗物（旧铜铃：施印牌触发亲和效果）
+	RelicManager.on_seal_card_played_ruyue(emotion)
+	# 县志一卷：施加锁链时揭示意图（印记不触发，但复用接口）
+	_check_resonances()
+
+func _apply_chain(count: int) -> void:
+	## 对敌人施加锁链
+	var cap: int = RelicManager.get_chain_stack_cap()
+	enemy_chains = min(enemy_chains + count, cap)
+	_total_chains_this_battle += count
+	# 千斤锁：检查总锁链阈值
+	RelicManager.on_chain_total_changed_tiejun(enemy_chains)
+
+func _check_resonances() -> void:
+	## 检查所有印记是否满足共鸣条件
+	for emotion: String in EmotionManager.EMOTIONS:
+		var threshold: int = RelicManager.get_resonance_threshold_override(emotion)
+		if _enemy_marks.get(emotion, 0) >= threshold:
+			_trigger_resonance(emotion)
+
+func _trigger_resonance(emotion: String) -> void:
+	## 触发印记共鸣
+	_last_resonance_triggered = emotion
+	var power_bonus: float = RelicManager.get_resonance_power_bonus(emotion)
+	# 消耗印记（神像碎块：不清零）
+	if not RelicManager.should_keep_marks_after_five_resonance():
+		_enemy_marks[emotion] = 0
+
+	match emotion:
+		"grief":
+			var dmg: int = int(8.0 * (1.0 + power_bonus) * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+		"fear":
+			# 跳过敌人下一次行动：设标记
+			next_intent["skip_next"] = true
+		"rage":
+			var pen_dmg: int = int(15.0 * (1.0 + power_bonus))
+			_deal_damage_to_enemy(pen_dmg)  # 穿甲伤害
+		"joy":
+			var heal_v: int = int(8.0 * (1.0 + power_bonus) * EmotionManager.get_heal_multiplier())
+			GameState.heal(heal_v)
+		"calm":
+			DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+
+	# 遗物回调
+	RelicManager.on_resonance_triggered_ruyue(emotion)
+	RelicManager.on_resonance_triggered_canxiang(self)
+	RelicManager.on_resonance_mirror_to_self(emotion)
+
+	# 检查五情共鸣（五种印记是否都有）
+	var all_present: bool = true
+	for e: String in EmotionManager.EMOTIONS:
+		if _enemy_marks.get(e, 0) <= 0:
+			all_present = false; break
+	if all_present:
+		_trigger_five_resonance()
+
+func _trigger_five_resonance() -> void:
+	## 触发五情共鸣
+	var purif_bonus: float = RelicManager.get_five_resonance_purification_bonus()
+	# 伤害：对敌人造成20点穿甲
+	_deal_damage_to_enemy(20)
+	# 渡化进度
+	# (由 BattleScene 响应 card_effect_applied 中的 du_hua_progress 处理)
+	# 碎镜片：记录
+	RelicManager.on_five_resonance_triggered_ruyue()
+	# 清除印记（神像碎块保留）
+	if not RelicManager.should_keep_marks_after_five_resonance():
+		for e: String in EmotionManager.EMOTIONS:
+			_enemy_marks[e] = 0
 
 func _end_battle(result: String) -> void:
 	current_state = STATE_BATTLE_END
