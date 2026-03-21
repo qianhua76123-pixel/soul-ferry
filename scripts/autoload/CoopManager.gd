@@ -1,6 +1,5 @@
-class_name CoopManager
 extends Node
-## 协作模式管理器（Autoload，仅在协作模式激活时有效）
+## CoopManager — 协作模式管理器（Autoload 单例，不使用 class_name 以避免与单例名冲突）
 ## 负责协同遗物加载、协同状态同步、回合级临时加成管理
 
 # ── 信号 ─────────────────────────────────────────────────

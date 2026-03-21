@@ -1,5 +1,5 @@
-class_name WumianManager
 extends Node
+## WumianManager — 无面人·空系统管理器（Autoload 单例，不使用 class_name 以避免与单例名冲突）
 
 ## WumianManager.gd - 无面人·空系统管理器（Autoload 单例）
 ## 注意：需在 Project Settings > Autoload 中注册为 "WumianManager"

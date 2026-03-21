@@ -894,7 +894,7 @@ func _choose_enemy_action() -> Dictionary:
 	if actions.is_empty(): return {}
 
 	# 愤怒阶段（Boss HP≤50%）：提升攻击/dot权重，降低辅助权重
-	var weighted: Dictionary = actions.duplicate(true)
+	var weighted: Array = actions.duplicate(true)
 	if boss_phase == 2:
 		for a in weighted:
 			var t: String = a.get("type", "")
