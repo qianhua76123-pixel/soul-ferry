@@ -889,99 +889,194 @@ func _start_idle_float(node: Control, amp: float = 4.0, period: float = 2.0) -> 
 ## ══════════════════════════════════════════════════════
 
 func _setup_layout_improvements() -> void:
-	# 地面线（BattleGround）：深墨绿细条，衬托立绘站位
-	var ground = ColorRect.new()
-	ground.name = "BattleGround"
-	ground.color = UIC.COLORS["ding"].darkened(0.7)
-	ground.color.a = 0.6
-	# 全宽固定高度：anchor 左右拉满，高度固定 4px
-	ground.set_anchor_and_offset(SIDE_LEFT,  0.0, 0)
-	ground.set_anchor_and_offset(SIDE_RIGHT, 1.0, 0)
-	ground.set_anchor_and_offset(SIDE_TOP,   0.0, 484)
-	ground.set_anchor_and_offset(SIDE_BOTTOM,0.0, 488)
-	ground.z_index = 2
+	# 获取实际视口尺寸（避免硬编码）
+	var vp_size: Vector2 = get_viewport().get_visible_rect().size
+	var W: float = vp_size.x   # 通常 1280
+	var H: float = vp_size.y   # 通常 600
+
+	# 卡盘顶部 Y（距底部 165px）
+	var tray_top: float    = H - 165.0
+	var tray_line: float   = H - 170.0  # 水墨分割线
+	var energy_top: float  = H - 200.0  # 能量面板顶
+	var energy_bot: float  = H - 168.0  # 能量面板底
+
 	var ui: Node = get_node_or_null("UI")
+
+	# ── 地面线 ──────────────────────────────────────────
+	var ground := ColorRect.new()
+	ground.name = "BattleGround"
+	ground.color = Color(UIC.COLORS["ding"].darkened(0.7), 0.6)
+	ground.position = Vector2(0, tray_top - 116)
+	ground.size     = Vector2(W, 4)
+	ground.z_index  = 2
 	if ui: ui.add_child(ground)
 
-	# ── 手牌区：卡盘 + 固定到屏幕底部 ──────────────────
-	if hand_container and ui:
-		# 1. 将 HandContainer 锚定到屏幕底部居中
-		hand_container.set_anchor_and_offset(SIDE_LEFT,   0.0,   0)
-		hand_container.set_anchor_and_offset(SIDE_RIGHT,  1.0,   0)
-		hand_container.set_anchor_and_offset(SIDE_TOP,    1.0, -165)
-		hand_container.set_anchor_and_offset(SIDE_BOTTOM, 1.0,  -10)
+	# ── HandContainer 位置（固定像素坐标）──────────────
+	if hand_container:
+		hand_container.position = Vector2(0, tray_top)
+		hand_container.size     = Vector2(W, H - tray_top - 10)
 		hand_container.add_theme_constant_override("separation", 10)
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
+		hand_container.z_index   = 2
 
-		# 2. 卡盘背景（半透明托盘，比 HandContainer 稍大）
-		if not ui.get_node_or_null("CardTray"):
-			var tray: Panel = Panel.new()
-			tray.name = "CardTray"
-			tray.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			tray.z_index = 0
-			# 锚定到屏幕底部，覆盖手牌区
-			tray.set_anchor_and_offset(SIDE_LEFT,   0.0,   0)
-			tray.set_anchor_and_offset(SIDE_RIGHT,  1.0,   0)
-			tray.set_anchor_and_offset(SIDE_TOP,    1.0, -180)
-			tray.set_anchor_and_offset(SIDE_BOTTOM, 1.0,    0)
-			# 卡盘样式：深色半透明，上边弧形金边
-			var tray_style: StyleBoxFlat = StyleBoxFlat.new()
-			tray_style.bg_color = Color(0.05, 0.04, 0.06, 0.82)
-			tray_style.border_width_top = 2
-			tray_style.border_color = UIConstants.color_of("gold_dim")
-			tray_style.corner_radius_top_left  = 12
-			tray_style.corner_radius_top_right = 12
-			tray.add_theme_stylebox_override("panel", tray_style)
-			ui.add_child(tray)
-			# 确保 HandContainer 在 tray 上层
+	if not ui: return
+
+	# ── 卡盘像素托盘背景（按角色不同配色）──────────────
+	if not ui.get_node_or_null("CardTray"):
+		var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
+		var tray := _build_card_tray(char_id, W, H, tray_top)
+		ui.add_child(tray)
+		if hand_container:
 			hand_container.z_index = 2
 
-		# 3. 卡盘上方水墨分割线
-		if not ui.get_node_or_null("HandAreaDivider"):
-			var strip := WaterInkDivider.new()
-			strip.name = "HandAreaDivider"
-			strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			strip.z_index = 1
-			strip.set_anchor_and_offset(SIDE_LEFT,   0.0,  8)
-			strip.set_anchor_and_offset(SIDE_RIGHT,  1.0, -8)
-			strip.set_anchor_and_offset(SIDE_TOP,    1.0, -183)
-			strip.set_anchor_and_offset(SIDE_BOTTOM, 1.0, -175)
-			strip.ink_color = UIConstants.color_of("gold_dim")
-			ui.add_child(strip)
+	# ── 水墨分割线 ──────────────────────────────────────
+	if not ui.get_node_or_null("HandAreaDivider"):
+		var strip := WaterInkDivider.new()
+		strip.name = "HandAreaDivider"
+		strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		strip.z_index = 1
+		strip.position = Vector2(8, tray_line)
+		strip.size     = Vector2(W - 16, 6)
+		strip.ink_color = UIConstants.color_of("gold_dim")
+		ui.add_child(strip)
 
-		# 4. 能量显示移到卡盘右上角（覆盖原 HUD 的 CostLabel）
-		if not ui.get_node_or_null("CardTrayEnergy"):
-			var energy_panel: Panel = Panel.new()
-			energy_panel.name = "CardTrayEnergy"
-			energy_panel.z_index = 3
-			energy_panel.set_anchor_and_offset(SIDE_RIGHT,  1.0, -12)
-			energy_panel.set_anchor_and_offset(SIDE_LEFT,   1.0, -90)
-			energy_panel.set_anchor_and_offset(SIDE_TOP,    1.0, -198)
-			energy_panel.set_anchor_and_offset(SIDE_BOTTOM, 1.0, -166)
-			var ep_style: StyleBoxFlat = StyleBoxFlat.new()
-			ep_style.bg_color = Color(0.08, 0.06, 0.04, 0.90)
-			ep_style.border_width_top    = 1
-			ep_style.border_width_bottom = 1
-			ep_style.border_width_left   = 1
-			ep_style.border_width_right  = 1
-			ep_style.border_color = UIConstants.color_of("gold")
-			ep_style.set_corner_radius_all(6)
-			energy_panel.add_theme_stylebox_override("panel", ep_style)
-			var energy_lbl: Label = Label.new()
-			energy_lbl.name = "EnergyLabel"
-			energy_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
-			energy_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			energy_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
-			energy_lbl.add_theme_font_size_override("font_size", 14)
-			energy_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
-			energy_panel.add_child(energy_lbl)
-			ui.add_child(energy_panel)
-			# 将 cost_label 的更新同步到这里（覆写信号）
-			_energy_tray_label = energy_lbl
+	# ── 卡盘右上角能量面板 ──────────────────────────────
+	if not ui.get_node_or_null("CardTrayEnergy"):
+		var energy_panel := Panel.new()
+		energy_panel.name     = "CardTrayEnergy"
+		energy_panel.z_index  = 3
+		energy_panel.position = Vector2(W - 90, energy_top)
+		energy_panel.size     = Vector2(78, energy_bot - energy_top)
+		var ep_style: StyleBoxFlat = StyleBoxFlat.new()
+		ep_style.bg_color = Color(0.08, 0.06, 0.04, 0.90)
+		ep_style.border_width_top    = 1; ep_style.border_width_bottom = 1
+		ep_style.border_width_left   = 1; ep_style.border_width_right  = 1
+		ep_style.border_color = UIConstants.color_of("gold")
+		ep_style.set_corner_radius_all(6)
+		energy_panel.add_theme_stylebox_override("panel", ep_style)
+		var energy_lbl: Label = Label.new()
+		energy_lbl.name = "EnergyLabel"
+		energy_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+		energy_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		energy_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+		energy_lbl.add_theme_font_size_override("font_size", 14)
+		energy_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+		energy_panel.add_child(energy_lbl)
+		ui.add_child(energy_panel)
+		_energy_tray_label = energy_lbl
 
-	# 卡牌悬停预览层（复用上方已声明的 ui）
+	# ── 卡牌悬停预览层 ──────────────────────────────────
 	_card_preview = CardPreviewClass.new()
 	if ui: ui.add_child(_card_preview)
+
+## 根据角色生成不同风格的卡盘像素背景
+func _build_card_tray(char_id: String, W: float, H: float, tray_top: float) -> Control:
+	var tray_h: float = H - tray_top
+	var img := Image.create(int(W), int(tray_h), false, Image.FORMAT_RGBA8)
+	img.fill(Color.TRANSPARENT)
+
+	match char_id:
+		"shen_tiejun": _draw_tray_shen(img, int(W), int(tray_h))
+		"wumian":       _draw_tray_wumian(img, int(W), int(tray_h))
+		_:              _draw_tray_ruan(img, int(W), int(tray_h))
+
+	var tex := ImageTexture.create_from_image(img)
+	var tray := TextureRect.new()
+	tray.name          = "CardTray"
+	tray.texture       = tex
+	tray.mouse_filter  = Control.MOUSE_FILTER_IGNORE
+	tray.z_index       = 0
+	tray.position      = Vector2(0, tray_top)
+	tray.size          = Vector2(W, tray_h)
+	tray.expand_mode   = TextureRect.EXPAND_FILL_PARENT_AND_KEEP_ASPECT
+	tray.stretch_mode  = TextureRect.STRETCH_SCALE
+	return tray
+
+## 阮如月卡盘 — 朱砂红边框，庙宇瓦片纹，金色符文装饰
+func _draw_tray_ruan(img: Image, W: int, H: int) -> void:
+	# 底色（深暖墨）
+	for y in H:
+		var t: float = float(y) / float(H)
+		var c: Color = Color(0.08, 0.05, 0.04, 0.85 + t * 0.1)
+		for x in W: img.set_pixel(x, y, c)
+	# 顶部朱砂红边线（2px）
+	for x in W:
+		img.set_pixel(x, 0, Color(0.72, 0.12, 0.12, 0.9))
+		img.set_pixel(x, 1, Color(0.62, 0.10, 0.10, 0.7))
+	# 金色双线边框（距顶4px）
+	for x in W:
+		img.set_pixel(x, 4, Color(0.78, 0.60, 0.10, 0.5))
+		img.set_pixel(x, 6, Color(0.78, 0.60, 0.10, 0.3))
+	# 瓦片纹（每40px一组横纹，模拟庙宇砖瓦）
+	var tile_c := Color(0.72, 0.12, 0.12, 0.06)
+	var i: int = 0
+	while i < W:
+		for y in range(10, H):
+			img.set_pixel(i, y, tile_c)
+		i += 40
+	# 符文装饰（中央渡字印记，简化）
+	var cx: int = W / 2
+	for dx in range(-2, 3):
+		img.set_pixel(cx + dx, 12, Color(0.78, 0.60, 0.10, 0.25))
+	img.set_pixel(cx, 10, Color(0.78, 0.60, 0.10, 0.20))
+	img.set_pixel(cx, 14, Color(0.78, 0.60, 0.10, 0.20))
+
+## 沈铁钧卡盘 — 铁链纹，深蓝钢色，铆钉角饰
+func _draw_tray_shen(img: Image, W: int, H: int) -> void:
+	# 底色（深蓝钢）
+	for y in H:
+		var t: float = float(y) / float(H)
+		var c: Color = Color(0.05, 0.08, 0.14, 0.87 + t * 0.08)
+		for x in W: img.set_pixel(x, y, c)
+	# 顶部铁灰边线
+	for x in W:
+		img.set_pixel(x, 0, Color(0.45, 0.48, 0.55, 0.9))
+		img.set_pixel(x, 1, Color(0.35, 0.38, 0.45, 0.7))
+	# 银色双线
+	for x in W:
+		img.set_pixel(x, 4, Color(0.60, 0.62, 0.68, 0.45))
+		img.set_pixel(x, 6, Color(0.50, 0.52, 0.58, 0.25))
+	# 铁链纹（交替矩形）
+	var link_c := Color(0.35, 0.38, 0.50, 0.12)
+	var j: int = 0
+	while j < W:
+		for y in range(10, H, 6):
+			if (j / 20 + y / 6) % 2 == 0:
+				for dy in range(0, 3):
+					if y + dy < H:
+						img.set_pixel(j % W, y + dy, link_c)
+		j += 20
+	# 铆钉角（左右各一组）
+	for nail_x in [8, 16, W-16, W-8]:
+		for ny in range(8, 16):
+			var dx2: int = nail_x - (8 if nail_x < W/2 else W-8)
+			var dy2: int = ny - 12
+			if dx2*dx2 + dy2*dy2 <= 9:
+				img.set_pixel(nail_x, ny, Color(0.65, 0.68, 0.72, 0.7))
+
+## 无名卡盘 — 渐变灰白，虚空纹，无边界感
+func _draw_tray_wumian(img: Image, W: int, H: int) -> void:
+	# 底色（渐变灰白，边缘透明）
+	for y in H:
+		var t: float = float(y) / float(H)
+		var a: float = 0.70 + t * 0.15
+		var g: float = 0.12 - t * 0.04
+		var c: Color = Color(g + 0.06, g + 0.06, g + 0.05, a)
+		for x in W: img.set_pixel(x, y, c)
+	# 顶部白色渐隐线（虚空感）
+	for x in W:
+		var fx: float = float(x) / float(W)
+		var edge_a: float = 0.5 * sin(fx * 3.14159)
+		img.set_pixel(x, 0, Color(0.85, 0.85, 0.83, edge_a))
+		img.set_pixel(x, 1, Color(0.75, 0.75, 0.73, edge_a * 0.6))
+	# 粒子纹（稀疏白点，模拟情绪粒子）
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 42
+	for _k in 80:
+		var px: int = rng.randi_range(0, W-1)
+		var py: int = rng.randi_range(8, H-1)
+		var pa: float = rng.randf_range(0.05, 0.20)
+		img.set_pixel(px, py, Color(0.9, 0.9, 0.88, pa))
 
 ## 祭坛三栏标题：DS-00 配色 + 标题下水墨分割线
 func _setup_altar_title_style() -> void:
