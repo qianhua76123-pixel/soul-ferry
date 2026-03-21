@@ -59,7 +59,8 @@ func _build_edge_vignettes() -> void:
 		_edge_rects.append(r)
 
 func _refresh_labels() -> void:
-	var center = size / 2.0
+	var effective_size = size if size.x > 4 else custom_minimum_size
+	var center = effective_size / 2.0
 	for emotion in EMOTIONS:
 		var lbl = _label_nodes.get(emotion)
 		if not lbl: continue
@@ -77,7 +78,9 @@ func _refresh_labels() -> void:
 		lbl.text = "%s\n%d/4\n%s" % [EMOTION_CN[emotion], val, bars]
 
 func _draw() -> void:
-	var center = size / 2.0
+	# 布局未计算完时 size 可能为 (0,0)，用 custom_minimum_size 兜底
+	var effective_size = size if size.x > 4 else custom_minimum_size
+	var center = effective_size / 2.0
 	# 背景面板
 	var bg_rect = Rect2(center - Vector2(RADIUS + 24, RADIUS + 24),
 						Vector2((RADIUS + 24) * 2, (RADIUS + 24) * 2))

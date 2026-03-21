@@ -59,9 +59,8 @@ func _ready() -> void:
 	TransitionManager.fade_in_only()
 	result_panel.visible = false
 	du_hua_btn.visible   = false
-	_setup_hud_theme()
-	_setup_result_panel_theme()
 
+	# ── 第一步：信号连接（纯逻辑，无 UI 依赖）──
 	state_machine.battle_started.connect(_on_battle_started)
 	state_machine.player_turn_started.connect(_on_player_turn_started)
 	state_machine.enemy_turn_started.connect(_on_enemy_turn_started)
@@ -80,39 +79,35 @@ func _ready() -> void:
 	du_hua_btn.pressed.connect(_on_du_hua_pressed)
 	result_btn.pressed.connect(_on_result_continue)
 
-	# 连接 RelicManager 触发信号 → UI 提示
 	RelicManager.relic_triggered.connect(_on_relic_triggered)
-	# 连接渡化成功
 	state_machine.du_hua_succeeded.connect(func(_eid): RelicManager.on_du_hua_success())
 
-	# 问路香按钮（仅持有时可见）
+	# ── 第二步：UI 主题 & 样式（不依赖布局尺寸）──
+	_setup_hud_theme()
+	_setup_result_panel_theme()
+
+	# ── 第三步：动态 UI 组件（添加子节点，不依赖 size）──
+	_setup_battle_background()   # 最底层背景，先挂上
 	if RelicManager.has_relic("wenlu_xiang"):
 		_add_wenlu_btn()
-
-	# 迷你遗物栏（战斗场内展示，用于触发闪光）
 	_build_relic_bar()
-
-	# Buff 图标栏 + Tooltip 系统
 	_setup_buff_ui()
-
-	# 主角立绘初始化
 	_setup_player_sprite()
-
-	# B-04 意图预告组件初始化
 	_setup_intent_display()
-	# B-06 渡化条件面板初始化
 	_setup_purification_panel()
+	_setup_energy_display()
 
+	# ── 第四步：布局微调（需要节点树已完整，延迟一帧）──
+	call_deferred("_deferred_layout_setup")
+
+	# ── 第五步：启动战斗逻辑（最后执行，保证 UI 节点全部就位）──
 	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
 	state_machine.start_battle(str(enemy_id))
 
-	# B-01 布局优化
+func _deferred_layout_setup() -> void:
+	## 延迟一帧执行，此时 Control 节点 size 已由引擎布局计算完毕
 	_setup_layout_improvements()
 	_setup_altar_title_style()
-
-	# B-07 战场氛围背景 + 费用圆点HUD
-	_setup_battle_background()
-	_setup_energy_display()
 
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
@@ -590,10 +585,17 @@ func _setup_buff_ui() -> void:
 	var pa2 = get_node_or_null("UI/AltarLayout/PlayerArea")
 	var ea2 = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if pa2:
+		# 隐藏旧版原始 ProgressBar + Label，避免与新双层血条重叠
+		var old_hpbar = pa2.get_node_or_null("HPBar")
+		if old_hpbar: old_hpbar.visible = false
+		var old_hplabel = pa2.get_node_or_null("HPLabel")
+		if old_hplabel: old_hplabel.visible = false
 		_player_hbar = PlayerHealthBarClass.new()
 		pa2.add_child(_player_hbar)
 		_player_hbar.set_hp(GameState.hp, GameState.max_hp)
 	if ea2:
+		var old_ehpbar = ea2.get_node_or_null("HPBar")
+		if old_ehpbar: old_ehpbar.visible = false
 		_enemy_hbar = EnemyHealthBarClass.new()
 		ea2.add_child(_enemy_hbar)
 
