@@ -32,13 +32,40 @@ func init_deck(card_ids: Array) -> void:
 	shuffle_deck()
 
 func init_starter_deck() -> void:
-	init_deck([
-		"zhenhunfu","zhenhunfu",
-		"hun_po_lie","hun_po_lie",
-		"lei_shang","lei_shang",
-		"podan","jue_liao_ling",
-		"hong_chen_yi_xiao","ku_sha",
-	])
+	var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
+	match char_id:
+		"ruan_ruyue":
+			init_deck([
+				"zhenhunfu","zhenhunfu",
+				"hun_po_lie","hun_po_lie",
+				"lei_shang","lei_shang",
+				"podan","jue_liao_ling",
+				"hong_chen_yi_xiao","ku_sha",
+			])
+		"shen_tiejun":
+			init_deck([
+				"tie_qu","tie_qu",
+				"tiejia_futi","tiejia_futi",
+				"hun_po_lie","hun_po_lie",
+				"lei_shang","lei_shang",
+				"jue_liao_ling","ku_sha",
+			])
+		"wumian":
+			init_deck([
+				"kong_shou","kong_shou",
+				"wu_wei","wu_wei",
+				"jie_qing","jie_qing",
+				"xu_shi_hu_huan","xu_shi_hu_huan",
+				"hun_po_lie","lei_shang",
+			])
+		_:
+			init_deck([
+				"zhenhunfu","zhenhunfu",
+				"hun_po_lie","hun_po_lie",
+				"lei_shang","lei_shang",
+				"podan","jue_liao_ling",
+				"hong_chen_yi_xiao","ku_sha",
+			])
 
 func get_total_card_count() -> int:
 	return len(deck) + len(hand) + len(discard_pile) + len(exhaust_pile)

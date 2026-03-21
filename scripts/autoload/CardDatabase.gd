@@ -2,7 +2,8 @@ extends Node
 
 ## CardDatabase.gd - 牌库数据，从 JSON 加载，运行时只读
 
-const CARDS_DATA_PATH = "res://data/cards.json"
+const CARDS_DATA_PATH        = "res://data/cards.json"
+const WUMIAN_CARDS_DATA_PATH = "res://data/wumian_cards.json"
 
 var _cards: Dictionary = {}
 var _loaded: bool = false
@@ -12,6 +13,8 @@ func _ready() -> void:
 
 func _load_cards() -> void:
 	if _loaded: return
+
+	# ── 主牌库（阮如月 / 沈铁钧 / 共通）──
 	var file: FileAccess = FileAccess.open(CARDS_DATA_PATH, FileAccess.READ)
 	if not file:
 		push_error("CardDatabase: 无法打开 " + CARDS_DATA_PATH); return
@@ -22,6 +25,19 @@ func _load_cards() -> void:
 	for card in json.get_data().get("cards", []):
 		card["cost"] = int(card.get("cost", 1))
 		_cards[card.get("id", "")] = card
+
+	# ── 无面人牌库（wumian_cards.json）──
+	var wfile: FileAccess = FileAccess.open(WUMIAN_CARDS_DATA_PATH, FileAccess.READ)
+	if wfile:
+		var wjson := JSON.new()
+		if wjson.parse(wfile.get_as_text()) == OK:
+			for card in wjson.get_data().get("wumian_cards", []):
+				card["cost"] = int(card.get("cost", 1))
+				if not card.has("character"):
+					card["character"] = "wumian"
+				_cards[card.get("id", "")] = card
+		wfile.close()
+
 	_loaded = true
 
 func get_card(card_id: String) -> Dictionary:
@@ -36,8 +52,19 @@ func get_all_cards() -> Array:
 	if not _loaded: _load_cards()
 	return _cards.values()
 
+## 返回当前角色可用的牌库奖励候选（排除其他角色专属牌）
+func get_cards_for_character(char_id: String) -> Array:
+	return get_all_cards().filter(func(c: Dictionary) -> bool:
+		var owner: String = c.get("character", "shared")
+		return owner == "shared" or owner == char_id
+	)
+
 func get_reward_cards(count: int = 3) -> Array:
-	var pool: Array = get_all_cards().filter(func(c): return not c.get("is_curse", false))
+	# 按当前角色过滤
+	var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
+	var pool: Array = get_cards_for_character(char_id).filter(
+		func(c: Dictionary) -> bool: return not c.get("is_curse", false)
+	)
 	pool.shuffle()
 	var weighted: Array = []
 	for c in pool:

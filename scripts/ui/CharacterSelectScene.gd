@@ -225,4 +225,7 @@ func _on_confirm_pressed() -> void:
 	else:
 		WumianManager.deactivate()
 
+	# 按角色初始化起始牌组（依赖 selected_character 已设置）
+	DeckManager.init_starter_deck()
+
 	TransitionManager.change_scene("res://scenes/MapScene.tscn", "踏上渡魂之路")

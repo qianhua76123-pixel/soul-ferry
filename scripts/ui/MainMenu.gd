@@ -282,8 +282,7 @@ func _play_enter_animation() -> void:
 func _on_new_game() -> void:
 	GameState.delete_save()
 	GameState.new_run()
-	DeckManager.init_starter_deck()
-	# 新游戏先进角色选择界面
+	# init_starter_deck 在角色选择后调用（CharacterSelectScene._on_confirm_pressed）
 	_transition_to("res://scenes/CharacterSelectScene.tscn")
 
 func _on_continue() -> void:
