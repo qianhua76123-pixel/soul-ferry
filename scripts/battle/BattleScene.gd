@@ -803,12 +803,12 @@ func _setup_player_sprite() -> void:
 func _set_player_sprite_state(state: String) -> void:
 	var sprite: Node = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
 	if not sprite: return
-	sprite.texture = PlayerPixelArtClass.create_texture(state)
+	var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
+	sprite.texture = PlayerPixelArtClass.create_texture(state, char_id)
 	# 非 idle 状态时停止浮动，idle 时重新启动
 	if state == "idle":
 		_start_idle_float(sprite, 4.0, 1.8)
 	else:
-		# 停掉所有 tween（attack/hurt/dead 状态不浮动）
 		sprite.set_meta("_float_active", false)
 
 ## 立绘 idle 浮动动画（主角 & 敌人通用）
