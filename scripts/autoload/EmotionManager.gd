@@ -24,8 +24,8 @@ func _ready() -> void:
 
 func modify(emotion: String, delta: int) -> void:
 	if emotion not in values: return
-	var old_val = values[emotion]
-	var new_val = clamp(old_val + delta, MIN_VALUE, MAX_VALUE)
+	var old_val: int = values[emotion]
+	var new_val: int = clamp(old_val + delta, MIN_VALUE, MAX_VALUE)
 	if old_val == new_val: return
 	values[emotion] = new_val
 	emotion_changed.emit(emotion, old_val, new_val)

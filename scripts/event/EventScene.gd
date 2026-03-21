@@ -25,7 +25,7 @@ func _ready() -> void:
 	result_continue_btn.pressed.connect(_on_continue_pressed)
 	_load_events()
 	# 自动加载（来自地图传入的事件ID）
-	var eid = ""
+	var eid: String = ""
 	if GameState.has_meta("pending_event_id"):
 		eid = str(GameState.get_meta("pending_event_id"))
 		GameState.remove_meta("pending_event_id")
@@ -33,11 +33,11 @@ func _ready() -> void:
 	_setup_event_visual()
 
 func _load_events() -> void:
-	var file = FileAccess.open("res://data/events.json", FileAccess.READ)
+	var file: FileAccess = FileAccess.open("res://data/events.json", FileAccess.READ)
 	if not file:
 		push_error("EventScene: 无法加载事件数据")
 		return
-	var json = JSON.new()
+	var json := JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		return
 	file.close()
@@ -47,14 +47,14 @@ func _load_events() -> void:
 func load_event(event_id: String = "") -> void:
 	if event_id == "":
 		# 按当前层过滤，随机选一个
-		var layer_events = _all_events.filter(
-			func(e): return e.get("layer", 1) <= GameState.current_layer
+		var layer_events: Array = _all_events.filter(
+			func(e: Dictionary) -> bool: return e.get("layer", 1) <= GameState.current_layer
 		)
 		if layer_events.is_empty():
 			layer_events = _all_events
 		_current_event = layer_events[randi() % len(layer_events)]
 	else:
-		for e in _all_events:
+		for e: Dictionary in _all_events:
 			if e.get("id", "") == event_id:
 				_current_event = e
 				break
@@ -66,21 +66,21 @@ func _render_event() -> void:
 	desc_label.text = _current_event.get("description", "")
 
 	# 清空旧选项
-	for child in choices_container.get_children():
+	for child: Node in choices_container.get_children():
 		child.queue_free()
 
 	# 年画眼：若持有且本局未用，展示所有选项的真实结果
-	var show_results = RelicManager.has_relic("nianhua_yan") and not RelicManager.nianhua_used_this_run
+	var show_results: bool = RelicManager.has_relic("nianhua_yan") and not RelicManager.nianhua_used_this_run
 
 	# 创建选项按钮
-	var choices = _current_event.get("choices", [])
-	for i in len(choices):
-		var choice = choices[i]
-		var btn = Button.new()
-		var btn_text = choice.get("text", "选项%d" % (i + 1))
+	var choices: Array = _current_event.get("choices", [])
+	for i: int in len(choices):
+		var choice: Dictionary = choices[i]
+		var btn := Button.new()
+		var btn_text: String = choice.get("text", "选项%d" % (i + 1))
 		if show_results:
 			# 附加真实结果预览
-			var result_preview = _get_result_preview(choice.get("result", {}))
+			var result_preview: String = _get_result_preview(choice.get("result", {}))
 			btn_text += "\n[年画眼] → " + result_preview
 		btn.text = btn_text
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -89,13 +89,13 @@ func _render_event() -> void:
 		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 		btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 		btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
-		var captured = choice
+		var captured: Dictionary = choice
 		btn.pressed.connect(func(): _on_choice_selected(captured))
 		choices_container.add_child(btn)
 
 	# 年画眼激活按钮（一局一次）
 	if RelicManager.has_relic("nianhua_yan") and not RelicManager.nianhua_used_this_run and not show_results:
-		var reveal_btn = Button.new()
+		var reveal_btn := Button.new()
 		reveal_btn.text = "👁 年画眼：看清真相（本局仅一次）"
 		reveal_btn.custom_minimum_size = Vector2(500, 36)
 		reveal_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
@@ -108,8 +108,8 @@ func _render_event() -> void:
 		choices_container.add_child(reveal_btn)
 
 func _get_result_preview(result: Dictionary) -> String:
-	var parts = []
-	var rtype = result.get("type","")
+	var parts: Array = []
+	var rtype: String = result.get("type", "")
 	match rtype:
 		"hp_gain":        parts.append("HP +%d" % int(result.get("value",0)))
 		"hp_loss":        parts.append("HP -%d" % int(result.get("value",0)))
@@ -119,7 +119,7 @@ func _get_result_preview(result: Dictionary) -> String:
 		"card_reward":    parts.append("获得牌")
 		"curse_card":     parts.append("获得诅咒牌")
 		"emotion_gain":
-			var e = EmotionManager.get_emotion_name(result.get("emotion",""))
+			var e: String = EmotionManager.get_emotion_name(result.get("emotion",""))
 			parts.append("%s +%d" % [e, int(result.get("value",0))])
 		"multi":
 			for eff in result.get("effects", []):
@@ -129,24 +129,24 @@ func _get_result_preview(result: Dictionary) -> String:
 
 func _on_choice_selected(choice: Dictionary) -> void:
 	# 禁用所有按钮，防止重复点击
-	for btn in choices_container.get_children():
-		btn.disabled = true
+	for btn: Node in choices_container.get_children():
+		btn.set("disabled", true)
 
-	var result = choice.get("result", {})
+	var result: Dictionary = choice.get("result", {})
 	_apply_result(result)
 	_show_result(result)
 
 func _apply_result(result: Dictionary) -> void:
-	var result_type = result.get("type", "")
+	var result_type: String = result.get("type", "")
 
 	match result_type:
 		"card_reward":
-			var card = CardDatabase.get_card(result.get("card_id", ""))
+			var card: Dictionary = CardDatabase.get_card(result.get("card_id", ""))
 			if not card.is_empty():
 				DeckManager.add_card_to_deck(card)
 
 		"multi":
-			for effect in result.get("effects", []):
+			for effect: Dictionary in result.get("effects", []):
 				_apply_single_effect(effect)
 
 		"emotion_gain":
@@ -165,12 +165,12 @@ func _apply_result(result: Dictionary) -> void:
 			GameState.increase_max_hp(result.get("value", 0))
 
 		"gold":
-			var gv = result.get("value", 0)
+			var gv: int = result.get("value", 0)
 			if gv >= 0: GameState.gain_gold(gv)
 			else: GameState.spend_gold(-gv)
 
 		"curse_card":
-			var card_2 = CardDatabase.get_card(result.get("card_id", ""))
+			var card_2: Dictionary = CardDatabase.get_card(result.get("card_id", ""))
 			if not card_2.is_empty():
 				card_2["is_curse"] = true
 				DeckManager.add_card_to_deck(card_2)
@@ -178,7 +178,7 @@ func _apply_result(result: Dictionary) -> void:
 func _apply_single_effect(effect: Dictionary) -> void:
 	match effect.get("type", ""):
 		"card_reward":
-			var card = CardDatabase.get_card(effect.get("card_id", ""))
+			var card: Dictionary = CardDatabase.get_card(effect.get("card_id", ""))
 			if not card.is_empty():
 				DeckManager.add_card_to_deck(card)
 		"emotion_gain":
@@ -188,7 +188,7 @@ func _apply_single_effect(effect: Dictionary) -> void:
 		"hp_gain":
 			GameState.heal(effect.get("value", 0))
 		"gold":
-			var ev = effect.get("value", 0)
+			var ev: int = effect.get("value", 0)
 			if ev >= 0: GameState.gain_gold(ev)
 			else: GameState.spend_gold(-ev)
 		"relic_reward":
@@ -197,12 +197,12 @@ func _apply_single_effect(effect: Dictionary) -> void:
 			GameState.increase_max_hp(effect.get("value", 0))
 		"card_upgrade":
 			# 随机升级牌库中一张牌（升级 = 费用-1，不低于0）
-			var full_deck = DeckManager.get_full_deck()
+			var full_deck: Array = DeckManager.get_full_deck()
 			if not full_deck.is_empty():
-				var target = full_deck[randi() % len(full_deck)]
+				var target: Dictionary = full_deck[randi() % len(full_deck)]
 				target["cost"] = max(0, target.get("cost", 1) - 1)
 		"curse_card":
-			var card_2 = CardDatabase.get_card(effect.get("card_id", ""))
+			var card_2: Dictionary = CardDatabase.get_card(effect.get("card_id", ""))
 			if not card_2.is_empty():
 				card_2["is_curse"] = true
 				DeckManager.add_card_to_deck(card_2)
@@ -211,10 +211,10 @@ func _apply_single_effect(effect: Dictionary) -> void:
 
 func _show_result(result: Dictionary) -> void:
 	result_panel.visible = true
-	var desc = result.get("description", "选择已生效。")
+	var desc: String = result.get("description", "选择已生效。")
 	# 追加叙事文本
-	for effect in result.get("effects", []):
-		var narrative = effect.get("text", "")
+	for effect: Dictionary in result.get("effects", []):
+		var narrative: String = effect.get("text", "")
 		if narrative != "":
 			desc += "\n\n[i]" + narrative + "[/i]"
 	result_label.text = desc
@@ -256,7 +256,7 @@ func _setup_event_visual() -> void:
 	add_child(deco2)
 
 	# 事件主面板切角描边（DS-00）
-	var event_panel = get_node_or_null("UI/EventPanel")
+	var event_panel: Node = get_node_or_null("UI/EventPanel")
 	if event_panel:
 		var inked = InkedPanel.new()
 		inked.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -273,9 +273,9 @@ func _setup_event_visual() -> void:
 	desc_label.add_theme_color_override("default_color", UIConstants.color_of("text_secondary"))
 
 	# 标题与正文之间加一条水墨分割线
-	var vbox = get_node_or_null("UI/EventPanel/VBox")
+	var vbox: Node = get_node_or_null("UI/EventPanel/VBox")
 	if vbox:
-		var divider = WaterInkDivider.new()
+		var divider := WaterInkDivider.new()
 		divider.custom_minimum_size = Vector2(500, 8)
 		divider.ink_color = UIConstants.color_of("gold_dim")
 		vbox.add_child(divider)

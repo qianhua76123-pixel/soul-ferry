@@ -148,7 +148,7 @@ func _show_upgrade_effect() -> void:
 	var overlay = ColorRect.new()
 	overlay.color = Color(0.98, 0.85, 0.10, 0.0)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var ui = get_node_or_null("UI")
+	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(overlay)
 	else: add_child(overlay)
 	var tw = overlay.create_tween()
@@ -162,7 +162,7 @@ func _show_upgrade_effect() -> void:
 	lbl.add_theme_color_override("font_color", Color(0.98, 0.88, 0.10))
 	lbl.add_theme_font_size_override("font_size", 22)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var root = get_node_or_null("UI") if get_node_or_null("UI") else self
+	var root: Node = get_node_or_null("UI") if get_node_or_null("UI") else self
 	root.add_child(lbl)
 	lbl.position = Vector2(400, 280)
 	var tw2 = lbl.create_tween()
@@ -174,7 +174,7 @@ func _on_leave() -> void:
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _update_status() -> void:
-	var hp_lbl = get_node_or_null("UI/HPStatus")
+	var hp_lbl: Node = get_node_or_null("UI/HPStatus")
 	if hp_lbl:
 		hp_lbl.text = "HP: %d / %d" % [int(GameState.hp), int(GameState.max_hp)]
 	status_label.text = "• 回复HP：恢复最大HP的30%%\n• 升级牌卡：费用-1 + 效果值+25%%\n\n当前HP：%d / %d" % [
@@ -182,7 +182,7 @@ func _update_status() -> void:
 
 ## 程序化烛火背景装饰
 func _build_bg_candles() -> void:
-	var bg = get_node_or_null("BgCanvas")
+	var bg: Node = get_node_or_null("BgCanvas")
 	if not bg: return
 	for i in range(5):
 		var candle = Label.new()
@@ -220,7 +220,7 @@ func _setup_rest_visual() -> void:
 	title_lbl.position.y = 24
 	add_child(title_lbl)
 
-	var ui_root = get_node_or_null("UI")
+	var ui_root: Node = get_node_or_null("UI")
 	if ui_root:
 		var frame = InkedPanel.new()
 		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

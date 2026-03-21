@@ -30,10 +30,10 @@ func _ready() -> void:
 	GameState.relic_added.connect(_on_relic_added_by_gamestate)
 
 func _load_relic_data() -> void:
-	var file = FileAccess.open("res://data/relics.json", FileAccess.READ)
+	var file: FileAccess = FileAccess.open("res://data/relics.json", FileAccess.READ)
 	if not file:
 		push_error("RelicManager: 无法打开 relics.json"); return
-	var json = JSON.new()
+	var json := JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		push_error("RelicManager: JSON 解析失败"); file.close(); return
 	file.close()

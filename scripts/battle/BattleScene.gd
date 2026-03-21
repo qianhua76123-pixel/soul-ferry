@@ -170,7 +170,7 @@ func _spawn_special_text(msg: String, color: Color) -> void:
 	lbl.add_theme_color_override("font_color", color)
 	lbl.add_theme_font_size_override("font_size", 16)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var ui = get_node_or_null("UI")
+	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(lbl)
 	else: add_child(lbl)
 	lbl.position = Vector2(576 - 160, 260)
@@ -253,7 +253,7 @@ const RELIC_ICONS = {
 
 ## 在玩家区底部动态创建迷你遗物栏
 func _build_relic_bar() -> void:
-	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if not player_area: return
 	var bar = HBoxContainer.new()
 	bar.name = "BattleRelicBar"
@@ -306,7 +306,7 @@ func _show_relic_popup(desc: String) -> void:
 	lbl.add_theme_color_override("font_color", Color(0.85, 0.72, 0.0))
 	lbl.add_theme_font_size_override("font_size", 13)
 	# 挂到 CanvasLayer 避免被场景缩放影响
-	var ui_layer = get_node_or_null("UI")
+	var ui_layer: Node = get_node_or_null("UI")
 	if ui_layer: ui_layer.add_child(lbl)
 	else:        add_child(lbl)
 	lbl.position = Vector2(12.0, 80.0 + randf_range(0.0, 20.0))
@@ -397,7 +397,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 	# 情绪变化浮字（在祭坛中央雷达图位置）
 	var diff = new_val - old_val
 	if diff != 0:
-		var radar_area = get_node_or_null("UI/AltarLayout/AltarCenter")
+		var radar_area: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 		if radar_area:
 			var rect = radar_area.get_global_rect()
 			var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
@@ -516,7 +516,7 @@ func _show_popup(result: Dictionary) -> void:
 
 ## 问路香按钮（动态添加到 HUD）
 func _add_wenlu_btn() -> void:
-	var hud = get_node_or_null("UI/HUD")
+	var hud: Node = get_node_or_null("UI/HUD")
 	if not hud: return
 	var btn = Button.new()
 	btn.name = "WenluBtn"
@@ -545,7 +545,7 @@ func _on_wenlu_pressed() -> void:
 		var rage := int(state_machine.boss_phase) == 2
 		_intent_display.show_intent_custom("🕯", line, rage)
 	# 禁用按钮
-	var btn = get_node_or_null("UI/HUD/WenluBtn")
+	var btn: Node = get_node_or_null("UI/HUD/WenluBtn")
 	if btn: btn.disabled = true
 
 ## ══════════════════════════════════════════════════════
@@ -562,14 +562,14 @@ func _setup_buff_ui() -> void:
 	BuffManager.buff_expired.connect(func(tgt, _id): _rebuild_buff_bar(tgt))
 
 	# 玩家 Buff 栏：插入 PlayerArea 底部
-	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if player_area:
 		var bar = HBoxContainer.new()
 		bar.name = "PlayerBuffBar"
 		player_area.add_child(bar)
 
 	# 敌人 Buff 栏：插入 EnemyArea 顶部（名字下方）
-	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if enemy_area:
 		var enemy_bar = HBoxContainer.new()
 		enemy_bar.name = "EnemyBuffBar"
@@ -577,7 +577,7 @@ func _setup_buff_ui() -> void:
 		enemy_area.move_child(enemy_bar, 1)
 
 	# 全局 Tooltip（Panel 包 Label，挂到 UI 最顶层）
-	var ui = get_node_or_null("UI")
+	var ui: Node = get_node_or_null("UI")
 	if ui:
 		_tooltip_label = Label.new()
 		_tooltip_label.name            = "BuffTooltip"
@@ -597,8 +597,8 @@ func _setup_buff_ui() -> void:
 	## B-02 新增双层血条组件（复用上方已声明的 player_area / enemy_area）
 	var PlayerHealthBarClass = preload("res://scripts/ui/PlayerHealthBar.gd")
 	var EnemyHealthBarClass  = preload("res://scripts/ui/EnemyHealthBar.gd")
-	var pa2 = get_node_or_null("UI/AltarLayout/PlayerArea")
-	var ea2 = get_node_or_null("UI/AltarLayout/EnemyArea")
+	var pa2: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var ea2: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if pa2:
 		# 隐藏旧版原始 ProgressBar + Label，避免与新双层血条重叠
 		var old_hpbar = pa2.get_node_or_null("HPBar")
@@ -622,7 +622,7 @@ func _rebuild_buff_bar(target: String) -> void:
 	var bar_path = "UI/AltarLayout/PlayerArea/PlayerBuffBar" \
 		if target == BuffManager.TARGET_PLAYER \
 		else "UI/AltarLayout/EnemyArea/EnemyBuffBar"
-	var bar = get_node_or_null(bar_path)
+	var bar: Node = get_node_or_null(bar_path)
 	if not bar: return
 
 	# 清空旧图标
@@ -699,14 +699,14 @@ func spawn_damage_number(value: int, type: String, pos: Vector2, extra: String =
 	if not _dmgnum_scene: return
 	var node = _dmgnum_scene.instantiate()
 	# 挂到 CanvasLayer，不受场景缩放影响
-	var ui = get_node_or_null("UI")
+	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(node)
 	else:  add_child(node)
 	node.spawn(value, type, pos, extra)
 
 ## 敌人受伤浮字（在 _on_card_effect 里调用）
 func _spawn_enemy_damage(value: int, type: String) -> void:
-	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if not enemy_area: return
 	var rect = enemy_area.get_global_rect()
 	var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
@@ -715,7 +715,7 @@ func _spawn_enemy_damage(value: int, type: String) -> void:
 
 ## 玩家受伤/回血浮字
 func _spawn_player_number(value: int, type: String) -> void:
-	var player_area = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if not player_area: return
 	var rect = player_area.get_global_rect()
 	var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
@@ -726,7 +726,7 @@ func _spawn_player_number(value: int, type: String) -> void:
 ## ══════════════════════════════════════════════════════
 func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 	var enemy_id = enemy_data.get("id", "")
-	var sprite_node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
+	var sprite_node: Node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
 	if not sprite_node: return
 
 	# 把 ColorRect 换成 TextureRect（如果还没换过）
@@ -793,7 +793,7 @@ func _on_boss_phase_changed(new_phase: int) -> void:
 ## ══════════════════════════════════════════════════════
 
 func _setup_player_sprite() -> void:
-	var sprite = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
+	var sprite: Node = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
 	if not sprite: return
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_set_player_sprite_state("idle")
@@ -801,7 +801,7 @@ func _setup_player_sprite() -> void:
 	_start_idle_float(sprite, 4.0, 1.8)
 
 func _set_player_sprite_state(state: String) -> void:
-	var sprite = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
+	var sprite: Node = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
 	if not sprite: return
 	sprite.texture = PlayerPixelArtClass.create_texture(state)
 	# 非 idle 状态时停止浮动，idle 时重新启动
@@ -838,7 +838,7 @@ func _setup_layout_improvements() -> void:
 	ground.set_anchor_and_offset(SIDE_TOP,   0.0, 484)
 	ground.set_anchor_and_offset(SIDE_BOTTOM,0.0, 488)
 	ground.z_index = 2
-	var ui = get_node_or_null("UI")
+	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(ground)
 
 	# HandContainer：居中对齐 + 卡牌间距
@@ -865,28 +865,28 @@ func _setup_layout_improvements() -> void:
 
 ## 祭坛三栏标题：DS-00 配色 + 标题下水墨分割线
 func _setup_altar_title_style() -> void:
-	var pa = get_node_or_null("UI/AltarLayout/PlayerArea")
+	var pa: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if pa:
 		var pt = pa.get_node_or_null("PlayerTitle")
 		if pt:
 			pt.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 			pt.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 			_insert_ink_divider_below(pa, pt, 168)
-	var ac = get_node_or_null("UI/AltarLayout/AltarCenter")
+	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 	if ac:
 		var at = ac.get_node_or_null("AltarTitle")
 		if at:
 			at.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 			at.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 			_insert_ink_divider_below(ac, at, 200)
-	var ea = get_node_or_null("UI/AltarLayout/EnemyArea")
+	var ea: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if ea:
 		var en = ea.get_node_or_null("EnemyName")
 		if en:
 			en.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 			en.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 			_insert_ink_divider_below(ea, en, 168)
-	var dw = get_node_or_null("UI/AltarLayout/AltarCenter/DisorderWarning")
+	var dw: Node = get_node_or_null("UI/AltarLayout/AltarCenter/DisorderWarning")
 	if dw:
 		dw.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 		# 节点自带红色 modulate，正文用浅色保证可读
@@ -896,11 +896,11 @@ func _setup_altar_title_style() -> void:
 		"UI/AltarLayout/PlayerArea/HPLabel",
 		"UI/AltarLayout/EnemyArea/ShieldLabel",
 	]:
-		var sl = get_node_or_null(path)
+		var sl: Node = get_node_or_null(path)
 		if sl:
 			sl.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
 			sl.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
-	var dh = get_node_or_null("UI/AltarLayout/EnemyArea/DuHuaHint")
+	var dh: Node = get_node_or_null("UI/AltarLayout/EnemyArea/DuHuaHint")
 	if dh:
 		dh.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 		dh.add_theme_color_override("font_color", UIConstants.color_of("gold"))
@@ -918,7 +918,7 @@ func _insert_ink_divider_below(parent: Node, after_node: Node, width_px: int) ->
 ## ══════════════════════════════════════════════════════
 
 func _setup_intent_display() -> void:
-	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if not enemy_area: return
 	_intent_display = IntentDisplayClass.new()
 	_intent_display.name = "BattleIntentDisplay"
@@ -943,7 +943,7 @@ func _setup_battle_background() -> void:
 	move_child(_bg_node, 0)   # 移到最底层
 
 func _setup_energy_display() -> void:
-	var hud = get_node_or_null("UI/HUD")
+	var hud: Node = get_node_or_null("UI/HUD")
 	if not hud: return
 	_energy_display = EnergyDisplayClass.new()
 	_energy_display.name = "EnergyDots"
@@ -967,7 +967,7 @@ func hide_card_preview() -> void:
 
 func _setup_purification_panel() -> void:
 	# 挂在五情祭坛中央区域下方
-	var altar_center = get_node_or_null("UI/AltarLayout/AltarCenter")
+	var altar_center: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 	if not altar_center: return
 	_purif_panel = PurificationPanelClass.new()
 	_purif_panel.name = "PurificationPanel"
@@ -980,7 +980,7 @@ func _setup_purification_panel() -> void:
 
 func _play_attack_flash() -> void:
 	## 攻击牌命中闪光：在敌人区域叠加白色闪光
-	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if not enemy_area: return
 	var flash = ColorRect.new()
 	flash.color = Color(1, 1, 1, 0.0)

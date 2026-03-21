@@ -62,10 +62,10 @@ func _on_buff_damage_to_enemy(amount: int) -> void:
 		_end_battle("victory")
 
 func _load_enemy(enemy_id: String) -> Dictionary:
-	var file = FileAccess.open("res://data/enemies.json", FileAccess.READ)
+	var file: FileAccess = FileAccess.open("res://data/enemies.json", FileAccess.READ)
 	if not file:
 		return {}
-	var json = JSON.new()
+	var json := JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		return {}
 	file.close()

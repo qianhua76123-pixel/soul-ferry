@@ -36,7 +36,7 @@ func _ready() -> void:
 
 func has_save() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH): return false
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
 	if not file: return false
 	var content = file.get_as_text().strip_edges()
 	file.close()
@@ -70,7 +70,7 @@ func save_to_file() -> void:
 		"save_time":     Time.get_unix_time_from_system(),
 	}
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if not file:
 		push_error("GameState: 无法写入存档 " + SAVE_PATH); return
 	file.store_string(JSON.stringify(data, "\t"))
@@ -80,9 +80,9 @@ func save_to_file() -> void:
 func load_from_file() -> bool:
 	if not has_save(): return false
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
 	if not file: return false
-	var json = JSON.new()
+	var json := JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		file.close()
 		push_error("GameState: 存档解析失败"); return false

@@ -64,7 +64,7 @@ func _ready() -> void:
 
 func _load_stats() -> void:
 	if not FileAccess.file_exists(STATS_PATH): return
-	var f = FileAccess.open(STATS_PATH, FileAccess.READ)
+	var f: FileAccess = FileAccess.open(STATS_PATH, FileAccess.READ)
 	if not f: return
 	var data = JSON.parse_string(f.get_as_text())
 	f.close()
@@ -73,7 +73,7 @@ func _load_stats() -> void:
 			stats[k] = data[k]
 
 func _save_stats() -> void:
-	var f = FileAccess.open(STATS_PATH, FileAccess.WRITE)
+	var f: FileAccess = FileAccess.open(STATS_PATH, FileAccess.WRITE)
 	if not f: return
 	f.store_string(JSON.stringify(stats, "\t"))
 	f.close()

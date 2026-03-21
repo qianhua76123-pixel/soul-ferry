@@ -21,7 +21,7 @@ var _title_origin_y: float = 0.0
 
 func _ready() -> void:
 	# ── 版本号 ─────────────────────────────────
-	var vl = get_node_or_null("UI/VersionLabel")
+	var vl: Node = get_node_or_null("UI/VersionLabel")
 	if vl:
 		vl.text = VERSION
 		vl.add_theme_color_override("font_color", Color(0.420, 0.353, 0.188))
@@ -70,7 +70,7 @@ func _make_flat_style(bg: Color, border: Color, border_w: int = 1) -> StyleBoxFl
 	return s
 
 func _style_new_game_btn() -> void:
-	var btn = get_node_or_null("UI/ButtonContainer/NewGameBtn")
+	var btn: Node = get_node_or_null("UI/ButtonContainer/NewGameBtn")
 	if not btn: return
 	btn.text = "✦  踏  上  旅  途"
 	btn.add_theme_font_size_override("font_size", 16)
@@ -85,7 +85,7 @@ func _style_new_game_btn() -> void:
 	btn.add_theme_stylebox_override("pressed", hover)
 
 func _style_continue_btn(has_save: bool) -> void:
-	var btn = get_node_or_null("UI/ButtonContainer/ContinueBtn")
+	var btn: Node = get_node_or_null("UI/ButtonContainer/ContinueBtn")
 	if not btn: return
 	btn.text = "继  续  渡  魂"
 	btn.add_theme_font_size_override("font_size", 16)
@@ -111,7 +111,7 @@ func _style_continue_btn(has_save: bool) -> void:
 		btn.disabled = true
 
 func _style_quit_btn() -> void:
-	var btn = get_node_or_null("UI/ButtonContainer/QuitBtn")
+	var btn: Node = get_node_or_null("UI/ButtonContainer/QuitBtn")
 	if not btn: return
 	btn.text = "就  此  搁  笔"
 	btn.add_theme_font_size_override("font_size", 16)
@@ -180,10 +180,10 @@ func _draw_ink_lines(node: Node2D) -> void:
 ## 标题下方 WaterInkDivider ──────────────────────
 
 func _insert_water_divider() -> void:
-	var ui_layer = get_node_or_null("UI")
+	var ui_layer: Node = get_node_or_null("UI")
 	if not ui_layer: return
 
-	var btn_container = get_node_or_null("UI/ButtonContainer")
+	var btn_container: Node = get_node_or_null("UI/ButtonContainer")
 	if not btn_container: return
 
 	var divider: Control = WaterInkDividerClass.new()
@@ -194,7 +194,7 @@ func _insert_water_divider() -> void:
 	ui_layer.add_child(divider)
 	# 放到 ButtonContainer 同 CanvasLayer，位置在副标题下方
 	# 水平居中
-	var sub = get_node_or_null("UI/SubtitleLabel")
+	var sub: Node = get_node_or_null("UI/SubtitleLabel")
 	if sub:
 		divider.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 		divider.offset_left  = -150.0
@@ -215,9 +215,9 @@ func _insert_water_divider() -> void:
 ## 进场动画 ─────────────────────────────────────
 
 func _play_enter_animation() -> void:
-	var tl = get_node_or_null("UI/TitleLabel")
-	var sl = get_node_or_null("UI/SubtitleLabel")
-	var div = get_node_or_null("UI/TitleDivider")
+	var tl: Node = get_node_or_null("UI/TitleLabel")
+	var sl: Node = get_node_or_null("UI/SubtitleLabel")
+	var div: Node = get_node_or_null("UI/TitleDivider")
 	var bc  = get_node_or_null("UI/ButtonContainer")
 
 	# 初始化隐藏状态
@@ -289,7 +289,7 @@ func _on_continue() -> void:
 	if GameState.load_from_file():
 		_transition_to("res://scenes/MapScene.tscn")
 	else:
-		var cb = get_node_or_null("UI/ButtonContainer/ContinueBtn")
+		var cb: Node = get_node_or_null("UI/ButtonContainer/ContinueBtn")
 		if cb:
 			cb.text     = "存档损坏"
 			cb.disabled = true

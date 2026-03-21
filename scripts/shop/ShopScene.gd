@@ -32,14 +32,14 @@ var _slot_infos: Array = []
 func _ready() -> void:
 	TransitionManager.fade_in_only()
 
-	var rp = get_node_or_null("UI/RemovePanel")
+	var rp: Node = get_node_or_null("UI/RemovePanel")
 	if rp:
 		rp.visible = false
 
 	leave_btn.pressed.connect(_on_leave_pressed)
 	remove_btn.pressed.connect(_on_remove_pressed)
 	remove_cancel_btn.pressed.connect(func(): 
-		var panel = get_node_or_null("UI/RemovePanel")
+		var panel: Node = get_node_or_null("UI/RemovePanel")
 		if panel:
 			panel.visible = false
 	)
@@ -60,10 +60,10 @@ func _rebuild_layout() -> void:
 		return
 
 	# 隐藏 tscn 里的原有布局节点，用代码节点替代
-	var orig_cards = get_node_or_null("UI/CardsForSale")
+	var orig_cards: Node = get_node_or_null("UI/CardsForSale")
 	if orig_cards:
 		orig_cards.visible = false
-	var orig_remove = get_node_or_null("UI/RemoveSection")
+	var orig_remove: Node = get_node_or_null("UI/RemoveSection")
 	if orig_remove:
 		orig_remove.visible = false
 
@@ -94,7 +94,7 @@ func _build_title_area(parent: CanvasLayer) -> void:
 	## 标题 + WaterInkDivider + 副标题
 
 	# 主标题（替换 tscn 里的 Title）
-	var tscn_title = get_node_or_null("UI/Title")
+	var tscn_title: Node = get_node_or_null("UI/Title")
 	if tscn_title:
 		tscn_title.visible = false
 
@@ -120,7 +120,7 @@ func _build_title_area(parent: CanvasLayer) -> void:
 	parent.add_child(divider)
 
 	# 副标题（替换 tscn 里的 FlavorText）
-	var tscn_flavor = get_node_or_null("UI/FlavorText")
+	var tscn_flavor: Node = get_node_or_null("UI/FlavorText")
 	if tscn_flavor:
 		tscn_flavor.visible = false
 
@@ -226,7 +226,7 @@ func _build_bottom_area(parent: CanvasLayer) -> void:
 	## 底部：金币显示 + 离开按钮（不重建，使用原有节点并调整位置）
 
 	# GoldLabel 隐藏原位，我们在这里用 tscn 里的 GoldLabel 调整样式就行
-	var tscn_gold = get_node_or_null("UI/GoldLabel")
+	var tscn_gold: Node = get_node_or_null("UI/GoldLabel")
 	if tscn_gold:
 		tscn_gold.visible = false
 
@@ -276,7 +276,7 @@ func _generate_shop() -> void:
 	_slot_infos.clear()
 
 	# 找左侧容器的 CardsRow
-	var cards_row = get_node_or_null("UI/BodyContainer/LeftCardsPanel/CardsRow")
+	var cards_row: Node = get_node_or_null("UI/BodyContainer/LeftCardsPanel/CardsRow")
 	if cards_row == null:
 		# fallback：使用 tscn 里的 HBoxContainer
 		cards_row = get_node_or_null("UI/CardsForSale")
@@ -394,7 +394,7 @@ func _on_remove_pressed() -> void:
 			remove_label.text = "移除一张牌（%d金币）— 金币不足" % REMOVE_PRICE
 		return
 
-	var panel = get_node_or_null("UI/RemovePanel")
+	var panel: Node = get_node_or_null("UI/RemovePanel")
 	if panel == null:
 		return
 	panel.visible = true
@@ -415,7 +415,7 @@ func _on_remove_card_selected(card: Dictionary) -> void:
 	if not GameState.spend_gold(REMOVE_PRICE):
 		return
 	DeckManager.remove_card_from_deck(card.get("id", ""))
-	var panel = get_node_or_null("UI/RemovePanel")
+	var panel: Node = get_node_or_null("UI/RemovePanel")
 	if panel:
 		panel.visible = false
 
@@ -465,7 +465,7 @@ func _setup_shop_visual() -> void:
 	add_child(curtain_left)
 
 	# 主体面板描边（DS-00）
-	var ui_root = get_node_or_null("UI")
+	var ui_root: Node = get_node_or_null("UI")
 	if ui_root:
 		var frame = InkedPanel.new()
 		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

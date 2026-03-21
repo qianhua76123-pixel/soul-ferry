@@ -84,10 +84,10 @@ const ENDINGS: Dictionary = {
 #  _ready
 # ══════════════════════════════════════════════════════
 func _ready() -> void:
-	var ending_type = GameState.get_meta("ending_type", "defeat")
+	var ending_type: String = str(GameState.get_meta("ending_type", "defeat"))
 	if not ENDINGS.has(ending_type):
 		ending_type = "defeat"
-	var data = ENDINGS[ending_type]
+	var data: Dictionary = ENDINGS[ending_type]
 
 	# 背景 BGM
 	SoundManager.play_bgm("ending_good" if ending_type == "success" else "ending_bad", 1.0)
@@ -103,7 +103,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_bg_canvas = CanvasLayer.new()
 	_bg_canvas.name = "BgCanvas"
 	add_child(_bg_canvas)
-	var bg = ColorRect.new()
+	var bg := ColorRect.new()
 	bg.color = data["bg_color"]
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.size = Vector2(1152, 648)
@@ -113,14 +113,14 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_draw_bg_art(_bg_canvas, data, ending_type)
 
 	# ── 标题 ──
-	var title_lbl = _make_label(data["title"], 48, data["color"])
+	var title_lbl: Label = _make_label(data["title"], 48, data["color"])
 	title_lbl.name = "TitleLabel"
 	title_lbl.position = Vector2(576, 80)
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_lbl.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_bg_canvas.add_child(title_lbl)
 
-	var sub_lbl = _make_label(data["subtitle"], 16, Color(data["color"].r, data["color"].g, data["color"].b, 0.65))
+	var sub_lbl: Label = _make_label(data["subtitle"], 16, Color(data["color"].r, data["color"].g, data["color"].b, 0.65))
 	sub_lbl.name = "SubLabel"
 	sub_lbl.position = Vector2(576, 136)
 	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -128,7 +128,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_bg_canvas.add_child(sub_lbl)
 
 	# ── 分割线 ──
-	var sep = _make_separator(data["color"])
+	var sep: ColorRect = _make_separator(data["color"])
 	sep.position = Vector2(288, 158)
 	_bg_canvas.add_child(sep)
 
@@ -142,7 +142,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_text_label.position            = Vector2(576 - 288, 180)
 	_text_label.add_theme_font_size_override("normal_font_size", 17)
 	_text_label.add_theme_color_override("default_color", Color(0.88, 0.84, 0.76))
-	var full_text = "\n".join(data["lines"])
+	var full_text: String = "\n".join(data["lines"])
 	_text_label.text = full_text
 	_bg_canvas.add_child(_text_label)
 
@@ -152,7 +152,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_bg_canvas.add_child(_stat_panel)
 
 	# ── 按钮区 ──
-	var btn_row = HBoxContainer.new()
+	var btn_row := HBoxContainer.new()
 	btn_row.name = "BtnRow"
 	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	btn_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
@@ -163,7 +163,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_btn_restart.pressed.connect(_on_restart)
 	btn_row.add_child(_btn_restart)
 
-	var spacer = Control.new()
+	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(20, 0)
 	btn_row.add_child(spacer)
 
@@ -176,7 +176,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 # ══════════════════════════════════════════════════════
 func _draw_bg_art(parent: CanvasLayer, data: Dictionary, ending_type: String) -> void:
 	# 用 Node2D + _draw 绘制背景装饰
-	var art = _BgArt.new()
+	var art := _BgArt.new()
 	art.ending_type = ending_type
 	art.accent_color = data["color"]
 	parent.add_child(art)
@@ -185,41 +185,41 @@ func _draw_bg_art(parent: CanvasLayer, data: Dictionary, ending_type: String) ->
 #  统计面板
 # ══════════════════════════════════════════════════════
 func _build_stat_panel(title: String, color: Color, ending_type: String) -> VBoxContainer:
-	var panel = VBoxContainer.new()
+	var panel := VBoxContainer.new()
 	panel.name = "StatPanel"
 	panel.custom_minimum_size = Vector2(260, 0)
 
-	var title_lbl = _make_label(title, 14, Color(color.r, color.g, color.b, 0.8))
+	var title_lbl: Label = _make_label(title, 14, Color(color.r, color.g, color.b, 0.8))
 	panel.add_child(title_lbl)
 
-	var sep = HSeparator.new()
+	var sep := HSeparator.new()
 	panel.add_child(sep)
 
 	# 从 GameState 读取本局统计
-	var stats = _collect_stats(ending_type)
-	for stat in stats:
-		var row = HBoxContainer.new()
-		var key_lbl = _make_label(stat["key"], 13, Color(0.75, 0.70, 0.65))
+	var stats: Array = _collect_stats(ending_type)
+	for stat: Dictionary in stats:
+		var row := HBoxContainer.new()
+		var key_lbl: Label = _make_label(stat["key"], 13, Color(0.75, 0.70, 0.65))
 		key_lbl.custom_minimum_size = Vector2(140, 0)
 		row.add_child(key_lbl)
-		var val_lbl = _make_label(str(stat["value"]), 13, Color(0.95, 0.90, 0.75))
+		var val_lbl: Label = _make_label(str(stat["value"]), 13, Color(0.95, 0.90, 0.75))
 		row.add_child(val_lbl)
 		panel.add_child(row)
 
 	return panel
 
 func _collect_stats(ending_type: String) -> Array:
-	var stats = []
+	var stats: Array = []
 	stats.append({"key": "渡化亡魂", "value": "%d 个" % int(GameState.get_meta("du_hua_count", 0))})
 	stats.append({"key": "镇压亡魂", "value": "%d 个" % int(GameState.get_meta("zhenya_count", 0))})
 	stats.append({"key": "到达楼层", "value": "第 %d 层" % int(GameState.current_layer)})
 	stats.append({"key": "剩余HP",   "value": "%d / %d" % [int(GameState.hp), int(GameState.max_hp)]})
 	stats.append({"key": "持有遗物", "value": "%d 件" % len(GameState.relics)})
 	stats.append({"key": "牌库规模", "value": "%d 张" % (len(DeckManager.deck) + len(DeckManager.hand) + len(DeckManager.discard_pile))})
-	var ach_count = AchievementManager.get_achievement_count()
-	var ach_total = AchievementManager.ACHIEVEMENTS.size()
+	var ach_count: int = AchievementManager.get_achievement_count()
+	var ach_total: int = AchievementManager.ACHIEVEMENTS.size()
 	stats.append({"key": "成就进度", "value": "%d / %d" % [int(ach_count), int(ach_total)]})
-	var gs = AchievementManager.get_stats()
+	var gs: Dictionary = AchievementManager.get_stats()
 	stats.append({"key": "累计游玩", "value": "%d 局" % int(gs.get("total_runs", 0))})
 	stats.append({"key": "累计渡化", "value": "%d 次" % int(gs.get("total_du_hua", 0))})
 	if ending_type == "success":
@@ -233,28 +233,28 @@ func _collect_stats(ending_type: String) -> Array:
 # ══════════════════════════════════════════════════════
 func _play_intro(data: Dictionary) -> void:
 	# 1. 黑屏渐显
-	var overlay = ColorRect.new()
+	var overlay := ColorRect.new()
 	overlay.name  = "FadeOverlay"
 	overlay.color = Color.BLACK
 	overlay.size  = Vector2(1152, 648)
 	_bg_canvas.add_child(overlay)
-	var tw = overlay.create_tween()
+	var tw: Tween = overlay.create_tween()
 	tw.tween_property(overlay, "modulate:a", 0.0, 1.5).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(overlay.queue_free)
 
 	# 2. 标题节点初始不可见，延迟淡入
-	var title_lbl = _bg_canvas.get_node_or_null("TitleLabel")
+	var title_lbl: Node = _bg_canvas.get_node_or_null("TitleLabel")
 	if title_lbl:
-		title_lbl.modulate = Color(1, 1, 1, 0)
-		var ttw = title_lbl.create_tween()
+		title_lbl.set("modulate", Color(1, 1, 1, 0))
+		var ttw: Tween = title_lbl.create_tween()
 		ttw.tween_interval(0.8)
 		ttw.tween_property(title_lbl, "modulate", Color.WHITE, 0.8)
 
 	# 3. 正文逐字打出（0.8s 后开始，每字 0.06s）
 	if _text_label:
 		_text_label.visible_characters = 0
-		var total_chars = len(_text_label.text)
-		var tw2 = _text_label.create_tween()
+		var total_chars: int = len(_text_label.text)
+		var tw2: Tween = _text_label.create_tween()
 		tw2.tween_interval(1.2)
 		tw2.tween_property(_text_label, "visible_characters", total_chars, total_chars * 0.06)
 		tw2.tween_callback(func(): _reveal_stats_and_buttons())
@@ -265,13 +265,13 @@ func _play_intro(data: Dictionary) -> void:
 func _reveal_stats_and_buttons() -> void:
 	if _stat_panel:
 		_stat_panel.modulate = Color(1, 1, 1, 0)
-		var tw = _stat_panel.create_tween()
+		var tw: Tween = _stat_panel.create_tween()
 		tw.tween_property(_stat_panel, "modulate", Color.WHITE, 0.6)
 
-	var btn_row = _bg_canvas.get_node_or_null("BtnRow")
+	var btn_row: Node = _bg_canvas.get_node_or_null("BtnRow")
 	if btn_row:
-		btn_row.modulate = Color(1, 1, 1, 0)
-		var tw2 = btn_row.create_tween()
+		btn_row.set("modulate", Color(1, 1, 1, 0))
+		var tw2: Tween = btn_row.create_tween()
 		tw2.tween_interval(0.3)
 		tw2.tween_property(btn_row, "modulate", Color.WHITE, 0.5)
 

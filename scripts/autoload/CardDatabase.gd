@@ -12,10 +12,10 @@ func _ready() -> void:
 
 func _load_cards() -> void:
 	if _loaded: return
-	var file = FileAccess.open(CARDS_DATA_PATH, FileAccess.READ)
+	var file: FileAccess = FileAccess.open(CARDS_DATA_PATH, FileAccess.READ)
 	if not file:
 		push_error("CardDatabase: 无法打开 " + CARDS_DATA_PATH); return
-	var json = JSON.new()
+	var json := JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		push_error("CardDatabase: JSON 解析失败"); file.close(); return
 	file.close()
