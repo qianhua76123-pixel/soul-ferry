@@ -88,7 +88,7 @@ func _draw() -> void:
 	draw_rect(bg_rect, BORDER_COLOR, false, 1.5)
 	# 同心五边形网格（4层）
 	for level in range(1, 5):
-		var pts: float = _get_pentagon(center, RADIUS * float(level) / 4.0)
+		var pts: Array = _get_pentagon(center, RADIUS * float(level) / 4.0)
 		pts.append(pts[0])
 		draw_polyline(PackedVector2Array(pts), GRID_COLOR, 1.0)
 	# 轴线
