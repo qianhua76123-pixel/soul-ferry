@@ -350,5 +350,80 @@
       "backstory": "被父母为了彩礼嫁给已死陌生人做冥婚新娘。从未爱过也从未被爱过，甚至不知道爱是什么感觉。执念不是悲，是「空白」。",
       "description": "穿着嫁衣的新娘，眼中没有任何情绪——甚至连悲伤都没有"
     }
+    ,
+    {
+      "id": "jiang_panyu",
+      "name": "江盼鱼",
+      "type": "boss",
+      "is_boss": true,
+      "chapter": 1,
+      "hp": 120,
+      "emotion_affinity": ["grief","fear"],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {"grief":3,"fear":2},
+        "description": "悲≥3 + 惧≥2，江盼鱼的执念开始动摇"
+      },
+      "actions": [
+        {"type":"attack","value":12,"weight":40,"description":"水涌"},
+        {"type":"attack_all","value":7,"weight":20,"description":"浪击"},
+        {"type":"heal_self","value":8,"weight":15,"description":"水中沉潜"},
+        {"type":"apply_debuff","value":"grief_aura","weight":25,"description":"七年等候（玩家悲+1）"}
+      ],
+      "boss_phase_2_hp_threshold": 0.5,
+      "phase_2_action_bonus": {"all_damage":1.5},
+      "loot": {"gold":[30,50],"relic_chance":0.8}
+    },
+    {
+      "id": "song_lanxiu",
+      "name": "宋兰秀",
+      "type": "boss",
+      "is_boss": true,
+      "chapter": 2,
+      "hp": 150,
+      "emotion_affinity": ["rage","calm"],
+      "du_hua_condition": {
+        "type": "emotion_threshold",
+        "emotion_requirement": {"calm":2,"rage":2},
+        "description": "定≥2 + 怒≥2，宋兰秀的怒火中出现了裂缝"
+      },
+      "actions": [
+        {"type":"attack","value":15,"weight":35,"description":"旱怒"},
+        {"type":"attack_all","value":9,"weight":20,"description":"烈火蔓延"},
+        {"type":"apply_debuff","value":"rage_aura","weight":20,"description":"无人相信（玩家怒+1）"},
+        {"type":"shield_self","value":12,"weight":25,"description":"六十年执念（自盾）"}
+      ],
+      "boss_phase_2_hp_threshold": 0.5,
+      "phase_2_action_bonus": {"all_damage":1.6,"shield_on_action":5},
+      "loot": {"gold":[40,65],"relic_chance":0.85}
+    },
+    {
+      "id": "shen_sujin",
+      "name": "沈素锦",
+      "type": "boss",
+      "is_boss": true,
+      "chapter": 3,
+      "hp": 180,
+      "emotion_affinity": ["joy","calm"],
+      "du_hua_condition": {
+        "type": "multi_stage",
+        "stages": 3,
+        "stage_requirements": [
+          {"joy":1,"calm":1},
+          {"joy":2,"calm":2},
+          {"joy":3,"calm":3}
+        ],
+        "description": "三阶段渡化：喜/定情绪分阶达标，逐步开解素锦"
+      },
+      "actions": [
+        {"type":"attack","value":14,"weight":30,"description":"无意识索取"},
+        {"type":"drain_emotion","value":1,"weight":25,"description":"情感真空（随机降低玩家一种情绪-1）"},
+        {"type":"shield_self","value":10,"weight":20,"description":"空的坚壁"},
+        {"type":"apply_debuff","value":"joy_drain","weight":25,"description":"索取喜意（玩家喜-1）"}
+      ],
+      "boss_phase_2_hp_threshold": 0.4,
+      "phase_2_action_bonus": {"all_damage":1.4,"drain_emotion_count":2},
+      "loot": {"gold":[50,80],"relic_chance":1.0}
+    }
   ]
 }
