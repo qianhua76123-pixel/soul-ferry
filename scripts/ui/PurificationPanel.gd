@@ -69,7 +69,7 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 
 	# 逐个情绪条件构建进度条
 	for emotion in emotion_req:
-		var required = emotion_req[emotion]
+		var required: int = emotion_req[emotion]
 		var col: VBoxContainer = VBoxContainer.new()
 		col.add_theme_constant_override("separation", 2)
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -106,7 +106,7 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 
 func update_display() -> void:
 	## 刷新所有条件进度，检查是否全部满足
-	var all_met = true
+	var all_met: bool = true
 	for item in _cond_items:
 		var cur  = EmotionManager.values.get(item["emotion"], 0)
 		var req  = item["required"]

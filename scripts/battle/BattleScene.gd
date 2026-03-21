@@ -49,11 +49,13 @@ const BattleBackgroundClass = preload("res://scripts/battle/BattleBackground.gd"
 const EnergyDisplayClass    = preload("res://scripts/ui/EnergyDisplay.gd")
 
 ## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
-const EnemyPixelArtClass  = preload("res://scripts/ui/EnemyPixelArt.gd")
-const PlayerPixelArtClass = preload("res://scripts/ui/PlayerPixelArt.gd")
+const EnemyPixelArtClass    = preload("res://scripts/ui/EnemyPixelArt.gd")
+const PlayerPixelArtClass   = preload("res://scripts/ui/PlayerPixelArt.gd")
+const DeckViewerPanelClass  = preload("res://scripts/ui/DeckViewerPanel.gd")
 
 ## 卡盘能量标签（右上角）
-var _energy_tray_label: Label = null
+var _energy_tray_label: Label  = null
+var _deck_viewer: Control       = null
 
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
@@ -261,13 +263,18 @@ func _build_relic_bar() -> void:
 	var bar: HBoxContainer = HBoxContainer.new()
 	bar.name = "BattleRelicBar"
 	for rid in GameState.relics:
-		var lbl: Label = Label.new()
-		lbl.name   = "rbtn_" + rid
-		lbl.text   = RELIC_ICONS.get(rid, "◈")
-		lbl.add_theme_font_size_override("font_size", 20)
 		var data: Dictionary = RelicManager._all_relics_data.get(rid, {})
-		lbl.tooltip_text = data.get("name","???") + "\n" + data.get("effect","")
-		bar.add_child(lbl)
+		var relic_name: String = data.get("name","???")
+		var relic_effect: String = data.get("effect","（无说明）")
+		# Button 替代 Label，mouse_filter 可接收 hover
+		var btn: Button = Button.new()
+		btn.name = "rbtn_" + rid
+		btn.text = RELIC_ICONS.get(rid, "◈")
+		btn.flat = true
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.add_theme_font_size_override("font_size", 20)
+		btn.tooltip_text = "[%s]\n%s" % [relic_name, relic_effect]
+		bar.add_child(btn)
 	player_area.add_child(bar)
 
 ## 遗物触发：闪光动画 + 浮字提示
@@ -517,6 +524,26 @@ func _setup_hud_theme() -> void:
 	du_hover.bg_color = du_hover.bg_color.lightened(0.06)
 	du_hua_btn.add_theme_stylebox_override("hover", du_hover)
 	du_hua_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+
+	# 卡组查看按钮（HUD 右侧，DeckCount 按钮旁）
+	var view_deck_btn: Button = Button.new()
+	view_deck_btn.name = "ViewDeckBtn"
+	view_deck_btn.text = "📖 [D]"
+	view_deck_btn.custom_minimum_size = Vector2(60, 28)
+	view_deck_btn.add_theme_font_size_override("font_size", 12)
+	view_deck_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	view_deck_btn.add_theme_stylebox_override("hover",  UIConstants.make_button_style("parch", "gold"))
+	view_deck_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	view_deck_btn.pressed.connect(func():
+		if _deck_viewer: _deck_viewer.open_panel())
+	var hud_node: Node = get_node_or_null("UI/HUD")
+	if hud_node: hud_node.add_child(view_deck_btn)
+
+	# 初始化卡组查看器面板
+	_deck_viewer = DeckViewerPanelClass.new()
+	_deck_viewer.name = "DeckViewerPanel"
+	var ui_node: Node = get_node_or_null("UI")
+	if ui_node: ui_node.add_child(_deck_viewer)
 
 func _result_panel_bbcode(title: String, body: String) -> String:
 	var tc := UIConstants.color_of("gold").to_html(false)

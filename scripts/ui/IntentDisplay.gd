@@ -84,12 +84,12 @@ func _notification(what: int) -> void:
 		queue_redraw()
 
 func _draw() -> void:
-	var rect = Rect2(Vector2.ZERO, size)
+	var rect: Rect2 = Rect2(Vector2.ZERO, size)
 	if rect.size.x < 8 or rect.size.y < 8:
 		return
-	var fill = UIConstants.color_of("parch")
-	var border = UIConstants.color_of("gold_dim")
-	var gl = UIConstants.color_of("gold")
+	var fill: Color = UIConstants.color_of("parch")
+	var border: Color = UIConstants.color_of("gold_dim")
+	var gl: Color = UIConstants.color_of("gold")
 	draw_rect(rect, Color(fill.r, fill.g, fill.b, _fill_alpha), true)
 	var border_a: float = clampf(0.70 * _edge_flash, 0.35, 1.0)
 	draw_rect(rect, Color(border.r, border.g, border.b, border_a), false, 1.0)
@@ -136,7 +136,7 @@ func _build_description(action: Dictionary) -> String:
 		"all_field_heat_dot":return "全场灼烧 ×%d" % int(val)
 		"shield":            return "获得 %d 护盾" % int(val)
 		"emotion_push":
-			var emo_cn = {"rage":"怒","fear":"惧","grief":"悲","joy":"喜","calm":"定"}
+			var emo_cn: Dictionary = {"rage":"怒","fear":"惧","grief":"悲","joy":"喜","calm":"定"}
 			var en: String = action.get("emotion", "")
 			return "使你%s +%d" % [emo_cn.get(en, en), int(val)]
 		"summon_tide":       return "召唤潮汐 %d×%d段" % [int(val), int(action.get("hits", 3))]

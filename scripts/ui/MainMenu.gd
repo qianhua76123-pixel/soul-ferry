@@ -91,7 +91,7 @@ func _style_continue_btn(has_save: bool) -> void:
 	btn.add_theme_font_size_override("font_size", 16)
 
 	if has_save:
-		var gold_dim = Color(0.420, 0.353, 0.188)
+		var gold_dim: Color = Color(0.420, 0.353, 0.188)
 		btn.add_theme_color_override("font_color", Color(0.784, 0.663, 0.431))
 		var normal: StyleBoxFlat = _make_flat_style(Color(0.102, 0.082, 0.031, 0.7),  gold_dim)
 		var hover  = _make_flat_style(Color(0.18,  0.15,  0.07,  0.85), Color(0.784, 0.663, 0.431))
@@ -261,9 +261,9 @@ func _play_enter_animation() -> void:
 	# d. 按钮逐个淡入（1.3s 后，即上面动画完毕后再等 0.0s，已经在约 1.3s 处）
 	tw.tween_interval(0.0)
 	if bc:
-		var btns = bc.get_children()
+		var btns: Array = bc.get_children()
 		for i in btns.size():
-			var btn = btns[i]
+			var btn: Node = btns[i]
 			tw.tween_property(btn, "modulate:a", 1.0, 0.3).set_ease(Tween.EASE_OUT)
 			if i < btns.size() - 1:
 				tw.tween_interval(0.15)

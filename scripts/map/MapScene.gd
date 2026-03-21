@@ -12,6 +12,9 @@ extends Node2D
 @onready var gold_label:     Label         = $UI/TopBar/GoldLabel
 @onready var relic_bar:      HBoxContainer = $UI/RelicBar
 
+const DeckViewerPanelClass = preload("res://scripts/ui/DeckViewerPanel.gd")
+var _deck_viewer: Control = null
+
 # ── 每层普通节点数量（不含 Boss）
 const LAYER_NODE_COUNTS: Array = [5, 5, 4]
 
@@ -75,6 +78,25 @@ func _ready() -> void:
 
 	if not GameState.check_victory_condition():
 		_check_layer_done()
+
+	# 初始化卡组查看器
+	_deck_viewer = DeckViewerPanelClass.new()
+	_deck_viewer.name = "DeckViewer"
+	var ui_layer: Node = get_node_or_null("UI")
+	if ui_layer:
+		ui_layer.add_child(_deck_viewer)
+		# 在 RelicBar 左侧加「查看牌组」按钮
+		var deck_btn: Button = Button.new()
+		deck_btn.name = "ViewDeckBtn"
+		deck_btn.text = "📖 牌组 [D]"
+		deck_btn.custom_minimum_size = Vector2(100, 28)
+		deck_btn.add_theme_font_size_override("font_size", 12)
+		deck_btn.pressed.connect(func(): _deck_viewer.open_panel())
+		# 插入到 RelicBar 前面
+		var rbar: Node = ui_layer.get_node_or_null("RelicBar")
+		if rbar:
+			ui_layer.add_child(deck_btn)
+			deck_btn.position = Vector2(rbar.position.x - 110, rbar.position.y + 4)
 
 # ══════════════════════════════════════════════════════
 #  地图生成
@@ -457,12 +479,22 @@ func _render_relics() -> void:
 	}
 	for rid: String in GameState.relics:
 		var data: Dictionary = RelicManager._all_relics_data.get(rid, {})
-		var lbl := Label.new()
-		lbl.text         = relic_icons.get(rid, "◈")
-		lbl.tooltip_text = data.get("name", "???") + "\n" + data.get("effect", "")
-		lbl.add_theme_font_size_override("font_size", 22)
-		lbl.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
-		relic_bar.add_child(lbl)
+		var relic_name: String = data.get("name", "???")
+		var relic_effect: String = data.get("effect", "（无说明）")
+		# 用 Button 代替 Label，使 mouse_filter 可接收 hover
+		var btn: Button = Button.new()
+		btn.text = relic_icons.get(rid, "◈") + " " + relic_name
+		btn.flat = true
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		btn.add_theme_font_size_override("font_size", 14)
+		btn.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+		btn.add_theme_color_override("font_hover_color", UIConstants.color_of("gold"))
+		# 自定义 tooltip：悬停显示完整说明
+		var tooltip_text: String = "[%s]
+%s" % [relic_name, relic_effect]
+		btn.tooltip_text = tooltip_text
+		relic_bar.add_child(btn)
 
 func _update_status() -> void:
 	hp_label.text   = "%s %d/%d" % [UIConstants.ICONS["hp"], GameState.hp, GameState.max_hp]

@@ -76,7 +76,7 @@ func _draw_bar(area: Control) -> void:
 	area.draw_line(Vector2(CORNER, 2), Vector2(CORNER + fill_w, 2), SHINE_COLOR, 1.0)
 
 	# 右侧数字（与填充色一致，字号11）
-	var hp_text = "%d / %d" % [_cur_hp, _max_hp]
+	var hp_text: String = "%d / %d" % [_cur_hp, _max_hp]
 	area.draw_string(ThemeDB.fallback_font,
 		Vector2(w - 60, 2 + BAR_H - 2),
 		hp_text, HORIZONTAL_ALIGNMENT_RIGHT, 60, 11, fill_color)
@@ -108,7 +108,7 @@ func _get_fill_color(ratio: float) -> Color:
 		return COLOR_LOW
 
 func set_hp(new_hp: int, max_hp: int) -> void:
-	var old_hp = _cur_hp
+	var old_hp: float = _cur_hp
 	_max_hp = max_hp
 	_cur_hp = new_hp
 
