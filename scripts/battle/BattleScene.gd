@@ -52,6 +52,9 @@ const EnergyDisplayClass    = preload("res://scripts/ui/EnergyDisplay.gd")
 const EnemyPixelArtClass  = preload("res://scripts/ui/EnemyPixelArt.gd")
 const PlayerPixelArtClass = preload("res://scripts/ui/PlayerPixelArt.gd")
 
+## 卡盘能量标签（右上角）
+var _energy_tray_label: Label = null
+
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
 
@@ -491,9 +494,19 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 		_set_player_sprite_state("dead")
 
 func _update_hud() -> void:
-	cost_label.text          = "费用: %d" % int(DeckManager.current_cost)
-	deck_count_label.text    = "▤ 牌库: %d" % int(len(DeckManager.deck))
-	discard_count_label.text = "↓ 弃牌: %d" % int(len(DeckManager.discard_pile))
+	var cost_now: int = int(DeckManager.current_cost)
+	var cost_max: int = int(DeckManager.max_cost)
+	cost_label.text          = "⚡%d/%d" % [cost_now, cost_max]
+	deck_count_label.text    = "▤ %d" % int(len(DeckManager.deck))
+	discard_count_label.text = "↓ %d" % int(len(DeckManager.discard_pile))
+	# 卡盘右上角能量标签同步
+	if _energy_tray_label:
+		_energy_tray_label.text = "⚡ %d / %d" % [cost_now, cost_max]
+		# 能量不足时变红提示
+		if cost_now == 0:
+			_energy_tray_label.add_theme_color_override("font_color", UIConstants.color_of("nu"))
+		else:
+			_energy_tray_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 	# 旧血条数据同步（已隐藏，仅备份）
 	player_hp_bar.max_value = GameState.max_hp
 	player_hp_bar.value     = GameState.hp
@@ -890,23 +903,81 @@ func _setup_layout_improvements() -> void:
 	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(ground)
 
-	# HandContainer：居中对齐 + 卡牌间距
-	if hand_container:
-		hand_container.add_theme_constant_override("separation", 12)
+	# ── 手牌区：卡盘 + 固定到屏幕底部 ──────────────────
+	if hand_container and ui:
+		# 1. 将 HandContainer 锚定到屏幕底部居中
+		hand_container.set_anchor_and_offset(SIDE_LEFT,   0.0,   0)
+		hand_container.set_anchor_and_offset(SIDE_RIGHT,  1.0,   0)
+		hand_container.set_anchor_and_offset(SIDE_TOP,    1.0, -165)
+		hand_container.set_anchor_and_offset(SIDE_BOTTOM, 1.0,  -10)
+		hand_container.add_theme_constant_override("separation", 10)
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
-		# 手牌区上方水墨分割线（与 HandContainer 左右边距对齐）
-		if ui and not ui.get_node_or_null("HandAreaDivider"):
+
+		# 2. 卡盘背景（半透明托盘，比 HandContainer 稍大）
+		if not ui.get_node_or_null("CardTray"):
+			var tray: Panel = Panel.new()
+			tray.name = "CardTray"
+			tray.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			tray.z_index = 0
+			# 锚定到屏幕底部，覆盖手牌区
+			tray.set_anchor_and_offset(SIDE_LEFT,   0.0,   0)
+			tray.set_anchor_and_offset(SIDE_RIGHT,  1.0,   0)
+			tray.set_anchor_and_offset(SIDE_TOP,    1.0, -180)
+			tray.set_anchor_and_offset(SIDE_BOTTOM, 1.0,    0)
+			# 卡盘样式：深色半透明，上边弧形金边
+			var tray_style: StyleBoxFlat = StyleBoxFlat.new()
+			tray_style.bg_color = Color(0.05, 0.04, 0.06, 0.82)
+			tray_style.border_width_top = 2
+			tray_style.border_color = UIConstants.color_of("gold_dim")
+			tray_style.corner_radius_top_left  = 12
+			tray_style.corner_radius_top_right = 12
+			tray.add_theme_stylebox_override("panel", tray_style)
+			ui.add_child(tray)
+			# 确保 HandContainer 在 tray 上层
+			hand_container.z_index = 2
+
+		# 3. 卡盘上方水墨分割线
+		if not ui.get_node_or_null("HandAreaDivider"):
 			var strip := WaterInkDivider.new()
 			strip.name = "HandAreaDivider"
 			strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			strip.z_index = 1
-			var top := int(hand_container.offset_top) - 10
-			strip.set_anchor_and_offset(SIDE_LEFT, 0.0, 8)
-			strip.set_anchor_and_offset(SIDE_RIGHT, 1.0, -8)
-			strip.set_anchor_and_offset(SIDE_TOP, 0.0, top)
-			strip.set_anchor_and_offset(SIDE_BOTTOM, 0.0, top + 8)
+			strip.set_anchor_and_offset(SIDE_LEFT,   0.0,  8)
+			strip.set_anchor_and_offset(SIDE_RIGHT,  1.0, -8)
+			strip.set_anchor_and_offset(SIDE_TOP,    1.0, -183)
+			strip.set_anchor_and_offset(SIDE_BOTTOM, 1.0, -175)
 			strip.ink_color = UIConstants.color_of("gold_dim")
 			ui.add_child(strip)
+
+		# 4. 能量显示移到卡盘右上角（覆盖原 HUD 的 CostLabel）
+		if not ui.get_node_or_null("CardTrayEnergy"):
+			var energy_panel: Panel = Panel.new()
+			energy_panel.name = "CardTrayEnergy"
+			energy_panel.z_index = 3
+			energy_panel.set_anchor_and_offset(SIDE_RIGHT,  1.0, -12)
+			energy_panel.set_anchor_and_offset(SIDE_LEFT,   1.0, -90)
+			energy_panel.set_anchor_and_offset(SIDE_TOP,    1.0, -198)
+			energy_panel.set_anchor_and_offset(SIDE_BOTTOM, 1.0, -166)
+			var ep_style: StyleBoxFlat = StyleBoxFlat.new()
+			ep_style.bg_color = Color(0.08, 0.06, 0.04, 0.90)
+			ep_style.border_width_top    = 1
+			ep_style.border_width_bottom = 1
+			ep_style.border_width_left   = 1
+			ep_style.border_width_right  = 1
+			ep_style.border_color = UIConstants.color_of("gold")
+			ep_style.set_corner_radius_all(6)
+			energy_panel.add_theme_stylebox_override("panel", ep_style)
+			var energy_lbl: Label = Label.new()
+			energy_lbl.name = "EnergyLabel"
+			energy_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+			energy_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			energy_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+			energy_lbl.add_theme_font_size_override("font_size", 14)
+			energy_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+			energy_panel.add_child(energy_lbl)
+			ui.add_child(energy_panel)
+			# 将 cost_label 的更新同步到这里（覆写信号）
+			_energy_tray_label = energy_lbl
 
 	# 卡牌悬停预览层（复用上方已声明的 ui）
 	_card_preview = CardPreviewClass.new()
