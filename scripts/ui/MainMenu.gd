@@ -23,9 +23,13 @@ func _ready() -> void:
 	quit_btn.pressed.connect(get_tree().quit)
 
 	version_label.text = VERSION
+	version_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("micro"))
+	version_label.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 
 	# 用代码生成水墨背景（程序化，不依赖外部贴图）
 	_draw_ink_bg()
+	_setup_particles()
+	_setup_menu_visual_style()
 
 	# 入场动画
 	title_label.modulate.a    = 0.0
@@ -114,7 +118,15 @@ func _setup_particles() -> void:
 	ink_particles.process_material = mat
 	ink_particles.position          = Vector2(640, -20)
 
-	# 粒子碰撞形状（全屏宽）
-	var mesh = QuadMesh.new()
-	mesh.size = Vector2(1280, 1)
-	ink_particles.draw_pass_1 = mesh
+	# Godot 4：GPUParticles2D 使用 texture 作为粒子外形，不再有 draw_pass_1 / QuadMesh
+	# 细长竖条（接近提示词 1×4px 意象，略放大以便过滤）
+	var strip := Image.create(2, 8, false, Image.FORMAT_RGBA8)
+	strip.fill(Color(1, 1, 1, 1))
+	ink_particles.texture = ImageTexture.create_from_image(strip)
+
+func _setup_menu_visual_style() -> void:
+	for btn in [new_game_btn, continue_btn, quit_btn]:
+		btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+		btn.add_theme_font_size_override("font_size", 16)
+		btn.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))

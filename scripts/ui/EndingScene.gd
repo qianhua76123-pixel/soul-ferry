@@ -312,6 +312,8 @@ func _make_button(text: String, color: Color) -> Button:
 	btn.custom_minimum_size = Vector2(140, 44)
 	btn.add_theme_font_size_override("font_size", 16)
 	btn.add_theme_color_override("font_color", color)
+	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	return btn
 
 # ══════════════════════════════════════════════════════

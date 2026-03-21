@@ -85,6 +85,10 @@ func _render_event() -> void:
 		btn.text = btn_text
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		btn.custom_minimum_size = Vector2(500, 44)
+		btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+		btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+		btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 		var captured = choice
 		btn.pressed.connect(func(): _on_choice_selected(captured))
 		choices_container.add_child(btn)
@@ -94,6 +98,9 @@ func _render_event() -> void:
 		var reveal_btn = Button.new()
 		reveal_btn.text = "👁 年画眼：看清真相（本局仅一次）"
 		reveal_btn.custom_minimum_size = Vector2(500, 36)
+		reveal_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+		reveal_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+		reveal_btn.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 		reveal_btn.pressed.connect(func():
 			RelicManager.use_nianhua_yan()
 			_render_event()   # 重新渲染带预览的选项
@@ -211,6 +218,10 @@ func _show_result(result: Dictionary) -> void:
 		if narrative != "":
 			desc += "\n\n[i]" + narrative + "[/i]"
 	result_label.text = desc
+	result_label.add_theme_font_size_override("normal_font_size", UIConstants.font_size_of("body"))
+	result_continue_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	result_continue_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	result_continue_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 
 func _on_continue_pressed() -> void:
 	event_completed.emit(_current_event)
@@ -243,3 +254,29 @@ func _setup_event_visual() -> void:
 	deco2.color    = Color(0.65, 0.50, 0.10, 0.8)
 	deco2.z_index  = 5
 	add_child(deco2)
+
+	# 事件主面板切角描边（DS-00）
+	var event_panel = get_node_or_null("UI/EventPanel")
+	if event_panel:
+		var inked = InkedPanel.new()
+		inked.set_anchors_preset(Control.PRESET_FULL_RECT)
+		inked.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.78)
+		inked.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.55)
+		inked.top_line_color = UIConstants.color_of("gold")
+		event_panel.add_child(inked)
+		event_panel.move_child(inked, 0)
+
+	# 标题、正文字号统一
+	title_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
+	title_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	desc_label.add_theme_font_size_override("normal_font_size", UIConstants.font_size_of("body"))
+	desc_label.add_theme_color_override("default_color", UIConstants.color_of("text_secondary"))
+
+	# 标题与正文之间加一条水墨分割线
+	var vbox = get_node_or_null("UI/EventPanel/VBox")
+	if vbox:
+		var divider = WaterInkDivider.new()
+		divider.custom_minimum_size = Vector2(500, 8)
+		divider.ink_color = UIConstants.color_of("gold_dim")
+		vbox.add_child(divider)
+		vbox.move_child(divider, 1)

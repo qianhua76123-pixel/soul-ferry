@@ -7,9 +7,9 @@ class_name BossUI
 ## 功能：
 ##   1. Boss 名称大字特效（红色+发光+入场动画）
 ##   2. 超大血条（带渐变色：绿→黄→橙→红）
-##   3. 意图预告系统（显示 Boss 下一轮行动，含图标+文字+进度预测）
-##   4. Boss 阶段系统（HP 过半时触发愤怒阶段，强化 Boss 外观）
-##   5. Boss 入场动画序列
+##   3. Boss 阶段系统（HP 过半时触发愤怒阶段，强化 Boss 外观）
+##   4. Boss 入场动画序列
+##  （敌人意图由 BattleStateMachine + IntentDisplay 统一显示）
 
 signal boss_phase_changed(new_phase: int)   # 1=正常, 2=愤怒
 
@@ -20,7 +20,6 @@ var _battle_scene:    Node  = null
 var _enemy_area:      Control = null
 var _hp_bar:          ProgressBar = null
 var _name_label:      Label = null
-var _intent_label:    Label = null
 var _sprite_node:     TextureRect = null
 
 # ══════════════════════════════════════════════════════
@@ -29,22 +28,7 @@ var _sprite_node:     TextureRect = null
 var _boss_data:       Dictionary = {}
 var _enemy_max_hp:    int = 0
 var _current_phase:   int = 1   # 1=正常, 2=愤怒（HP≤50%）
-var _action_index:    int = 0   # 当前即将执行的 action 序号
 var _is_active:       bool = false
-
-# 意图类型图标映射
-const INTENT_ICONS: Dictionary = {
-	"attack":          "⚔",
-	"attack_all":      "💢",
-	"shield":          "🛡",
-	"heal":            "💚",
-	"dot":             "🔥",
-	"dot_fire":        "🔥",
-	"emotion_push":    "🌀",
-	"summon":          "👻",
-	"all_field_heat_dot": "☄",
-	"phase_change":    "⚡",
-}
 
 # ══════════════════════════════════════════════════════
 #  激活（由 BattleScene 在 _on_battle_started 后调用）
@@ -54,13 +38,12 @@ func activate(battle_scene: Node, enemy_data: Dictionary) -> void:
 	_boss_data    = enemy_data
 	_enemy_max_hp = enemy_data.get("hp", 100)
 	_current_phase = 1
-	_action_index  = 0
 	_is_active     = true
 
 	_resolve_nodes()
 	_apply_boss_style()
 	_play_boss_intro()
-	_update_intent_display(0)
+	# 敌人意图由 BattleStateMachine.intent_updated → IntentDisplay 统一显示，避免与 Boss 预测重复
 
 # ══════════════════════════════════════════════════════
 #  每回合由 BattleScene 调用，传入当前 HP 和回合数
@@ -69,10 +52,9 @@ func on_turn_start(current_hp: int, turn: int) -> void:
 	if not _is_active: return
 	_update_hp_bar_color(current_hp)
 	_check_phase_change(current_hp)
-	_update_intent_display(turn)
 
-## 每次卡牌打出后由 BattleScene 调用（刷新下一行动预告）
-func on_card_played(_card: Dictionary, _result: Dictionary, current_hp: int, turn: int) -> void:
+## 每次卡牌打出后由 BattleScene 调用（刷新血条与阶段）
+func on_card_played(_card: Dictionary, _result: Dictionary, current_hp: int, _turn: int) -> void:
 	if not _is_active: return
 	_update_hp_bar_color(current_hp)
 	_check_phase_change(current_hp)
@@ -93,7 +75,6 @@ func _resolve_nodes() -> void:
 	_enemy_area   = _battle_scene.get_node_or_null("UI/AltarLayout/EnemyArea")
 	_hp_bar       = _battle_scene.get_node_or_null("UI/AltarLayout/EnemyArea/HPBar")
 	_name_label   = _battle_scene.get_node_or_null("UI/AltarLayout/EnemyArea/EnemyName")
-	_intent_label = _battle_scene.get_node_or_null("UI/AltarLayout/EnemyArea/IntentLabel")
 	_sprite_node  = _battle_scene.get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
 
 # ══════════════════════════════════════════════════════
@@ -111,7 +92,7 @@ func _apply_boss_style() -> void:
 	# Boss 名称：加大字号，朱红色
 	if _name_label:
 		_name_label.add_theme_font_size_override("font_size", 20)
-		_name_label.add_theme_color_override("font_color", Color(0.9, 0.15, 0.15))
+		_name_label.add_theme_color_override("font_color", UIConstants.color_of("nu"))
 
 	# BOSS 标签（在 EnemyArea 顶部插入）
 	if _enemy_area:
@@ -119,7 +100,7 @@ func _apply_boss_style() -> void:
 		boss_tag.name = "BossTag"
 		boss_tag.text = "【 BOSS 】"
 		boss_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		boss_tag.add_theme_color_override("font_color", Color(0.95, 0.75, 0.10))
+		boss_tag.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 		boss_tag.add_theme_font_size_override("font_size", 14)
 		_enemy_area.add_child(boss_tag)
 		_enemy_area.move_child(boss_tag, 0)
@@ -212,62 +193,6 @@ func _spawn_phase_text() -> void:
 	tw.tween_property(lbl, "position:y", -90.0, 1.5)
 	tw.parallel().tween_property(lbl, "modulate:a", 0.0, 1.5)
 	tw.tween_callback(lbl.queue_free)
-
-# ══════════════════════════════════════════════════════
-#  意图预告显示
-## 从 enemy_data.actions 读取下一行动（按权重轮转简化预测）
-# ══════════════════════════════════════════════════════
-func _update_intent_display(turn: int) -> void:
-	if not _intent_label: return
-	var actions = _boss_data.get("actions", [])
-	if actions.is_empty():
-		_intent_label.text = "意图：???"
-		return
-
-	# 愤怒阶段：Boss 优先使用高伤害 action
-	var available = actions
-	if _current_phase == 2:
-		var rage_actions = actions.filter(func(a): return a.get("type","") in ["attack","attack_all","dot_fire"])
-		if not rage_actions.is_empty():
-			available = rage_actions
-
-	# 加权随机预测下一个（仅预测，不真正改变状态机）
-	var predicted = _predict_next_action(available, turn)
-	if predicted.is_empty():
-		_intent_label.text = "意图：???"
-		return
-
-	var icon  = INTENT_ICONS.get(predicted.get("type",""), "❓")
-	var atype = predicted.get("type", "")
-	var aval  = predicted.get("value", 0)
-	var desc  = _action_desc(atype, aval)
-
-	# 颜色：愤怒阶段橙红，正常暗金
-	if _current_phase == 2:
-		_intent_label.add_theme_color_override("font_color", Color(1.0, 0.4, 0.1))
-	else:
-		_intent_label.add_theme_color_override("font_color", Color(0.85, 0.80, 0.70))
-
-	var rage_mark = "  【愤怒】" if _current_phase == 2 else ""
-	_intent_label.text = "%s %s%s" % [icon, desc, rage_mark]
-
-func _predict_next_action(actions: Array, turn: int) -> Dictionary:
-	# 简单预测：按 turn 轮转（可替换为更复杂的 AI 预测）
-	if actions.is_empty(): return {}
-	return actions[turn % actions.size()]
-
-func _action_desc(atype: String, aval: int) -> String:
-	match atype:
-		"attack":        return "攻击 %d 伤害" % aval
-		"attack_all":    return "全体攻击 %d" % aval
-		"shield":        return "获得 %d 护盾" % aval
-		"heal":          return "恢复 %d HP" % aval
-		"dot", "dot_fire": return "施加灼烧 %d" % aval
-		"emotion_push":  return "干扰情绪"
-		"all_field_heat_dot": return "全场烈焰"
-		"summon":        return "召唤随从"
-		"phase_change":  return "形态变换"
-		_:               return atype
 
 # ══════════════════════════════════════════════════════
 #  立绘震动工具

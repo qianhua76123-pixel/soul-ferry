@@ -59,14 +59,18 @@ func _build_shop_slot(card: Dictionary) -> VBoxContainer:
 	# 价格标签
 	var price = _get_price(card)
 	var price_label = Label.new()
-	price_label.text = "💰 %d" % price
+	price_label.text = "%s %d" % [UIConstants.ICONS["coin"], price]
 	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	price_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 	vbox.add_child(price_label)
 
 	# 购买按钮
 	var buy_btn = Button.new()
 	buy_btn.text = "购买"
 	buy_btn.disabled = GameState.gold < price
+	buy_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	buy_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	buy_btn.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
 	var captured_card = card
 	var captured_price = price
 	var captured_btn = buy_btn
@@ -124,7 +128,7 @@ func _on_gold_changed(_old: int, _new: int) -> void:
 	_update_gold_display()
 
 func _update_gold_label() -> void:
-	gold_label.text = "💰 %d" % int(GameState.gold)
+	gold_label.text = "%s %d" % [UIConstants.ICONS["coin"], int(GameState.gold)]
 
 func _on_leave_pressed() -> void:
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
@@ -158,6 +162,24 @@ func _setup_shop_visual() -> void:
 	title_lbl.position.y = 24
 	add_child(title_lbl)
 
+	# 主体面板描边（DS-00）
+	var ui_root = get_node_or_null("UI")
+	if ui_root:
+		var frame = InkedPanel.new()
+		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		frame.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.12)
+		frame.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.45)
+		frame.top_line_color = UIConstants.color_of("gold")
+		ui_root.add_child(frame)
+		ui_root.move_child(frame, 0)
+
+	var title_divider = WaterInkDivider.new()
+	title_divider.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	title_divider.position.y = 58
+	title_divider.custom_minimum_size = Vector2(0, 8)
+	title_divider.ink_color = UIConstants.color_of("gold_dim")
+	add_child(title_divider)
+
 	# 烛火装饰（两侧各一）
 	for side in [-1, 1]:
 		var candle = Label.new()
@@ -171,15 +193,12 @@ func _setup_shop_visual() -> void:
 		tw.tween_property(candle, "modulate:a", 1.0,  0.9 + side * 0.15)
 
 	# 金币标签样式增强
-	gold_label.add_theme_font_size_override("font_size", 16)
-	gold_label.add_theme_color_override("font_color", Color(0.95, 0.76, 0.08))
+	gold_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
+	gold_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 
 	# 离开按钮样式
-	var leave_style = StyleBoxFlat.new()
-	leave_style.bg_color     = Color(0.12, 0.08, 0.04)
-	leave_style.border_color = Color(0.55, 0.42, 0.08)
-	leave_style.set_border_width_all(2)
-	leave_style.set_corner_radius_all(4)
+	var leave_style = UIConstants.make_button_style("parch", "gold_dim")
 	leave_btn.add_theme_stylebox_override("normal", leave_style)
+	leave_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	leave_btn.add_theme_color_override("font_color", Color(0.85, 0.72, 0.45))
 	leave_btn.add_theme_font_size_override("font_size", 14)

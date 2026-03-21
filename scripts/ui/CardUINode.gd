@@ -8,19 +8,12 @@ signal card_clicked(card_data: Dictionary)
 
 const CARD_W = 90.0
 const CARD_H = 130.0
-const RARITY_COLORS = {
-	"common":    Color(0.55, 0.52, 0.47),
-	"rare":      Color(0.85, 0.72, 0.0),
-	"legendary": Color(0.85, 0.12, 0.12),
-}
-const BG_COLOR   = Color(0.08, 0.06, 0.05)
-const TEXT_COLOR = Color(0.92, 0.88, 0.80)
 
 var card_data: Dictionary = {}
 var is_playable: bool = true
 var _emotion_color: Color = Color.WHITE
 var _cost_text: String = "?"
-var _rarity_color: Color = RARITY_COLORS["common"]
+var _rarity_color: Color = UIConstants.color_of("card_border_common")
 var _hover_offset: float = 0.0
 
 func _ready() -> void:
@@ -33,19 +26,32 @@ func setup(data: Dictionary) -> void:
 	_emotion_color = EmotionManager.get_emotion_color(data.get("emotion_tag", "calm"))
 	var cost = data.get("cost", 0) - EmotionManager.get_cost_reduction()
 	_cost_text = str(max(0, cost))
-	_rarity_color = RARITY_COLORS.get(data.get("rarity", "common"), RARITY_COLORS["common"])
+	_rarity_color = _rarity_border_color(data.get("rarity", "common"))
 	queue_redraw()
+
+func _rarity_border_color(rarity: String) -> Color:
+	match rarity:
+		"rare":
+			return UIConstants.color_of("card_border_rare")
+		"legendary":
+			return UIConstants.color_of("card_border_legendary")
+		_:
+			return UIConstants.color_of("card_border_common")
 
 func set_playable(playable: bool) -> void:
 	is_playable = playable
-	modulate = Color.WHITE if playable else Color(0.45, 0.45, 0.45, 0.75)
+	if playable:
+		modulate = Color.WHITE
+	else:
+		var a := UIConstants.color_of("ash")
+		modulate = Color(a.r, a.g, a.b, 0.58)
 
 func _draw() -> void:
 	var ofs = Vector2(0, -_hover_offset)
 	# 外框
 	draw_rect(Rect2(ofs, Vector2(CARD_W, CARD_H)), _rarity_color)
 	# 底色
-	draw_rect(Rect2(ofs + Vector2(2,2), Vector2(CARD_W-4, CARD_H-4)), BG_COLOR)
+	draw_rect(Rect2(ofs + Vector2(2,2), Vector2(CARD_W-4, CARD_H-4)), UIConstants.color_of("card_face"))
 	# 情绪色条
 	draw_rect(Rect2(ofs + Vector2(2,2), Vector2(CARD_W-4, 8)), _emotion_color)
 	# 占位插图
@@ -54,18 +60,20 @@ func _draw() -> void:
 	draw_line(ofs+Vector2(2,63), ofs+Vector2(CARD_W-2,63), _rarity_color, 1.0)
 	# 牌名
 	var name = card_data.get("name","???")
+	var tc := UIConstants.color_of("text_primary")
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,76), name,
-		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, TEXT_COLOR)
+		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, tc)
 	# 描述
 	var desc = card_data.get("description","")
 	if desc.length() > 20: desc = desc.substr(0,18) + "…"
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,90), desc,
-		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, Color(TEXT_COLOR.r,TEXT_COLOR.g,TEXT_COLOR.b,0.7))
+		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, UIConstants.color_of("text_muted"))
 	# 费用圆
-	draw_circle(ofs+Vector2(14,14), 11.0, Color(0.15,0.12,0.10))
+	var ink := UIConstants.color_of("ink")
+	draw_circle(ofs+Vector2(14,14), 11.0, Color(ink.r * 1.2, ink.g * 1.2, ink.b * 1.2))
 	draw_arc(ofs+Vector2(14,14), 11.0, 0, TAU, 32, _rarity_color, 1.5)
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(9,19), _cost_text,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, TEXT_COLOR)
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, tc)
 	# 情绪图标
 	var c = _emotion_color; c.a = 0.85
 	draw_circle(ofs+Vector2(CARD_W-14, CARD_H-14), 7.0, c)
@@ -190,14 +198,14 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			draw_arc(Vector2(cx, cy), 20.0, 0, TAU, 64, Color(c.r,c.g,c.b,0.6), 2.0)
 			draw_arc(Vector2(cx, cy), 16.0, 0, TAU, 64, Color(c.r,c.g,c.b,0.35), 1.0)
 			# 八方分割线
-			for i in 8:
+			for i in range(8):
 				var a_2_2 = i * PI / 4.0
 				draw_line(
 					Vector2(cx + cos(a_2_2) * 10, cy + sin(a_2_2) * 10),
 					Vector2(cx + cos(a_2_2) * 19, cy + sin(a_2_2) * 19),
 					Color(c.r, c.g, c.b, 0.5), 1.0)
 			# 八卦爻（外圈）
-			for i in 8:
+			for i in range(8):
 				var a_2_2_2 = i * PI / 4.0
 				var bx = cx + cos(a_2_2_2) * 13
 				var by = cy + sin(a_2_2_2) * 13

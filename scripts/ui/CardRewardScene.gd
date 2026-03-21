@@ -58,7 +58,7 @@ func _on_skip() -> void:
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _update_gold() -> void:
-	gold_label.text = "💰 %d" % int(GameState.gold)
+	gold_label.text = "%s %d" % [UIConstants.ICONS["coin"], int(GameState.gold)]
 
 func _setup_reward_visual() -> void:
 	## 奖励场景视觉：暗金色背景 + 标题动画 + 卡牌星尘入场
@@ -71,17 +71,17 @@ func _setup_reward_visual() -> void:
 	move_child(bg, 0)
 
 	# 顶部金色细线装饰
-	var line = ColorRect.new()
+	var line = WaterInkDivider.new()
 	line.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	line.size.y  = 2
-	line.color   = Color(0.75, 0.58, 0.10, 0.7)
-	line.z_index = 5
+	line.custom_minimum_size = Vector2(0, 8)
+	line.position.y = 52
+	line.ink_color = UIConstants.color_of("gold_dim")
 	add_child(line)
 
 	# 标题样式
 	if title_label:
-		title_label.add_theme_font_size_override("font_size", 22)
-		title_label.add_theme_color_override("font_color", Color(0.95, 0.76, 0.08))
+		title_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("title"))
+		title_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 		# 入场浮动
 		title_label.modulate.a = 0.0
 		var tw = title_label.create_tween()
@@ -89,13 +89,10 @@ func _setup_reward_visual() -> void:
 
 	# 跳过按钮样式
 	if skip_btn:
-		var sty = StyleBoxFlat.new()
-		sty.bg_color     = Color(0.10, 0.07, 0.03)
-		sty.border_color = Color(0.45, 0.35, 0.08)
-		sty.set_border_width_all(1)
-		sty.set_corner_radius_all(4)
+		var sty = UIConstants.make_button_style("parch", "gold_dim")
 		skip_btn.add_theme_stylebox_override("normal", sty)
-		skip_btn.add_theme_color_override("font_color", Color(0.70, 0.58, 0.35))
+		skip_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+		skip_btn.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
 
 	# 卡牌依次淡入（给 CardRow 的子节点加延迟）
 	await get_tree().process_frame

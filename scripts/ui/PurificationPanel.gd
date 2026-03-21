@@ -26,7 +26,7 @@ func _build() -> void:
 	_title_lbl = Label.new()
 	_title_lbl.text = "✦ 渡化条件"
 	_title_lbl.add_theme_font_size_override("font_size", 12)
-	_title_lbl.add_theme_color_override("font_color", Color(0.65, 0.52, 0.12))
+	_title_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 	_title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_title_lbl)
 
@@ -43,6 +43,9 @@ func _build() -> void:
 	_purify_btn.add_theme_font_size_override("font_size", 12)
 	_purify_btn.custom_minimum_size = Vector2(200, 28)
 	_purify_btn.pressed.connect(func(): purify_requested.emit())
+	_purify_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	_purify_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	_purify_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 	add_child(_purify_btn)
 
 func setup_conditions(enemy_data: Dictionary) -> void:
@@ -59,7 +62,7 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 		var hint = Label.new()
 		hint.text = cond.get("description", "满足特殊条件后触发")
 		hint.add_theme_font_size_override("font_size", 11)
-		hint.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+		hint.add_theme_color_override("font_color", UIConstants.color_of("text_dim"))
 		hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_cond_row.add_child(hint)
 		return
@@ -85,10 +88,12 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 		bar.show_percentage = false
 		bar.custom_minimum_size = Vector2(44, 8)
 		var sty = StyleBoxFlat.new()
-		sty.bg_color = Color(0.45, 0.45, 0.45, 0.6)
+		var track := UIConstants.color_of("text_dim")
+		sty.bg_color = Color(track.r, track.g, track.b, 0.58)
 		bar.add_theme_stylebox_override("fill", sty)
 		var sty_bg = StyleBoxFlat.new()
-		sty_bg.bg_color = Color(0.10, 0.10, 0.10, 0.6)
+		var ink := UIConstants.color_of("ink")
+		sty_bg.bg_color = Color(ink.r, ink.g, ink.b, 0.62)
 		bar.add_theme_stylebox_override("background", sty_bg)
 		col.add_child(bar)
 
@@ -112,10 +117,11 @@ func update_display() -> void:
 			cur, req, " ✓" if met else ""]
 		# 进度条颜色
 		var fill_sty = StyleBoxFlat.new()
-		fill_sty.bg_color = Color(0.95, 0.76, 0.08) if met else Color(0.45, 0.45, 0.45, 0.6)
+		var unfilled := UIConstants.color_of("text_dim")
+		fill_sty.bg_color = UIConstants.color_of("gold") if met else Color(unfilled.r, unfilled.g, unfilled.b, 0.58)
 		item["bar"].add_theme_stylebox_override("fill", fill_sty)
 		item["label"].add_theme_color_override("font_color",
-			Color(0.95, 0.76, 0.08) if met else Color(0.70, 0.70, 0.70))
+			UIConstants.color_of("gold") if met else UIConstants.color_of("text_muted"))
 		if not met: all_met = false
 
 	_set_ready(all_met)
@@ -126,12 +132,12 @@ func _set_ready(ready: bool) -> void:
 	if ready:
 		_purify_btn.text     = "✦ 开始渡化"
 		_purify_btn.disabled = false
-		_title_lbl.add_theme_color_override("font_color", Color(0.95, 0.76, 0.08))
+		_title_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 		_play_pulse()
 	else:
 		_purify_btn.text     = "条件未满足"
 		_purify_btn.disabled = true
-		_title_lbl.add_theme_color_override("font_color", Color(0.65, 0.52, 0.12))
+		_title_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 		if _pulse_tween: _pulse_tween.kill()
 		modulate.a = 1.0
 

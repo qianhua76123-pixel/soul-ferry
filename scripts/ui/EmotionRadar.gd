@@ -21,6 +21,7 @@ const EMOTION_COLORS = {
 var _label_nodes: Dictionary = {}
 var _edge_rects:  Array      = []
 var _warn_tween:  Tween      = null
+@export var show_inner_title: bool = false
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(200, 200)
@@ -43,7 +44,7 @@ func _build_edge_vignettes() -> void:
 	var root_ui = get_tree().root.find_child("UI", true, false)
 	if not root_ui:
 		root_ui = get_parent()
-	for i in 4:
+	for i in range(4):
 		var r = ColorRect.new()
 		r.name = "EdgeVignette%d" % i
 		r.color = Color(0, 0, 0, 0)
@@ -71,7 +72,7 @@ func _refresh_labels() -> void:
 		var c = EMOTION_COLORS[emotion]
 		lbl.add_theme_color_override("font_color", c)
 		var bars = ""
-		for b in MAX_VAL:
+		for b in range(MAX_VAL):
 			bars += "█" if b < val else "░"
 		lbl.text = "%s\n%d/4\n%s" % [EMOTION_CN[emotion], val, bars]
 
@@ -79,7 +80,7 @@ func _draw() -> void:
 	var center = size / 2.0
 	# 背景面板
 	var bg_rect = Rect2(center - Vector2(RADIUS + 24, RADIUS + 24),
-	                    Vector2((RADIUS + 24) * 2, (RADIUS + 24) * 2))
+						Vector2((RADIUS + 24) * 2, (RADIUS + 24) * 2))
 	draw_rect(bg_rect, Color(0.04, 0.08, 0.12, 0.88), true)
 	draw_rect(bg_rect, BORDER_COLOR, false, 1.5)
 	# 同心五边形网格（4层）
@@ -104,15 +105,16 @@ func _draw() -> void:
 	var border_pts = PackedVector2Array(fill_pts)
 	border_pts.append(border_pts[0])
 	draw_polyline(border_pts, fill_color.lightened(0.3), 2.0)
-	# 标题
-	draw_string(ThemeDB.fallback_font,
-		center + Vector2(-28, -(RADIUS + 14)),
-		"五情祭坛", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
-		Color(0.65, 0.52, 0.12))
+	# 标题（默认关闭，避免与外部 AltarTitle 重复）
+	if show_inner_title:
+		draw_string(ThemeDB.fallback_font,
+			center + Vector2(-28, -(RADIUS + 14)),
+			"五情祭坛", HORIZONTAL_ALIGNMENT_LEFT, -1, 11,
+			Color(0.65, 0.52, 0.12))
 
 func _get_pentagon(center: Vector2, r: float) -> Array:
 	var pts = []
-	for i in 5:
+	for i in range(5):
 		var a = deg_to_rad(EMOTION_ANGLES[EMOTIONS[i]])
 		pts.append(center + Vector2(cos(a), sin(a)) * r)
 	return pts
@@ -145,7 +147,7 @@ func _play_shake() -> void:
 	if _warn_tween: _warn_tween.kill()
 	var orig_x = position.x
 	_warn_tween = create_tween()
-	for i in 4:
+	for i in range(4):
 		_warn_tween.tween_property(self, "position:x",
 			orig_x + (3.0 if i % 2 == 0 else -3.0), 0.05)
 	_warn_tween.tween_property(self, "position:x", orig_x, 0.05)

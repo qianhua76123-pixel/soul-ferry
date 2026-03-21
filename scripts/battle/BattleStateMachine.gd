@@ -391,13 +391,17 @@ func _choose_enemy_action() -> Dictionary:
 			elif t in ["shield", "heal"]:
 				a["weight"] = max(1, int(a.get("weight", 1) * 0.3))  # 防御性行动权重×0.3
 
-	var total = 0
-	for a in weighted: total += a.get("weight", 1)
-	var roll = randi() % total
-	var cum  = 0
+	var total: int = 0
 	for a in weighted:
-		cum += a.get("weight", 1)
-		if roll < cum: return a
+		total += int(a.get("weight", 1))
+	if total <= 0:
+		return weighted[0]
+	var roll: int = randi() % total
+	var cum: int = 0
+	for a in weighted:
+		cum += int(a.get("weight", 1))
+		if roll < cum:
+			return a
 	return weighted[0]
 
 func _execute_enemy_action(action: Dictionary) -> void:

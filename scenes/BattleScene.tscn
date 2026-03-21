@@ -197,15 +197,15 @@ offset_right = 890.0
 offset_bottom = 485.0
 visible = false
 
-[node name="ResultLabel" type="Label" parent="UI/ResultPanel"]
+[node name="ResultLabel" type="RichTextLabel" parent="UI/ResultPanel"]
 layout_mode = 1
 offset_left = 10.0
 offset_top = 20.0
 offset_right = 490.0
 offset_bottom = 180.0
-horizontal_alignment = 1
-vertical_alignment = 1
-autowrap_mode = 3
+bbcode_enabled = true
+fit_content = false
+scroll_active = false
 text = "结算中..."
 
 [node name="ContinueBtn" type="Button" parent="UI/ResultPanel"]

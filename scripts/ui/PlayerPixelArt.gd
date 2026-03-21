@@ -166,7 +166,7 @@ static func _draw_body_robe(img: Image, torso_y: int) -> void:
 ## 下袍+腿（站立）
 static func _draw_lower_robe(img: Image, waist_y: int) -> void:
 	# 下袍（向下展开的 A 字形）
-	for i in 16:
+	for i in range(16):
 		var w = 8 + i / 2
 		var x = 16 - w / 2
 		_rect(img, x, waist_y + i, w, 1, C_ROBE_MID)

@@ -36,7 +36,7 @@ func toggle() -> void:
 func _build_ui() -> void:
 	# 半透明遮罩
 	var overlay = ColorRect.new()
-	overlay.color = Color(0.0, 0.0, 0.0, 0.55)
+	overlay.color = UIConstants.color_of("overlay_dim")
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(overlay)
@@ -47,18 +47,7 @@ func _build_ui() -> void:
 	_panel.custom_minimum_size = Vector2(340, 380)
 	_panel.position = Vector2(-170, -190)
 
-	var style = StyleBoxFlat.new()
-	style.bg_color           = Color(0.06, 0.04, 0.03)
-	style.border_color       = Color(0.55, 0.12, 0.08)
-	style.border_width_left  = 2
-	style.border_width_right = 2
-	style.border_width_top   = 2
-	style.border_width_bottom= 2
-	style.corner_radius_top_left     = 8
-	style.corner_radius_top_right    = 8
-	style.corner_radius_bottom_left  = 8
-	style.corner_radius_bottom_right = 8
-	_panel.add_theme_stylebox_override("panel", style)
+	_panel.add_theme_stylebox_override("panel", UIConstants.make_panel_style())
 	add_child(_panel)
 
 	var vbox = VBoxContainer.new()
@@ -77,11 +66,14 @@ func _build_ui() -> void:
 	var title = Label.new()
 	title.text = "— 暂停 —"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_color_override("font_color", Color(0.75, 0.20, 0.12))
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	title.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
 	vbox.add_child(title)
 
-	vbox.add_child(HSeparator.new())
+	var div = WaterInkDivider.new()
+	div.custom_minimum_size = Vector2(280, 8)
+	div.ink_color = UIConstants.color_of("gold_dim")
+	vbox.add_child(div)
 
 	# BGM 音量
 	vbox.add_child(_make_label("🎵 背景音乐"))
@@ -103,56 +95,58 @@ func _build_ui() -> void:
 	_sfx_slider.value_changed.connect(func(v): SoundManager.set_sfx_volume(v / 100.0))
 	vbox.add_child(_sfx_slider)
 
-	vbox.add_child(HSeparator.new())
+	var div_mid = WaterInkDivider.new()
+	div_mid.custom_minimum_size = Vector2(280, 8)
+	div_mid.ink_color = UIConstants.color_of("gold_dim")
+	vbox.add_child(div_mid)
 
 	# 当前状态信息
 	var info = Label.new()
 	info.name = "InfoLabel"
 	info.text = _get_status_text()
-	info.add_theme_color_override("font_color", Color(0.60, 0.56, 0.50))
-	info.add_theme_font_size_override("font_size", 12)
+	info.add_theme_color_override("font_color", UIConstants.color_of("text_dim"))
+	info.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(info)
 
-	vbox.add_child(HSeparator.new())
+	var div2 = WaterInkDivider.new()
+	div2.custom_minimum_size = Vector2(280, 8)
+	div2.ink_color = UIConstants.color_of("gold_dim")
+	vbox.add_child(div2)
 
 	# 按钮区
-	var continue_btn = _make_btn("继续游戏", Color(0.12, 0.40, 0.12))
+	var continue_btn = _make_btn("继续游戏")
 	continue_btn.pressed.connect(func(): toggle())
 	vbox.add_child(continue_btn)
 
-	var menu_btn = _make_btn("返回主菜单", Color(0.40, 0.10, 0.08))
+	var menu_btn = _make_btn("返回主菜单")
+	menu_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "nu"))
+	menu_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	menu_btn.pressed.connect(_on_return_to_menu)
 	vbox.add_child(menu_btn)
 
 func _make_label(text: String) -> Label:
 	var lbl = Label.new()
 	lbl.text = text
-	lbl.add_theme_color_override("font_color", Color(0.82, 0.78, 0.70))
-	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
+	lbl.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 	return lbl
 
-func _make_btn(text: String, bg: Color) -> Button:
+func _make_btn(text: String) -> Button:
 	var btn = Button.new()
 	btn.text = text
 	btn.custom_minimum_size = Vector2(0, 40)
-	var s = StyleBoxFlat.new()
-	s.bg_color = bg
-	s.corner_radius_top_left     = 4
-	s.corner_radius_top_right    = 4
-	s.corner_radius_bottom_left  = 4
-	s.corner_radius_bottom_right = 4
-	btn.add_theme_stylebox_override("normal", s)
-	var sp = s.duplicate()
-	sp.bg_color = bg.lightened(0.2)
-	btn.add_theme_stylebox_override("hover", sp)
-	btn.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
+	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 	return btn
 
 func _get_status_text() -> String:
-	return "HP: %d/%d  |  金: %d  |  层: %d" % [
-		GameState.hp, GameState.max_hp,
-		GameState.gold, GameState.current_layer]
+	return "%s %d/%d  |  %s %d  |  层: %d" % [
+		UIConstants.ICONS["hp"], GameState.hp, GameState.max_hp,
+		UIConstants.ICONS["coin"], GameState.gold,
+		GameState.current_layer]
 
 func _on_return_to_menu() -> void:
 	get_tree().paused = false

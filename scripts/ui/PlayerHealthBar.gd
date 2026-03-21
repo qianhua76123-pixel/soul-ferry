@@ -31,7 +31,7 @@ func _build() -> void:
 	ghost_style.bg_color = Color(0.85, 0.65, 0.0, 0.7)
 	_ghost_bar.add_theme_stylebox_override("fill", ghost_style)
 	var ghost_bg = StyleBoxFlat.new()
-	ghost_bg.bg_color = Color(0.08, 0.06, 0.05)
+	ghost_bg.bg_color = UIConstants.color_of("card_face")
 	_ghost_bar.add_theme_stylebox_override("background", ghost_bg)
 	bar_container.add_child(_ghost_bar)
 
@@ -51,13 +51,13 @@ func _build() -> void:
 	# HP 数值 + 护盾同行
 	_info_label = Label.new()
 	_info_label.add_theme_font_size_override("font_size", 12)
-	_info_label.add_theme_color_override("font_color", Color(0.90, 0.86, 0.78))
+	_info_label.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 	add_child(_info_label)
 
 	# Buff 行
 	_buff_label = Label.new()
 	_buff_label.add_theme_font_size_override("font_size", 11)
-	_buff_label.add_theme_color_override("font_color", Color(0.65, 0.60, 0.55))
+	_buff_label.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
 	add_child(_buff_label)
 
 func set_hp(new_hp: int, max_hp: int) -> void:

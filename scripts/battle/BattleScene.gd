@@ -57,6 +57,8 @@ func _ready() -> void:
 	TransitionManager.fade_in_only()
 	result_panel.visible = false
 	du_hua_btn.visible   = false
+	_setup_hud_theme()
+	_setup_result_panel_theme()
 
 	state_machine.battle_started.connect(_on_battle_started)
 	state_machine.player_turn_started.connect(_on_player_turn_started)
@@ -104,6 +106,7 @@ func _ready() -> void:
 
 	# B-01 布局优化
 	_setup_layout_improvements()
+	_setup_altar_title_style()
 
 	# B-07 战场氛围背景 + 费用圆点HUD
 	_setup_battle_background()
@@ -119,7 +122,6 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	if _enemy_hbar and _enemy_hbar.has_method("set_hp"):
 		_enemy_hbar.set_hp(int(enemy_data.get("hp", 100)), int(enemy_data.get("hp", 100)))
 	enemy_shield_label.text = "🛡 0"
-	enemy_intent_label.text = "意图：..."
 	du_hua_hint_label.text  = ""
 	# B-06 渡化条件面板初始化
 	if _purif_panel and _purif_panel.has_method("setup_conditions"):
@@ -222,15 +224,15 @@ func _on_battle_ended(result: String) -> void:
 		AchievementManager.record_zhen_ya()
 	match result:
 		"victory":
-			result_label.text = "镇压成功\n\n亡魂已被强行驱散。"
+			result_label.text = _result_panel_bbcode("镇压成功", "亡魂已被强行驱散。")
 			result_btn.text   = "继续前行"
 			SoundManager.play_sfx("battle_victory")
 		"du_hua":
-			result_label.text = "渡化完成\n\n你帮他说清楚了那件事。\n他终于可以走了。"
+			result_label.text = _result_panel_bbcode("渡化完成", "你帮他说清楚了那件事。\n他终于可以走了。")
 			result_btn.text   = "目送他离去"
 			SoundManager.play_sfx("du_hua_success")
 		"defeat":
-			result_label.text = "你也困在这里了\n\n渡魂人，渡人先渡己。"
+			result_label.text = _result_panel_bbcode("你也困在这里了", "渡魂人，渡人先渡己。")
 			result_btn.text   = "重新开始"
 			SoundManager.play_sfx("battle_defeat")
 
@@ -435,11 +437,43 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 
 func _update_hud() -> void:
 	cost_label.text          = "费用: %d" % int(DeckManager.current_cost)
-	deck_count_label.text    = "牌库: %d" % int(len(DeckManager.deck))
-	discard_count_label.text = "弃牌: %d" % int(len(DeckManager.discard_pile))
+	deck_count_label.text    = "▤ 牌库: %d" % int(len(DeckManager.deck))
+	discard_count_label.text = "↓ 弃牌: %d" % int(len(DeckManager.discard_pile))
 	player_hp_bar.max_value  = GameState.max_hp
 	player_hp_bar.value      = GameState.hp
-	player_hp_label.text     = "%d / %d" % [int(GameState.hp), int(GameState.max_hp)]
+	player_hp_label.text     = "%s %d / %d" % [UIConstants.ICONS["hp"], int(GameState.hp), int(GameState.max_hp)]
+
+func _setup_hud_theme() -> void:
+	turn_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
+	turn_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	deck_count_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+	discard_count_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+	deck_count_label.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
+	discard_count_label.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
+	end_turn_btn.text = "结束回合 [E]"
+	end_turn_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	end_turn_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	end_turn_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	end_turn_btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
+	du_hua_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold"))
+	var du_hover := UIConstants.make_button_style("parch", "gold")
+	du_hover.bg_color = du_hover.bg_color.lightened(0.06)
+	du_hua_btn.add_theme_stylebox_override("hover", du_hover)
+	du_hua_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+
+func _result_panel_bbcode(title: String, body: String) -> String:
+	var tc := UIConstants.color_of("gold").to_html(false)
+	var bc := UIConstants.color_of("ash").to_html(false)
+	return "[center][color=#%s]%s[/color]\n\n[color=#%s]%s[/color][/center]" % [tc, title, bc, body]
+
+func _setup_result_panel_theme() -> void:
+	result_panel.add_theme_stylebox_override("panel", UIConstants.make_panel_style())
+	result_label.add_theme_font_size_override("normal_font_size", UIConstants.font_size_of("body"))
+	result_label.add_theme_color_override("default_color", UIConstants.color_of("text_primary"))
+	result_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	result_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	result_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	result_btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 
 func _refresh_hand() -> void:
 	for card_ui in hand_container.get_children():
@@ -458,7 +492,8 @@ func _show_popup(result: Dictionary) -> void:
 		"shield_attack","remove_enemy_shield"]
 	var lbl = Label.new()
 	lbl.text = ("-%d" if is_dmg else "+%d") % value
-	lbl.add_theme_color_override("font_color", Color.RED if is_dmg else Color.GREEN)
+	lbl.add_theme_color_override("font_color",
+		UIConstants.color_of("damage_flash") if is_dmg else UIConstants.color_of("heal_flash"))
 	lbl.add_theme_font_size_override("font_size", 22)
 	add_child(lbl)
 	lbl.position = Vector2(900 + randf_range(-30, 30), 280)
@@ -474,21 +509,29 @@ func _add_wenlu_btn() -> void:
 	var btn = Button.new()
 	btn.name = "WenluBtn"
 	btn.text = "🕯问路香"
-	btn.custom_minimum_size = Vector2(90, 30)
+	btn.custom_minimum_size = Vector2(100, 30)
+	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	var dis := UIConstants.make_button_style("parch", "ash")
+	dis.bg_color = Color(dis.bg_color.r, dis.bg_color.g, dis.bg_color.b, 0.5)
+	btn.add_theme_stylebox_override("disabled", dis)
+	btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 	btn.pressed.connect(_on_wenlu_pressed)
 	hud.add_child(btn)
 
 func _on_wenlu_pressed() -> void:
 	if not RelicManager.use_wenlu_xiang(): return
 	# 展示敌人下两回合意图（从 state_machine 读取）
-	var intent_lbl = get_node_or_null("UI/AltarLayout/EnemyArea/IntentLabel")
-	if intent_lbl:
-		var acts = state_machine.enemy_data.get("actions", [])
-		if acts.is_empty(): return
-		var preview = []
-		for a in acts.slice(0, min(2, len(acts))):
-			preview.append("%s %s" % [a.get("type","?"), str(a.get("value",""))])
-		intent_lbl.text = "感知：" + " / ".join(preview)
+	var acts = state_machine.enemy_data.get("actions", [])
+	if acts.is_empty(): return
+	var preview: Array[String] = []
+	for a in acts.slice(0, min(2, len(acts))):
+		preview.append("%s %s" % [a.get("type", "?"), str(a.get("value", ""))])
+	var line := "感知：" + " / ".join(preview)
+	if _intent_display and _intent_display.has_method("show_intent_custom"):
+		var rage := int(state_machine.boss_phase) == 2
+		_intent_display.show_intent_custom("🕯", line, rage)
 	# 禁用按钮
 	var btn = get_node_or_null("UI/HUD/WenluBtn")
 	if btn: btn.disabled = true
@@ -783,10 +826,73 @@ func _setup_layout_improvements() -> void:
 		hand_container.add_theme_constant_override("separation", 12)
 		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
+		# 手牌区上方水墨分割线（与 HandContainer 左右边距对齐）
+		if ui and not ui.get_node_or_null("HandAreaDivider"):
+			var strip := WaterInkDivider.new()
+			strip.name = "HandAreaDivider"
+			strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			strip.z_index = 1
+			var top := int(hand_container.offset_top) - 10
+			strip.set_anchor_and_offset(SIDE_LEFT, 0.0, 8)
+			strip.set_anchor_and_offset(SIDE_RIGHT, 1.0, -8)
+			strip.set_anchor_and_offset(SIDE_TOP, 0.0, top)
+			strip.set_anchor_and_offset(SIDE_BOTTOM, 0.0, top + 8)
+			strip.ink_color = UIConstants.color_of("gold_dim")
+			ui.add_child(strip)
 
 	# 卡牌悬停预览层（复用上方已声明的 ui）
 	_card_preview = CardPreviewClass.new()
 	if ui: ui.add_child(_card_preview)
+
+## 祭坛三栏标题：DS-00 配色 + 标题下水墨分割线
+func _setup_altar_title_style() -> void:
+	var pa = get_node_or_null("UI/AltarLayout/PlayerArea")
+	if pa:
+		var pt = pa.get_node_or_null("PlayerTitle")
+		if pt:
+			pt.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+			pt.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+			_insert_ink_divider_below(pa, pt, 168)
+	var ac = get_node_or_null("UI/AltarLayout/AltarCenter")
+	if ac:
+		var at = ac.get_node_or_null("AltarTitle")
+		if at:
+			at.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+			at.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+			_insert_ink_divider_below(ac, at, 200)
+	var ea = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if ea:
+		var en = ea.get_node_or_null("EnemyName")
+		if en:
+			en.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+			en.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+			_insert_ink_divider_below(ea, en, 168)
+	var dw = get_node_or_null("UI/AltarLayout/AltarCenter/DisorderWarning")
+	if dw:
+		dw.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+		# 节点自带红色 modulate，正文用浅色保证可读
+		dw.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	for path in [
+		"UI/AltarLayout/PlayerArea/ShieldLabel",
+		"UI/AltarLayout/PlayerArea/HPLabel",
+		"UI/AltarLayout/EnemyArea/ShieldLabel",
+	]:
+		var sl = get_node_or_null(path)
+		if sl:
+			sl.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
+			sl.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+	var dh = get_node_or_null("UI/AltarLayout/EnemyArea/DuHuaHint")
+	if dh:
+		dh.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+		dh.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+
+func _insert_ink_divider_below(parent: Node, after_node: Node, width_px: int) -> void:
+	var div := WaterInkDivider.new()
+	div.custom_minimum_size = Vector2(width_px, 6)
+	div.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	div.ink_color = UIConstants.color_of("gold_dim")
+	parent.add_child(div)
+	parent.move_child(div, after_node.get_index() + 1)
 
 ## ══════════════════════════════════════════════════════
 ## B-04 敌人意图预告
@@ -796,7 +902,10 @@ func _setup_intent_display() -> void:
 	var enemy_area = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if not enemy_area: return
 	_intent_display = IntentDisplayClass.new()
+	_intent_display.name = "BattleIntentDisplay"
 	enemy_area.add_child(_intent_display)
+	if enemy_intent_label:
+		enemy_intent_label.visible = false
 	# 初始显示"蓄势待发"
 	_intent_display.show_intent({})
 

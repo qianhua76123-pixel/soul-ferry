@@ -41,14 +41,21 @@ func setup(data: Dictionary) -> void:
 	# 稀有度边框颜色
 	if card_rarity_border:
 		match data.get("rarity", "common"):
-			"common": card_rarity_border.modulate = Color(0.7, 0.7, 0.7)
-			"rare": card_rarity_border.modulate = Color(1.0, 0.85, 0.0)
-			"legendary": card_rarity_border.modulate = Color(0.9, 0.1, 0.1)
+			"rare":
+				card_rarity_border.modulate = UIConstants.color_of("gold")
+			"legendary":
+				card_rarity_border.modulate = UIConstants.color_of("nu")
+			_:
+				card_rarity_border.modulate = UIConstants.color_of("gold_dim")
 
 ## 设置是否可出牌状态
 func set_playable(playable: bool) -> void:
 	is_playable = playable
-	modulate = Color.WHITE if playable else Color(0.5, 0.5, 0.5, 0.8)
+	if playable:
+		modulate = Color.WHITE
+	else:
+		var a := UIConstants.color_of("ash")
+		modulate = Color(a.r, a.g, a.b, 0.58)
 
 func _ready() -> void:
 	_base_y = position.y

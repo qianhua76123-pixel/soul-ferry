@@ -184,7 +184,7 @@ func _update_status() -> void:
 func _build_bg_candles() -> void:
 	var bg = get_node_or_null("BgCanvas")
 	if not bg: return
-	for i in 5:
+	for i in range(5):
 		var candle = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 28)
@@ -220,8 +220,24 @@ func _setup_rest_visual() -> void:
 	title_lbl.position.y = 24
 	add_child(title_lbl)
 
+	var ui_root = get_node_or_null("UI")
+	if ui_root:
+		var frame = InkedPanel.new()
+		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		frame.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.10)
+		frame.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.45)
+		frame.top_line_color = UIConstants.color_of("gold")
+		ui_root.add_child(frame)
+		ui_root.move_child(frame, 0)
+
+	var divider = WaterInkDivider.new()
+	divider.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	divider.position.y = 56
+	divider.ink_color = UIConstants.color_of("gold_dim")
+	add_child(divider)
+
 	# 3支烛台
-	for i in 3:
+	for i in range(3):
 		var candle = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 24)
@@ -234,20 +250,14 @@ func _setup_rest_visual() -> void:
 
 	# 强化按钮样式（heal/upgrade）
 	for btn in [heal_btn, upgrade_btn]:
-		var sty = StyleBoxFlat.new()
-		sty.bg_color     = Color(0.08, 0.12, 0.10)
-		sty.border_color = Color(0.30, 0.55, 0.35)
-		sty.set_border_width_all(2)
-		sty.set_corner_radius_all(5)
+		var sty = UIConstants.make_button_style("parch", "gold_dim")
 		btn.add_theme_stylebox_override("normal", sty)
+		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 		btn.add_theme_color_override("font_color", Color(0.80, 0.90, 0.75))
-		btn.add_theme_font_size_override("font_size", 14)
+		btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 
 	# 离开按钮
-	var leave_sty = StyleBoxFlat.new()
-	leave_sty.bg_color     = Color(0.10, 0.07, 0.05)
-	leave_sty.border_color = Color(0.40, 0.30, 0.15)
-	leave_sty.set_border_width_all(1)
-	leave_sty.set_corner_radius_all(4)
+	var leave_sty = UIConstants.make_button_style("parch", "gold_dim")
 	leave_btn.add_theme_stylebox_override("normal", leave_sty)
+	leave_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	leave_btn.add_theme_color_override("font_color", Color(0.65, 0.55, 0.38))

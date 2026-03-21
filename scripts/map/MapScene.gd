@@ -4,6 +4,7 @@ extends Node2D
 
 @onready var node_container = $UI/NodeContainer
 @onready var layer_label    = $UI/LayerLabel
+@onready var title_label    = $UI/TopBar/Title
 @onready var hp_label       = $UI/TopBar/HPLabel
 @onready var gold_label     = $UI/TopBar/GoldLabel
 @onready var relic_bar      = $UI/RelicBar
@@ -24,6 +25,11 @@ const SCENE_PATHS = {
 }
 const NODE_ICONS = {"battle":"[战]","event":"[事]","shop":"[店]","rest":"[息]","boss":"[魔]"}
 const NODE_CN    = {"battle":"战斗","event":"事件","shop":"商店","rest":"休息","boss":"Boss"}
+const LAYER_BG_COLORS = {
+	1: Color("#0a1008"),
+	2: Color("#120a08"),
+	3: Color("#08080f"),
+}
 
 # 地图数据持久化在 GameState.meta 中
 var _map_data: Array = []
@@ -49,6 +55,7 @@ func _ready() -> void:
 	_update_status()
 	_render_map()
 	_render_relics()
+	_apply_ui_theme()
 
 	# 通关检测（每次进入地图都检测一次）
 	# 注意：_check_layer_done 内部已保护防重复推进
@@ -77,9 +84,10 @@ func _generate_map() -> void:
 		_map_data.append(layer_nodes)
 
 func _roll_type() -> String:
-	var total = 0
-	for w in NODE_WEIGHTS.values(): total += w
-	var roll = randi() % total
+	var total: int = 0
+	for w in NODE_WEIGHTS.values():
+		total += int(w)
+	var roll: int = randi() % total
 	var cum  = 0
 	for t in NODE_WEIGHTS:
 		cum += NODE_WEIGHTS[t]
@@ -88,6 +96,9 @@ func _roll_type() -> String:
 
 func _render_map() -> void:
 	layer_label.text = LAYER_NAMES.get(GameState.current_layer, "???")
+	var bg = get_node_or_null("Background")
+	if bg:
+		bg.color = LAYER_BG_COLORS.get(GameState.current_layer, UIConstants.color_of("ink"))
 	for child in node_container.get_children():
 		child.queue_free()
 
@@ -98,16 +109,22 @@ func _render_map() -> void:
 		var lbl = Label.new()
 		lbl.text = LAYER_NAMES.get(layer_num, "第%d层" % layer_num)
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.modulate = Color.WHITE if is_current else Color(0.45,0.45,0.45)
+		lbl.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
+		lbl.modulate = Color(0.90, 0.84, 0.72) if is_current else Color(0.45,0.45,0.45)
 		node_container.add_child(lbl)
+
+		var title_divider = WaterInkDivider.new()
+		title_divider.custom_minimum_size = Vector2(580, 8)
+		title_divider.ink_color = UIConstants.color_of("gold_dim")
+		node_container.add_child(title_divider)
 
 		var hbox = HBoxContainer.new()
 		hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 		for nd in _map_data[layer_idx]:
 			if not hbox.get_children().is_empty():
 				var sep = Label.new()
-				sep.text = " — "
-				sep.modulate = Color(0.3,0.25,0.2)
+				sep.text = " ◇ "
+				sep.modulate = Color(0.42, 0.35, 0.22)
 				hbox.add_child(sep)
 			hbox.add_child(_make_node_btn(nd, is_current))
 		node_container.add_child(hbox)
@@ -117,8 +134,9 @@ func _render_map() -> void:
 			var connector = _make_layer_connector(is_current)
 			node_container.add_child(connector)
 
-		var line = HSeparator.new()
-		line.modulate = Color(0.15,0.12,0.09)
+		var line = WaterInkDivider.new()
+		line.custom_minimum_size = Vector2(780, 8)
+		line.ink_color = UIConstants.color_of("gold_dim")
 		node_container.add_child(line)
 
 func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
@@ -132,14 +150,14 @@ func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
 
 	# 样式：按类型定制颜色
 	var style = StyleBoxFlat.new()
-	style.corner_radius_top_left    = 6
-	style.corner_radius_top_right   = 6
-	style.corner_radius_bottom_left = 6
-	style.corner_radius_bottom_right= 6
-	style.border_width_left   = 2
-	style.border_width_right  = 2
-	style.border_width_top    = 2
-	style.border_width_bottom = 2
+	style.corner_radius_top_left    = 3
+	style.corner_radius_top_right   = 3
+	style.corner_radius_bottom_left = 3
+	style.corner_radius_bottom_right= 3
+	style.border_width_left   = 1
+	style.border_width_right  = 1
+	style.border_width_top    = 1
+	style.border_width_bottom = 1
 
 	var node_colors = {
 		"battle":  [Color(0.22, 0.07, 0.07), Color(0.60, 0.12, 0.10)],
@@ -160,6 +178,9 @@ func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
 		style.border_color = Color(nc[1].r*0.45, nc[1].g*0.45, nc[1].b*0.45)
 
 	btn.add_theme_stylebox_override("normal", style)
+	var hover_style = style.duplicate()
+	hover_style.border_color = UIConstants.color_of("gold")
+	btn.add_theme_stylebox_override("hover", hover_style)
 
 	# 按下效果
 	var pressed_style = style.duplicate()
@@ -178,6 +199,11 @@ func _make_node_btn(nd: Dictionary, is_current: bool) -> Button:
 
 	btn.add_theme_font_size_override("font_size", 12)
 	btn.disabled = not is_current or visited
+	if btn.disabled:
+		var disabled_style = style.duplicate()
+		disabled_style.bg_color = Color(0.12, 0.11, 0.10, 0.7)
+		disabled_style.border_color = Color(0.28, 0.24, 0.20, 0.7)
+		btn.add_theme_stylebox_override("disabled", disabled_style)
 
 	# Boss 节点脉冲动画
 	if ntype == "boss" and is_current and not visited:
@@ -278,29 +304,44 @@ func _render_relics() -> void:
 		lbl.text = relic_icons.get(rid, "◈")
 		lbl.tooltip_text = data.get("name","???") + "\n" + data.get("effect","")
 		lbl.add_theme_font_size_override("font_size", 22)
+		lbl.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 		relic_bar.add_child(lbl)
 
 func _update_status() -> void:
-	hp_label.text   = "HP: %d/%d" % [GameState.hp, GameState.max_hp]
-	gold_label.text = "💰 %d"     % GameState.gold
+	hp_label.text   = "%s %d/%d" % [UIConstants.ICONS["hp"], GameState.hp, GameState.max_hp]
+	gold_label.text = "%s %d" % [UIConstants.ICONS["coin"], GameState.gold]
+
+func _apply_ui_theme() -> void:
+	title_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
+	title_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	layer_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
+	layer_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	hp_label.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
+	gold_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 
 ## 生成层间向下箭头连接线
 func _make_layer_connector(is_active: bool) -> Control:
 	var c = Control.new()
-	c.custom_minimum_size = Vector2(0, 28)
+	c.custom_minimum_size = Vector2(0, 40)
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var path = WaterInkDivider.new()
+	path.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	path.custom_minimum_size = Vector2(120, 8)
+	path.position = Vector2(-60, 8)
+	path.ink_color = UIConstants.color_of("ash")
+	c.add_child(path)
 
 	var lbl = Label.new()
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
-	lbl.anchors_preset = Control.PRESET_FULL_RECT
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	# 用箭头字符 + 细线模拟路径
-	lbl.text = "│\n▼"
-	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.text = "▼"
+	lbl.add_theme_font_size_override("font_size", 12)
 
 	if is_active:
-		lbl.add_theme_color_override("font_color", Color(0.65, 0.20, 0.10, 0.9))
+		lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 		# 激活层的箭头带脉冲动画
 		var tw = lbl.create_tween().set_loops()
 		tw.tween_property(lbl, "modulate:a", 0.4, 0.7).set_ease(Tween.EASE_IN_OUT)

@@ -75,6 +75,16 @@ EventScene     # 民俗事件
 ShopScene      # 商店
 ```
 
+### UI 设计系统（DS-00）
+```
+UIConstants.gd    # 全局色板、字号、按钮/面板样式工厂方法
+InkedPanel.gd     # 切角水墨面板
+WaterInkDivider.gd # 水墨渗透分割线
+```
+新 UI 优先从 `UIConstants` 取色与 `make_button_style` / `make_panel_style`，避免散落硬编码颜色。卡牌稀有度边框见 `card_border_*` / `card_face`。战斗浮字 `DamageNumber` 使用 `damage_flash` / `heal_flash` 等与 DS-00 一致。
+
+**战斗意图（M-08 节选）**：`IntentDisplay` 在攻击/群体/狂暴等威胁意图时提高纸底不透明度并触发金边短闪烁；大范围杀招显示一行朱砂caption「杀招将启」。`IntentLabel` 已弃用显示，统一走 `BattleIntentDisplay`。结算面板为 `RichTextLabel` + BBCode。`PurificationPanel` 条件条轨道色取自 `text_dim` / `ink`，未满足项文字用 `text_muted`。
+
 ### 数据文件
 ```
 res://data/cards.json     # 牌卡数据

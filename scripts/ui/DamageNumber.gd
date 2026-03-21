@@ -5,14 +5,27 @@ extends Node2D
 
 @onready var _label: Label = $Label
 
-# type → 颜色 + 前缀格式
-const TYPE_CONFIG = {
-	"damage":  {"color": Color(1.0, 0.22, 0.18, 1.0), "prefix": "-"},
-	"heal":    {"color": Color(0.28, 0.88, 0.28, 1.0), "prefix": "+"},
-	"emotion": {"color": Color(0.95, 0.78, 0.12, 1.0), "prefix": ""},
-	"shield":  {"color": Color(0.45, 0.65, 1.00, 1.0), "prefix": "+"},
-	"buff":    {"color": Color(0.80, 0.45, 1.00, 1.0), "prefix": ""},
-}
+func _color_for_type(type: String) -> Color:
+	match type:
+		"heal":
+			return UIConstants.color_of("heal_flash")
+		"emotion":
+			return UIConstants.color_of("gold")
+		"shield":
+			return UIConstants.color_of("bei")
+		"buff":
+			return UIConstants.color_of("ju")
+		_:
+			return UIConstants.color_of("damage_flash")
+
+func _prefix_for_type(type: String) -> String:
+	match type:
+		"damage":
+			return "-"
+		"heal", "shield":
+			return "+"
+		_:
+			return ""
 
 func _ready() -> void:
 	_label.visible = false
@@ -25,8 +38,7 @@ func _ready() -> void:
 func spawn(value: int, type: String, pos: Vector2, extra: String = "") -> void:
 	global_position = pos + Vector2(randf_range(-14.0, 14.0), 0.0)   # 轻微横向抖动
 
-	var cfg    = TYPE_CONFIG.get(type, TYPE_CONFIG["damage"])
-	var prefix = cfg["prefix"]
+	var prefix = _prefix_for_type(type)
 
 	if type == "emotion" and extra != "":
 		_label.text = extra
@@ -35,7 +47,7 @@ func spawn(value: int, type: String, pos: Vector2, extra: String = "") -> void:
 	else:
 		_label.text = "%s%d" % [prefix, value]
 
-	_label.add_theme_color_override("font_color", cfg["color"])
+	_label.add_theme_color_override("font_color", _color_for_type(type))
 	_label.modulate.a = 0.0
 	_label.visible    = true
 
