@@ -93,9 +93,24 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 	draw_rect(Rect2(pos, size), bg)
 	var cx: float = pos.x + size.x / 2.0
 	var cy: float = pos.y + size.y / 2.0
-	var c  = _emotion_color
-	var cd = Color(c.r * 0.6, c.g * 0.6, c.b * 0.6, 0.9)  # 暗色
-	var cl = Color(min(c.r+0.3,1.0), min(c.g+0.3,1.0), min(c.b+0.3,1.0), 0.5) # 亮色
+	var c: Color  = _emotion_color
+	var cd: Color = Color(c.r * 0.6, c.g * 0.6, c.b * 0.6, 0.9)
+	var cl: Color = Color(min(c.r+0.3,1.0), min(c.g+0.3,1.0), min(c.b+0.3,1.0), 0.5)
+
+	# 无名卡牌：虚空风格（不画情绪符号）
+	if card_data.get("character","") == "wumian":
+		for layer: int in range(4):
+			var r2: float = size.x * 0.35 * (1.0 - layer * 0.2)
+			var a2: float = 0.15 - layer * 0.03
+			draw_circle(Vector2(cx, cy), r2, Color(0.85, 0.85, 0.83, a2))
+		draw_arc(Vector2(cx, cy - 4), size.x * 0.22, 0, TAU, 24, Color(0.9,0.9,0.88,0.4), 1.2)
+		var rng2 := RandomNumberGenerator.new()
+		rng2.seed = abs(card_data.get("id","x").hash())
+		for _p: int in 7:
+			var px2: float = pos.x + rng2.randf_range(4, size.x - 4)
+			var py2: float = pos.y + rng2.randf_range(4, size.y - 4)
+			draw_circle(Vector2(px2, py2), 1.0, Color(0.9,0.9,0.88, rng2.randf_range(0.1,0.3)))
+		return
 
 	match card_data.get("emotion_tag", "calm"):
 

@@ -283,6 +283,11 @@ func _play_enter_animation() -> void:
 func _on_new_game() -> void:
 	GameState.delete_save()
 	GameState.new_run()
+	# 第一次游玩时显示新手引导
+	if not GameState.get_meta("tutorial_done", false):
+		var tutorial: TutorialOverlay = TutorialOverlay.new()
+		get_tree().root.add_child(tutorial)
+		await tutorial.tutorial_finished
 	# init_starter_deck 在角色选择后调用（CharacterSelectScene._on_confirm_pressed）
 	_transition_to("res://scenes/CharacterSelectScene.tscn")
 

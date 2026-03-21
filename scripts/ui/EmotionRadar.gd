@@ -6,7 +6,7 @@ extends Control
 const EMOTIONS       = ["calm", "rage", "fear", "grief", "joy"]
 const EMOTION_CN     = {"calm":"定","rage":"怒","fear":"惧","grief":"悲","joy":"喜"}
 const EMOTION_ANGLES = {"calm":-90.0,"rage":-18.0,"fear":54.0,"grief":126.0,"joy":198.0}
-const MAX_VAL        = 4
+const MAX_VAL        = 5
 const RADIUS         = 72.0
 const GRID_COLOR     = Color(1, 1, 1, 0.07)
 const BORDER_COLOR   = Color(0.55, 0.42, 0.08, 0.85)
@@ -21,6 +21,7 @@ const EMOTION_COLORS = {
 var _label_nodes: Dictionary = {}
 var _edge_rects:  Array      = []
 var _warn_tween:  Tween      = null
+var _pulse_timers: Dictionary = {}  # emotion → float phase
 @export var show_inner_title: bool = false
 
 func _ready() -> void:
@@ -28,6 +29,20 @@ func _ready() -> void:
 	_build_labels()
 	_build_edge_vignettes()
 	EmotionManager.emotion_changed.connect(_on_emotion_changed)
+	for e: String in EMOTIONS:
+		_pulse_timers[e] = 0.0
+	set_process(true)
+
+func _process(delta: float) -> void:
+	var need_redraw: bool = false
+	for e: String in EMOTIONS:
+		if EmotionManager.values.get(e, 0) >= MAX_VAL:
+			_pulse_timers[e] = _pulse_timers.get(e, 0.0) + delta
+			need_redraw = true
+		else:
+			_pulse_timers[e] = 0.0
+	if need_redraw:
+		queue_redraw()
 
 func _build_labels() -> void:
 	for emotion in EMOTIONS:
@@ -91,10 +106,23 @@ func _draw() -> void:
 		var pts: Array = _get_pentagon(center, RADIUS * float(level) / 4.0)
 		pts.append(pts[0])
 		draw_polyline(PackedVector2Array(pts), GRID_COLOR, 1.0)
-	# 轴线
-	for emotion in EMOTIONS:
+	# 轴线（满值时高亮）
+	for emotion: String in EMOTIONS:
 		var angle: float = deg_to_rad(EMOTION_ANGLES[emotion])
-		draw_line(center, center + Vector2(cos(angle), sin(angle)) * RADIUS, GRID_COLOR, 0.8)
+		var val: int = EmotionManager.values.get(emotion, 0)
+		if val >= MAX_VAL:
+			var ec: Color = EMOTION_COLORS.get(emotion, Color.WHITE)
+			draw_line(center, center + Vector2(cos(angle), sin(angle)) * RADIUS, Color(ec.r,ec.g,ec.b,0.7), 2.5)
+			# 端点脉冲圆
+			var phase: float = _pulse_timers.get(emotion, 0.0)
+			var ep: Vector2 = center + Vector2(cos(angle), sin(angle)) * RADIUS
+			var pr: float = 6.0 + 4.0 * sin(phase * 4.0)
+			var pa: float = 0.7 + 0.3 * sin(phase * 4.0)
+			draw_circle(ep, pr, Color(ec.r, ec.g, ec.b, pa * 0.5))
+			draw_arc(ep, pr + 2, 0, TAU, 20, Color(ec.r,ec.g,ec.b, pa * 0.6), 1.5)
+			draw_arc(ep, pr + 4, 0, TAU, 20, Color(ec.r,ec.g,ec.b, pa * 0.25), 1.0)
+		else:
+			draw_line(center, center + Vector2(cos(angle), sin(angle)) * RADIUS, GRID_COLOR, 0.8)
 	# 填充多边形
 	var fill_pts: PackedVector2Array = PackedVector2Array()
 	for emotion in EMOTIONS:

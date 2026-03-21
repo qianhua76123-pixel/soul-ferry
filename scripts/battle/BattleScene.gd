@@ -109,10 +109,129 @@ func _ready() -> void:
 	var enemy_id: String = str(GameState.get_meta("pending_enemy_id", "yuan_gui"))
 	state_machine.start_battle(str(enemy_id))
 
+## 情绪溢出状态栏
+var _emotion_status_bar: HBoxContainer = null
+
 func _deferred_layout_setup() -> void:
 	## 延迟一帧执行，此时 Control 节点 size 已由引擎布局计算完毕
 	_setup_layout_improvements()
 	_setup_altar_title_style()
+	_setup_emotion_status_bar()
+	# 无名角色专属 UI
+	var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
+	if char_id == "wumian":
+		_setup_wumian_ui()
+
+## 情绪溢出状态图标栏（轮盘右侧/上方）
+func _setup_emotion_status_bar() -> void:
+	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
+	if not ac: return
+	_emotion_status_bar = HBoxContainer.new()
+	_emotion_status_bar.name = "EmotionStatusBar"
+	_emotion_status_bar.add_theme_constant_override("separation", 6)
+	ac.add_child(_emotion_status_bar)
+	EmotionManager.emotion_changed.connect(_update_emotion_status_bar.bind())
+
+func _update_emotion_status_bar() -> void:
+	if not _emotion_status_bar: return
+	for child: Node in _emotion_status_bar.get_children():
+		child.queue_free()
+	var emo_names: Dictionary = {"grief":"悲","fear":"惧","rage":"怒","joy":"喜","calm":"定"}
+	var emo_colors: Dictionary = {
+		"rage": Color(0.80,0.20,0.20), "fear": Color(0.40,0.20,0.80),
+		"grief": Color(0.20,0.40,0.80),"joy":  Color(0.80,0.67,0.00),
+		"calm": Color(0.20,0.80,0.55)
+	}
+	for emo: String in ["grief","fear","rage","joy","calm"]:
+		var val: int = EmotionManager.values.get(emo, 0)
+		if val < 4: continue
+		var ec: Color = emo_colors.get(emo, Color.WHITE)
+		var chip: Panel = Panel.new()
+		chip.custom_minimum_size = Vector2(44, 22)
+		var chip_style: StyleBoxFlat = StyleBoxFlat.new()
+		chip_style.bg_color = Color(ec.r*0.3, ec.g*0.3, ec.b*0.3, 0.9)
+		chip_style.border_width_top=1; chip_style.border_width_bottom=1
+		chip_style.border_width_left=1; chip_style.border_width_right=1
+		chip_style.border_color = ec
+		chip_style.set_corner_radius_all(4)
+		chip.add_theme_stylebox_override("panel", chip_style)
+		var lbl: Label = Label.new()
+		lbl.text = "%s %d" % [emo_names.get(emo,"?"), val]
+		lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 11)
+		lbl.add_theme_color_override("font_color", ec.lightened(0.3))
+		chip.add_child(lbl)
+		_emotion_status_bar.add_child(chip)
+		# 满值时图标闪烁
+		if val >= 5:
+			var tw: Tween = chip.create_tween().set_loops()
+			tw.tween_property(chip, "modulate", Color(1.4,1.3,1.1,1.0), 0.4)
+			tw.tween_property(chip, "modulate", Color.WHITE, 0.4)
+
+## 无名角色专属 UI
+func _setup_wumian_ui() -> void:
+	WumianManager.activate()
+	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
+	if not ac: return
+	var emp_bg: Panel = Panel.new()
+	emp_bg.name = "EmptinessBar"
+	emp_bg.custom_minimum_size = Vector2(220, 36)
+	var emp_style: StyleBoxFlat = StyleBoxFlat.new()
+	emp_style.bg_color = Color(0.10,0.10,0.12,0.9)
+	emp_style.border_width_top=1; emp_style.border_width_bottom=1
+	emp_style.border_width_left=1; emp_style.border_width_right=1
+	emp_style.border_color = Color(0.7,0.7,0.7,0.5)
+	emp_style.set_corner_radius_all(4)
+	emp_bg.add_theme_stylebox_override("panel", emp_style)
+	var emp_lbl: Label = Label.new()
+	emp_lbl.name = "EmptinessLabel"
+	emp_lbl.text = "空 度  0 / 10"
+	emp_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	emp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	emp_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	emp_lbl.add_theme_font_size_override("font_size", 13)
+	emp_lbl.add_theme_color_override("font_color", Color(0.85,0.85,0.85))
+	emp_bg.add_child(emp_lbl)
+	ac.add_child(emp_bg)
+	var tier_lbl: Label = Label.new()
+	tier_lbl.name = "EmptinessTier"
+	tier_lbl.text = "低空度 — 效果+10%"
+	tier_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tier_lbl.add_theme_font_size_override("font_size", 11)
+	tier_lbl.add_theme_color_override("font_color", Color(0.7,0.7,0.65))
+	ac.add_child(tier_lbl)
+	WumianManager.emptiness_changed.connect(_on_emptiness_changed)
+	WumianManager.kongming_triggered.connect(_on_kongming_triggered)
+
+func _on_emptiness_changed(_old: int, new_val: int) -> void:
+	var emp_bg: Node = get_node_or_null("UI/AltarLayout/AltarCenter/EmptinessBar")
+	if emp_bg:
+		var lbl: Node = emp_bg.get_node_or_null("EmptinessLabel")
+		if lbl: lbl.set("text", "空 度  %d / 10" % new_val)
+	var tier_lbl: Node = get_node_or_null("UI/AltarLayout/AltarCenter/EmptinessTier")
+	if tier_lbl:
+		var tier_texts: Array = ["低空度 — 效果+10%","中空度 — 平衡状态","高空度 — 费用-1","极高空度 — 费用0 · HP-5/回合"]
+		var tier_colors: Array = [Color(0.6,0.8,0.6),Color(0.7,0.7,0.65),Color(0.8,0.7,0.3),Color(0.9,0.3,0.2)]
+		var tier: int = clamp(WumianManager.current_tier, 0, 3)
+		tier_lbl.set("text", tier_texts[tier])
+		tier_lbl.add_theme_color_override("font_color", tier_colors[tier])
+
+func _on_kongming_triggered(_pre: int) -> void:
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+	var flash: ColorRect = ColorRect.new()
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash.color = Color(1,1,1,0.0)
+	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flash.z_index = 150
+	ui.add_child(flash)
+	var tw: Tween = flash.create_tween()
+	tw.tween_property(flash, "color:a", 0.6, 0.08)
+	tw.tween_property(flash, "color:a", 0.0, 0.45)
+	tw.tween_callback(flash.queue_free)
+	_show_float_text("空  鸣", get_viewport().get_visible_rect().size / 2.0, Color(0.9,0.9,0.85,1.0), 28)
 
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
