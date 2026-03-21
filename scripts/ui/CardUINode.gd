@@ -244,27 +244,20 @@ func _animate_hover(on: bool) -> void:
 	tween.tween_property(self, "modulate",
 		Color(1.15, 1.12, 1.05, 1.0) if on else Color.WHITE, 0.14)
 
-## 出牌飞出动画：飞向祭坛中央，淡出消失
-## 出牌动画：原地缩小淡出（不做位移，避免坐标混淆）
+## 出牌动画：原地放大淡出
 func play_card_animation(_target_global_pos: Vector2) -> void:
 	var tween: Tween = create_tween().set_parallel(true)
-	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.08) \
-		.set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 0.0, 0.18) \
-		.set_ease(Tween.EASE_IN)
+	tween.tween_property(self, "scale", Vector2(1.25, 1.25), 0.08).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "modulate:a", 0.0, 0.18).set_ease(Tween.EASE_IN)
 	tween.chain().tween_callback(queue_free)
 
-## 抽入动画：从下方淡入弹入（纯局部坐标，不涉及全局偏移）
+## 抽入动画：纯淡入+缩放弹入，不修改 position（position 由 HBoxContainer 管理）
 func play_draw_animation(_from_offset: Vector2) -> void:
-	var orig_pos: Vector2 = position
-	position = orig_pos + Vector2(0, 30)   # 从下方 30px 滑入
 	modulate.a = 0.0
-	scale = Vector2(0.85, 0.85)
+	scale = Vector2(0.75, 0.75)
 	var tween: Tween = create_tween().set_parallel(true)
-	tween.tween_property(self, "position", orig_pos, 0.20) \
-		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(self, "modulate:a", 1.0, 0.18)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.20) \
+	tween.tween_property(self, "modulate:a", 1.0, 0.22).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.22) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 func _gui_input(event: InputEvent) -> void:

@@ -378,21 +378,25 @@ func _on_hand_updated(hand: Array) -> void:
 		sep = max(4, 12 - (card_count - 5) * 3)
 	hand_container.add_theme_constant_override("separation", sep)
 
-	# ⑤ 等两帧确保布局稳定（一帧不够，HBoxContainer 需要两帧完成尺寸分配）
+	# ⑤ 等两帧确保布局稳定（HBoxContainer 需要两帧完成尺寸分配）
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	# ⑥ 播入场动画（统一从下方弹入，新牌稍大延迟区分）
+	# ⑥ 播入场动画（淡入+缩放弹入，stagger 错开）
 	var delay: float = 0.0
-	for card_ui2: Node in hand_container.get_children():
-		var cd3: Variant = card_ui2.get("card_data")
+	var children: Array = hand_container.get_children()
+	for idx in children.size():
+		var card_node: Node = children[idx]
+		var cd3: Variant = card_node.get("card_data")
 		var is_new: bool = not (cd3 is Dictionary and old_ids.has(cd3.get("id", "")))
-		if card_ui2.has_method("play_draw_animation"):
-			var tw: Tween = card_ui2.create_tween()
+		if card_node.has_method("play_draw_animation"):
+			# 用 idx 捕获确保闭包拿到正确节点引用
+			var captured: Node = card_node
+			var tw: Tween = card_node.create_tween()
 			tw.tween_interval(delay)
-			tw.tween_callback(func(): card_ui2.play_draw_animation(Vector2.ZERO))
+			tw.tween_callback(func(): captured.play_draw_animation(Vector2.ZERO))
 		else:
-			card_ui2.modulate.a = 1.0
+			card_node.modulate.a = 1.0
 		delay += 0.05 if is_new else 0.02
 
 func _on_card_clicked(card_data: Dictionary) -> void:
