@@ -80,11 +80,11 @@ func _rebuild_layout() -> void:
 	ui_layer.add_child(body)
 
 	# 左侧卡牌区（520px）
-	var left_panel = _build_left_panel()
+	var left_panel: Control = _build_left_panel()
 	body.add_child(left_panel)
 
 	# 右侧区域（220px）
-	var right_panel = _build_right_panel()
+	var right_panel: Control = _build_right_panel()
 	body.add_child(right_panel)
 
 	# ---------- 底部区域 ----------
@@ -290,7 +290,7 @@ func _generate_shop() -> void:
 		child.queue_free()
 
 	for card in _shop_cards:
-		var slot = _build_shop_slot(card)
+		var slot: Control = _build_shop_slot(card)
 		cards_row.add_child(slot)
 
 	_refresh_afford()
@@ -309,7 +309,7 @@ func _build_shop_slot(card: Dictionary) -> VBoxContainer:
 	vbox.add_child(card_ui)
 
 	# 价格标签
-	var price = _get_price(card)
+	var price: int = _get_price(card)
 	var price_label: Label = Label.new()
 	price_label.text = "%s %d" % [UIConstants.ICONS["coin"], price]
 	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -325,8 +325,8 @@ func _build_shop_slot(card: Dictionary) -> VBoxContainer:
 	buy_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
 	buy_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	buy_btn.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
-	var captured_card = card
-	var captured_price = price
+	var captured_card: Dictionary = card
+	var captured_price: int = price
 	var captured_btn   = buy_btn
 	buy_btn.pressed.connect(func(): _on_buy_card(captured_card, captured_price, captured_btn, vbox))
 	vbox.add_child(buy_btn)
@@ -370,7 +370,7 @@ func _refresh_afford() -> void:
 		if buy_btn and buy_btn.text == "已购买":
 			continue
 
-		var can_afford = current_gold >= price_val
+		var can_afford: bool = current_gold >= price_val
 		if can_afford:
 			if card_node:
 				card_node.modulate = Color(1, 1, 1, 1)
@@ -407,7 +407,7 @@ func _on_remove_pressed() -> void:
 		var card_ui = _card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
 		card_ui.set_playable(true)
-		var captured = card
+		var captured: Dictionary = card
 		card_ui.card_clicked.connect(func(_c): _on_remove_card_selected(captured))
 		remove_deck_container.add_child(card_ui)
 
@@ -499,7 +499,7 @@ func _setup_shop_visual() -> void:
 	gold_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 
 	# 离开按钮样式
-	var leave_style = UIConstants.make_button_style("parch", "gold_dim")
+	var leave_style: StyleBox = UIConstants.make_button_style("parch", "gold_dim")
 	leave_btn.add_theme_stylebox_override("normal", leave_style)
 	leave_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	leave_btn.add_theme_color_override("font_color", Color(0.85, 0.72, 0.45))

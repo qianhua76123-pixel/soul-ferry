@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://char_select_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/CharacterSelectScene.gd" id="1_charselect"]
+
+[node name="CharacterSelectScene" type="Control"]
+script = ExtResource("1_charselect")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0

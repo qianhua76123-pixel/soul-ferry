@@ -283,7 +283,8 @@ func _on_new_game() -> void:
 	GameState.delete_save()
 	GameState.new_run()
 	DeckManager.init_starter_deck()
-	_transition_to("res://scenes/MapScene.tscn")
+	# 新游戏先进角色选择界面
+	_transition_to("res://scenes/CharacterSelectScene.tscn")
 
 func _on_continue() -> void:
 	if GameState.load_from_file():
@@ -295,8 +296,9 @@ func _on_continue() -> void:
 			cb.disabled = true
 
 func _transition_to(scene_path: String) -> void:
-	var title_map = {
-		"res://scenes/MapScene.tscn": "踏上渡魂之路"
+	var title_map: Dictionary = {
+		"res://scenes/MapScene.tscn": "踏上渡魂之路",
+		"res://scenes/CharacterSelectScene.tscn": "选择渡魂人"
 	}
 	TransitionManager.change_scene(scene_path, title_map.get(scene_path, ""))
 

@@ -83,8 +83,8 @@ func _draw_bar(area: Control) -> void:
 
 func _draw_chamfered_rect(area: Control, rect: Rect2, color: Color, c: float) -> void:
 	# 用多边形实现切角矩形（左上右上右下左下四个角各切 c px）
-	var x = rect.position.x
-	var y = rect.position.y
+	var x: float = rect.position.x
+	var y: float = rect.position.y
 	var rw = rect.size.x
 	var rh = rect.size.y
 	var pts = PackedVector2Array([

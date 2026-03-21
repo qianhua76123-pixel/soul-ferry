@@ -33,7 +33,7 @@ func _build_slot(card: Dictionary) -> VBoxContainer:
 	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.custom_minimum_size = Vector2(110, 200)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	var card_ui = _card_scene.instantiate()
+	var card_ui: Node = _card_scene.instantiate()
 	if card_ui.has_method("setup"):
 		card_ui.setup(card)
 	if card_ui.has_method("set_playable"):
@@ -89,7 +89,7 @@ func _setup_reward_visual() -> void:
 
 	# 跳过按钮样式
 	if skip_btn:
-		var sty = UIConstants.make_button_style("parch", "gold_dim")
+		var sty: StyleBox = UIConstants.make_button_style("parch", "gold_dim")
 		skip_btn.add_theme_stylebox_override("normal", sty)
 		skip_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 		skip_btn.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))

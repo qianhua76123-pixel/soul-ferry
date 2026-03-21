@@ -203,7 +203,7 @@ func _play_icon_shake(dmg_value: int) -> void:
 		_desc_label.add_theme_font_size_override("font_size", 15)
 	else:
 		_desc_label.add_theme_font_size_override("font_size", 12)
-	var orig_x = _icon_label.position.x
+	var orig_x: float = _icon_label.position.x
 	var tw: Tween = _icon_label.create_tween()
 	tw.tween_property(_icon_label, "position:x", orig_x + 4, 0.12)
 	tw.tween_property(_icon_label, "position:x", orig_x - 4, 0.12)

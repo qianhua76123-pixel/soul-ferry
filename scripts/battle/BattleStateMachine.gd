@@ -216,19 +216,19 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			result.value = dmg_2_2_2_2
 
 		"shield":
-			var sv = base_val + bonus
+			var sv: int = base_val + bonus
 			player_shield += sv
 			result.value = sv
 
 		"shield_attack":
 			# 护盾 + 造成等量伤害
-			var sv_2 = base_val + bonus
+			var sv_2: int = base_val + bonus
 			player_shield += sv_2
 			_deal_damage_to_enemy(sv_2)
 			result.value = sv_2
 
 		"shield_and_draw":
-			var sv_2_2 = base_val + bonus
+			var sv_2_2: int = base_val + bonus
 			player_shield += sv_2_2
 			DeckManager.draw_cards(2)
 			result.value = sv_2_2
@@ -303,7 +303,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 		"reset_shield":
 			# 五情归一：护盾 = 五情总值 × base_val
 			var total_2: float = EmotionManager.get_total_value()
-			var sv_2_2_2_2 = total_2 * base_val
+			var sv_2_2_2_2: int = total_2 * base_val
 			player_shield += sv_2_2_2_2
 			result.value = sv_2_2_2_2
 
@@ -932,7 +932,7 @@ func _execute_enemy_action(action: Dictionary) -> void:
 				# 闪避成功，不扣血，播放浮字由 BattleScene 通过 hp_changed 无变化判断
 			else:
 				var raw: int = int(action.get("value", 0) * mul)
-				var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
+				var dmg: int = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
 				if player_shield > 0:
 					var blocked: int = min(player_shield, dmg)
 					player_shield -= blocked
@@ -978,10 +978,10 @@ func _execute_enemy_action(action: Dictionary) -> void:
 		"rage_card_storm":
 			# 鬼新娘·素锦：狂暴连击（伤害随玩家手牌数量递增）
 			var base_dmg  = action.get("value", 5)
-			var hand_size = len(DeckManager.hand)
+			var hand_size: int = len(DeckManager.hand)
 			# 每张手牌+2额外伤害，模拟"花嫁之怒吞噬一切"
 			var total_dmg: int = int((base_dmg + hand_size * 2) * mul)
-			var dmg_2_2 = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
+			var dmg_2_2: int = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
 			if player_shield > 0:
 				var blocked_2_2: int = min(player_shield, dmg_2_2)
 				player_shield -= blocked_2_2

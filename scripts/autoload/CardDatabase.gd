@@ -75,10 +75,10 @@ func get_desc(card_id: String, level: int = 0) -> String:
 	# 升级值计算
 	var upval  = int(base * 1.5) if base > 0 else base
 	var bonus_int: int = bonus if bonus != null else 0
-	var upbonus = bonus_int + 1 if bonus_int > 0 else bonus_int
+	var upbonus: int = bonus_int + 1 if bonus_int > 0 else bonus_int
 
 	var val  = upval   if level > 0 and upval   != base       else base
-	var bval = upbonus if level > 0 and upbonus != bonus_int  else bonus_int
+	var bval: int = upbonus if level > 0 and upbonus != bonus_int  else bonus_int
 
 	# 升级变化数值标金色
 	var vs: String = str(int(val)) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)

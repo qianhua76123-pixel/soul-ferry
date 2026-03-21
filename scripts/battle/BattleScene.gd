@@ -364,7 +364,7 @@ func _on_hand_updated(hand: Array) -> void:
 	var delay = 0.0
 	for card_ui in hand_container.get_children():
 		card_ui.modulate.a = 0.0
-		var orig_y = card_ui.position.y
+		var orig_y: float = card_ui.position.y
 		card_ui.position.y = orig_y + 30
 		var tw: Tween = card_ui.create_tween()
 		tw.tween_interval(delay)
@@ -383,7 +383,7 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 		func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
 	# 根据牌型播放不同的命中动画，然后触发效果
 	var effect_type: String = card_data.get("effect_type", "")
-	var is_attack = effect_type in ["attack","attack_all","attack_lifesteal","attack_dot",
+	var is_attack: bool = effect_type in ["attack","attack_all","attack_lifesteal","attack_dot",
 		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
 		"shield_attack","remove_enemy_shield","dodge_attack"]
 	if is_attack:
@@ -395,7 +395,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 	_update_hud()
 	_refresh_hand()
 	# 情绪变化浮字（在祭坛中央雷达图位置）
-	var diff = new_val - old_val
+	var diff: int = new_val - old_val
 	if diff != 0:
 		var radar_area: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 		if radar_area:
@@ -595,7 +595,7 @@ func _setup_buff_ui() -> void:
 		_tooltip_panel.visible = false
 
 	## B-02 新增双层血条组件（复用上方已声明的 player_area / enemy_area）
-	var PlayerHealthBarClass = preload("res://scripts/ui/PlayerHealthBar.gd")
+	var PlayerHealthBarClass: GDScript = preload("res://scripts/ui/PlayerHealthBar.gd")
 	var EnemyHealthBarClass  = preload("res://scripts/ui/EnemyHealthBar.gd")
 	var pa2: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	var ea2: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
@@ -633,7 +633,7 @@ func _rebuild_buff_bar(target: String) -> void:
 	var buffs: Array = BuffManager.get_buffs(target)
 	for buff in buffs:
 		if buff["stacks"] <= 0: continue
-		var slot = _make_buff_icon(buff)
+		var slot: Control = _make_buff_icon(buff)
 		bar.add_child(slot)
 
 ## 构建单个 Buff 图标：半透明色块 + 层数文字 + Tooltip
@@ -697,7 +697,7 @@ func _hide_tooltip() -> void:
 ## 在世界坐标 pos 生成浮字
 func spawn_damage_number(value: int, type: String, pos: Vector2, extra: String = "") -> void:
 	if not _dmgnum_scene: return
-	var node = _dmgnum_scene.instantiate()
+	var node: Node = _dmgnum_scene.instantiate()
 	# 挂到 CanvasLayer，不受场景缩放影响
 	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(node)
@@ -747,7 +747,7 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 		sprite_node = tr
 
 	# 生成像素纹理
-	var tex = EnemyPixelArtClass.create_texture(enemy_id)
+	var tex: ImageTexture = EnemyPixelArtClass.create_texture(enemy_id)
 	if sprite_node is TextureRect:
 		sprite_node.texture = tex
 
@@ -815,7 +815,7 @@ func _set_player_sprite_state(state: String) -> void:
 func _start_idle_float(node: Control, amp: float = 4.0, period: float = 2.0) -> void:
 	if not node: return
 	node.set_meta("_float_active", true)
-	var base_y = node.position.y
+	var base_y: float = node.position.y
 	var tw: Tween = node.create_tween().set_loops()
 	tw.tween_property(node, "position:y", base_y - amp, period * 0.5)\
 		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)

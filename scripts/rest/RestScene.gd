@@ -47,7 +47,7 @@ func _on_upgrade_mode() -> void:
 	for child in deck_container.get_children():
 		child.queue_free()
 
-	var card_scene = preload("res://scenes/CardUI.tscn")
+	var card_scene: GDScript = preload("res://scenes/CardUI.tscn")
 	for card in DeckManager.get_full_deck():
 		var card_ui = card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
@@ -250,14 +250,14 @@ func _setup_rest_visual() -> void:
 
 	# 强化按钮样式（heal/upgrade）
 	for btn in [heal_btn, upgrade_btn]:
-		var sty = UIConstants.make_button_style("parch", "gold_dim")
+		var sty: StyleBox = UIConstants.make_button_style("parch", "gold_dim")
 		btn.add_theme_stylebox_override("normal", sty)
 		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 		btn.add_theme_color_override("font_color", Color(0.80, 0.90, 0.75))
 		btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 
 	# 离开按钮
-	var leave_sty = UIConstants.make_button_style("parch", "gold_dim")
+	var leave_sty: StyleBox = UIConstants.make_button_style("parch", "gold_dim")
 	leave_btn.add_theme_stylebox_override("normal", leave_sty)
 	leave_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	leave_btn.add_theme_color_override("font_color", Color(0.65, 0.55, 0.38))
