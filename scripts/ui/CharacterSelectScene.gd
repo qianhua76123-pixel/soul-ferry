@@ -1,6 +1,6 @@
 extends Control
 ## 角色选择界面
-## 职责：展示三个可玩角色，玩家选择后保存到 GameState，跳转 MapScene
+## 职责：展示三个可玩角色（含像素立绘），玩家选择后保存到 GameState，跳转 MapScene
 
 const UIC = preload("res://scripts/ui/UIConstants.gd")
 
@@ -16,7 +16,6 @@ func _ready() -> void:
 func _load_characters() -> void:
 	var file: FileAccess = FileAccess.open("res://data/characters.json", FileAccess.READ)
 	if not file:
-		# 降级：使用内置默认数据
 		_characters = [
 			{"id":"ruan_ruyue","name":"阮如月","description":"游走于庙宇与渡口间的年轻庙祝，以五情印记渡化困于世间的魂魄。","hp":80,"energy":3,"passive_desc":"施印亲和 · 渡化偏向"},
 			{"id":"shen_tiejun","name":"沈铁钧","description":"已退休的老捕快，用铁链与怒气镇压不肯离去的亡魂。","hp":100,"energy":3,"passive_desc":"锁链怒爆 · 镇压偏向"},
@@ -33,13 +32,11 @@ func _load_characters() -> void:
 		_characters = data.get("characters", [])
 
 func _build_ui() -> void:
-	# 背景
 	var bg: ColorRect = ColorRect.new()
 	bg.color = Color(0.04, 0.05, 0.08, 1.0)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
-	# 标题
 	var title: Label = Label.new()
 	title.text = "选择渡魂人"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -50,7 +47,6 @@ func _build_ui() -> void:
 	title.offset_bottom = 90
 	add_child(title)
 
-	# 副标题
 	var subtitle: Label = Label.new()
 	subtitle.text = "每位渡魂人有独特的战斗风格与胜利路线"
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -61,15 +57,14 @@ func _build_ui() -> void:
 	subtitle.offset_bottom = 120
 	add_child(subtitle)
 
-	# 角色卡片行
 	var row: HBoxContainer = HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	row.add_theme_constant_override("separation", 32)
 	row.set_anchors_preset(Control.PRESET_CENTER)
 	row.offset_left   = -540
 	row.offset_right  = 540
-	row.offset_top    = -160
-	row.offset_bottom = 220
+	row.offset_top    = -200
+	row.offset_bottom = 240
 	add_child(row)
 
 	for i in _characters.size():
@@ -77,7 +72,6 @@ func _build_ui() -> void:
 		row.add_child(panel)
 		_card_panels.append(panel)
 
-	# 确认按钮
 	var confirm_btn: Button = Button.new()
 	confirm_btn.text = "踏上渡魂之路"
 	confirm_btn.custom_minimum_size = Vector2(220, 52)
@@ -93,13 +87,14 @@ func _build_ui() -> void:
 	confirm_btn.pressed.connect(_on_confirm_pressed)
 	add_child(confirm_btn)
 
-	# 默认选中第一个
 	_select(0)
 
 func _build_character_card(index: int) -> Control:
 	var char_data: Dictionary = _characters[index]
+	var char_id: String = char_data.get("id", "ruan_ruyue")
+
 	var panel: PanelContainer = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(300, 380)
+	panel.custom_minimum_size = Vector2(300, 440)
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.10, 0.14, 0.92)
@@ -115,26 +110,28 @@ func _build_character_card(index: int) -> Control:
 	panel.add_theme_stylebox_override("panel", style)
 
 	var vbox: VBoxContainer = VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", 10)
+	vbox.add_theme_constant_override("separation", 6)
 
-	# 角色名
+	# ── 角色名 ──
 	var name_lbl: Label = Label.new()
 	name_lbl.text = char_data.get("name", "???")
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_font_size_override("font_size", UIC.font_size_of("heading"))
 	name_lbl.add_theme_color_override("font_color", UIC.color_of("gold"))
 
-	# 像素立绘占位（ColorRect，之后替换为真实贴图）
-	var portrait: ColorRect = ColorRect.new()
-	portrait.custom_minimum_size = Vector2(240, 160)
-	portrait.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	match char_data.get("id", ""):
-		"ruan_ruyue": portrait.color = Color(0.38, 0.18, 0.55, 0.8)
-		"shen_tiejun": portrait.color = Color(0.12, 0.22, 0.35, 0.8)
-		"wumian":      portrait.color = Color(0.50, 0.50, 0.48, 0.8)
-		_:             portrait.color = Color(0.20, 0.20, 0.20, 0.8)
+	# ── 像素立绘（128×192，居中）──
+	var portrait_center: CenterContainer = CenterContainer.new()
+	portrait_center.custom_minimum_size = Vector2(0, 200)
+	var portrait: TextureRect = TextureRect.new()
+	portrait.custom_minimum_size = Vector2(128, 192)
+	portrait.expand_mode = TextureRect.EXPAND_KEEP_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# 生成对应角色立绘
+	portrait.texture = CharacterPortrait.create(char_id)
+	portrait_center.add_child(portrait)
 
-	# HP / 能量
+	# ── HP / 能量 ──
 	var stats_lbl: Label = Label.new()
 	var hp_val: int = char_data.get("hp", 80)
 	var energy_val: int = char_data.get("energy", 3)
@@ -143,24 +140,24 @@ func _build_character_card(index: int) -> Control:
 	stats_lbl.add_theme_font_size_override("font_size", UIC.font_size_of("small"))
 	stats_lbl.add_theme_color_override("font_color", UIC.color_of("parch"))
 
-	# 被动简述
+	# ── 被动简述 ──
 	var passive_lbl: Label = Label.new()
 	passive_lbl.text = char_data.get("passive_desc", "")
 	passive_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	passive_lbl.add_theme_font_size_override("font_size", UIC.font_size_of("small"))
 	passive_lbl.add_theme_color_override("font_color", UIC.color_of("gold_dim"))
 
-	# 简介
+	# ── 简介 ──
 	var desc_lbl: RichTextLabel = RichTextLabel.new()
 	desc_lbl.bbcode_enabled = true
 	desc_lbl.text = char_data.get("description", "")
-	desc_lbl.custom_minimum_size = Vector2(260, 80)
+	desc_lbl.custom_minimum_size = Vector2(260, 56)
 	desc_lbl.fit_content = true
 	desc_lbl.add_theme_font_size_override("normal_font_size", UIC.font_size_of("small"))
 	desc_lbl.add_theme_color_override("default_color", UIC.color_of("parch_dim"))
 
 	vbox.add_child(name_lbl)
-	vbox.add_child(portrait)
+	vbox.add_child(portrait_center)
 	vbox.add_child(stats_lbl)
 	vbox.add_child(passive_lbl)
 	vbox.add_child(desc_lbl)
@@ -187,7 +184,6 @@ func _select(index: int) -> void:
 		style.corner_radius_bottom_left  = 8
 		style.corner_radius_bottom_right = 8
 		if i == index:
-			# 选中态：金色高亮边框
 			style.bg_color = Color(0.10, 0.13, 0.18, 0.95)
 			style.border_width_left   = 3
 			style.border_width_right  = 3
@@ -208,10 +204,8 @@ func _on_confirm_pressed() -> void:
 	var chosen: Dictionary = _characters[_selected_index]
 	var char_id: String = chosen.get("id", "ruan_ruyue")
 
-	# 存入 GameState
 	GameState.set_meta("selected_character", char_id)
 
-	# 按角色调整初始能量（通过 max_cost 覆盖）
 	var hp: int     = chosen.get("hp", 80)
 	var energy: int = chosen.get("energy", 3)
 	GameState.max_hp = hp
@@ -219,13 +213,10 @@ func _on_confirm_pressed() -> void:
 	DeckManager.max_cost     = energy
 	DeckManager.current_cost = energy
 
-	# 激活无面人专属管理器
 	if char_id == "wumian":
 		WumianManager.activate()
 	else:
 		WumianManager.deactivate()
 
-	# 按角色初始化起始牌组（依赖 selected_character 已设置）
 	DeckManager.init_starter_deck()
-
 	TransitionManager.change_scene("res://scenes/MapScene.tscn", "踏上渡魂之路")
