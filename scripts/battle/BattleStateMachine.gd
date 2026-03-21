@@ -919,13 +919,13 @@ func _choose_enemy_action() -> Dictionary:
 
 func _execute_enemy_action(action: Dictionary) -> void:
 	if action.is_empty(): return
-	var mul   = EmotionManager.get_enemy_damage_multiplier()
+	var mul: float = EmotionManager.get_enemy_damage_multiplier()
 	# 愤怒阶段：敌人伤害额外×1.3
 	if boss_phase == 2:
 		mul *= 1.3
 	var atype: String = action.get("type", "")
 	match atype:
-		"attack":
+		"attack", "attack_all":
 			# 先检查玩家闪避
 			if _dodge_charges > 0:
 				_dodge_charges -= 1
@@ -991,6 +991,42 @@ func _execute_enemy_action(action: Dictionary) -> void:
 			# 狂暴风暴附带：让玩家「惧」「悲」各+1
 			EmotionManager.modify("fear", 1)
 			EmotionManager.modify("grief", 1)
+
+		# ── Boss 专属行动 ──────────────────────────────────
+		"heal_self":
+			# Boss 自愈（水中沉潜等）
+			var heal_val: int = int(action.get("value", 0))
+			enemy_hp = min(enemy_hp + heal_val, enemy_max_hp)
+
+		"shield_self":
+			# Boss 自盾
+			var shield_val: int = int(action.get("value", 0))
+			# 府衙封条遗物：敌人防御行动时锁链+1
+			if RelicManager.has_relic("fu_ya_feng_tiao") or RelicManager.has_relic("fu_ya_feng_tiao_upgraded"):
+				enemy_chains = min(enemy_chains + 1, RelicManager.get_chain_stack_cap())
+			enemy_shield += shield_val
+
+		"apply_debuff":
+			# Boss 施加 debuff（情绪光环等）
+			var debuff_type: String = str(action.get("value", ""))
+			match debuff_type:
+				"grief_aura":
+					EmotionManager.modify("grief", 1)
+				"rage_aura":
+					EmotionManager.modify("rage", 1)
+				"joy_drain":
+					EmotionManager.modify("joy", -1)
+				_:
+					pass
+
+		"drain_emotion":
+			# Boss 吸取情绪（沈素锦：情感真空）
+			var drain_count: int = action.get("drain_emotion_count", 1)
+			var emotions: Array = ["grief", "fear", "rage", "joy", "calm"]
+			for _i in drain_count:
+				var rand_emo: String = emotions[randi() % emotions.size()]
+				if EmotionManager.values.get(rand_emo, 0) > 0:
+					EmotionManager.modify(rand_emo, -int(action.get("value", 1)))
 
 func _deal_damage_to_enemy(amount: int) -> void:
 	# 五彩香灰：多印记类型加伤

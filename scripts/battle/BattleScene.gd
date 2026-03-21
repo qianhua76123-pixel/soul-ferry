@@ -138,7 +138,7 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 
 func _on_player_turn_started(turn: int) -> void:
 	var moon_icons: Array = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
-	var moon: int = moon_icons[int(turn - 1) % 8]
+	var moon: String = moon_icons[int(turn - 1) % 8]
 	turn_label.text       = "%s 第 %d 回合" % [moon, int(turn)]
 	end_turn_btn.disabled = false
 	du_hua_btn.visible    = false
