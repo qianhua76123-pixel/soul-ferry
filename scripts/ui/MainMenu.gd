@@ -165,8 +165,9 @@ func _draw_ink_bg() -> void:
 func _draw_ink_lines(node: Node2D) -> void:
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 42
-	var W = 1280.0
-	var H = 720.0
+	var vp: Viewport = get_viewport()
+	var W: float = vp.get_visible_rect().size.x if vp else 1280.0
+	var H: float = vp.get_visible_rect().size.y if vp else 720.0
 
 	for _i in 30:
 		var x      = rng.randf_range(0.0, W)
