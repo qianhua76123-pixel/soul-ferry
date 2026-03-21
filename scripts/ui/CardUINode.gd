@@ -245,33 +245,26 @@ func _animate_hover(on: bool) -> void:
 		Color(1.15, 1.12, 1.05, 1.0) if on else Color.WHITE, 0.14)
 
 ## 出牌飞出动画：飞向祭坛中央，淡出消失
-func play_card_animation(target_global_pos: Vector2) -> void:
-	var start_pos: Vector2 = global_position
+## 出牌动画：原地缩小淡出（不做位移，避免坐标混淆）
+func play_card_animation(_target_global_pos: Vector2) -> void:
 	var tween: Tween = create_tween().set_parallel(true)
-	# 飞向目标（全局坐标转换）
-	var delta: Vector2 = target_global_pos - start_pos
-	tween.tween_property(self, "position", position + delta * 0.85, 0.22) \
-		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_CUBIC)
-	# 同时缩小
-	tween.tween_property(self, "scale", Vector2(0.5, 0.5), 0.22) \
+	tween.tween_property(self, "scale", Vector2(1.3, 1.3), 0.08) \
+		.set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "modulate:a", 0.0, 0.18) \
 		.set_ease(Tween.EASE_IN)
-	# 淡出
-	tween.tween_property(self, "modulate:a", 0.0, 0.20) \
-		.set_ease(Tween.EASE_IN)
-	# 动画结束后销毁
 	tween.chain().tween_callback(queue_free)
 
-## 抽入动画（由外部调用，传入起始偏移）
-func play_draw_animation(from_offset: Vector2) -> void:
+## 抽入动画：从下方淡入弹入（纯局部坐标，不涉及全局偏移）
+func play_draw_animation(_from_offset: Vector2) -> void:
 	var orig_pos: Vector2 = position
-	position = orig_pos + from_offset
+	position = orig_pos + Vector2(0, 30)   # 从下方 30px 滑入
 	modulate.a = 0.0
-	scale = Vector2(0.7, 0.7)
+	scale = Vector2(0.85, 0.85)
 	var tween: Tween = create_tween().set_parallel(true)
-	tween.tween_property(self, "position", orig_pos, 0.22) \
+	tween.tween_property(self, "position", orig_pos, 0.20) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tween.tween_property(self, "modulate:a", 1.0, 0.18)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.22) \
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.20) \
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 func _gui_input(event: InputEvent) -> void:

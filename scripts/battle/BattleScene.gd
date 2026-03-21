@@ -345,22 +345,18 @@ func _on_result_continue() -> void:
 var _last_battle_result: String = ""
 
 func _on_hand_updated(hand: Array) -> void:
-	# 记录旧手牌 ID 集合，判断哪些是新增牌
+	# ① 先记录旧手牌 ID（必须在 queue_free 之前）
 	var old_ids: Dictionary = {}
 	for child in hand_container.get_children():
 		var cd: Variant = child.get("card_data")
 		if cd is Dictionary:
-			old_ids[cd.get("id","")] = true
+			old_ids[cd.get("id", "")] = true
 
-	# 清除旧牌
+	# ② 清除旧牌
 	for child in hand_container.get_children():
 		child.queue_free()
 
-	# 牌堆位置（用于抽牌起始点）
-	var deck_btn: Node = get_node_or_null("UI/HUD/DeckCount")
-	var deck_gpos: Vector2 = Vector2(80, get_viewport_rect().size.y * 0.5) \
-		if not deck_btn else deck_btn.get_global_rect().get_center()
-
+	# ③ 建新牌节点
 	for i in hand.size():
 		var cd2: Dictionary = hand[i]
 		var card_ui: Node = _card_scene.instantiate()
@@ -371,45 +367,33 @@ func _on_hand_updated(hand: Array) -> void:
 		if card_ui.has_method("set_playable"):
 			card_ui.set_playable(can_afford and EmotionManager.can_play_card(cd2))
 		card_ui.card_clicked.connect(_on_card_clicked)
+		# 初始隐藏，等布局稳定后播动画
+		card_ui.modulate.a = 0.0
 		hand_container.add_child(card_ui)
 
-	# 间距
+	# ④ 动态间距
 	var card_count: int = hand_container.get_child_count()
 	var sep: int = 12
 	if card_count > 5:
 		sep = max(4, 12 - (card_count - 5) * 3)
 	hand_container.add_theme_constant_override("separation", sep)
 
-	# 等一帧让布局计算完成再播动画
+	# ⑤ 等两帧确保布局稳定（一帧不够，HBoxContainer 需要两帧完成尺寸分配）
+	await get_tree().process_frame
 	await get_tree().process_frame
 
+	# ⑥ 播入场动画（统一从下方弹入，新牌稍大延迟区分）
 	var delay: float = 0.0
-	for i2 in hand_container.get_children().size():
-		var card_ui2: Node = hand_container.get_children()[i2]
+	for card_ui2: Node in hand_container.get_children():
 		var cd3: Variant = card_ui2.get("card_data")
-		var is_new: bool = true
-		if cd3 is Dictionary and old_ids.has(cd3.get("id","")):
-			is_new = false
-
-		if is_new and card_ui2.has_method("play_draw_animation"):
-			# 新抽的牌：从牌堆位置飞入
-			var card_gpos: Vector2 = card_ui2.get_global_rect().get_center()
-			var offset: Vector2 = deck_gpos - card_gpos
+		var is_new: bool = not (cd3 is Dictionary and old_ids.has(cd3.get("id", "")))
+		if card_ui2.has_method("play_draw_animation"):
 			var tw: Tween = card_ui2.create_tween()
 			tw.tween_interval(delay)
-			tw.tween_callback(func(): card_ui2.play_draw_animation(offset))
-			delay += 0.07
+			tw.tween_callback(func(): card_ui2.play_draw_animation(Vector2.ZERO))
 		else:
-			# 已有的牌：简单淡入复位
-			card_ui2.modulate.a = 0.0
-			var orig_y: float = card_ui2.position.y
-			card_ui2.position.y = orig_y + 20
-			var tw2: Tween = card_ui2.create_tween()
-			tw2.tween_interval(delay)
-			tw2.tween_property(card_ui2, "position:y", orig_y, 0.15) \
-				.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-			tw2.parallel().tween_property(card_ui2, "modulate:a", 1.0, 0.15)
-			delay += 0.03
+			card_ui2.modulate.a = 1.0
+		delay += 0.05 if is_new else 0.02
 
 func _on_card_clicked(card_data: Dictionary) -> void:
 	if state_machine.current_state != 2: # STATE_PLAYER_TURN
@@ -419,28 +403,23 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 	get_tree().create_timer(0.5).timeout.connect(
 		func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
 
-	# 找到被点击的卡牌 UI 节点，播放飞出动画
-	var altar_center: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
-	var target_pos: Vector2 = get_viewport_rect().size / 2.0
-	if altar_center and altar_center is Control:
-		target_pos = (altar_center as Control).get_global_rect().get_center()
-
+	# 找到被点击的卡牌节点，播出牌动画（原地缩放淡出）
 	for card_ui in hand_container.get_children():
 		var cd: Variant = card_ui.get("card_data")
 		if cd is Dictionary and cd.get("id","") == card_data.get("id",""):
 			if card_ui.has_method("play_card_animation"):
-				card_ui.play_card_animation(target_pos)
+				card_ui.play_card_animation(Vector2.ZERO)  # 不需要目标坐标
 			break
 
-	# 等飞出动画启动后再执行效果
+	# 等出牌动画开始后再执行效果
 	var effect_type: String = card_data.get("effect_type", "")
 	var is_attack: bool = effect_type in ["attack","attack_all","attack_lifesteal","attack_dot",
 		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
 		"shield_attack","remove_enemy_shield","dodge_attack"]
-	await get_tree().create_timer(0.15).timeout
+	await get_tree().create_timer(0.12).timeout
 	if is_attack:
 		_play_attack_flash()
-		await get_tree().create_timer(0.10).timeout
+		await get_tree().create_timer(0.08).timeout
 	state_machine.play_card(card_data)
 
 func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
