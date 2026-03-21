@@ -581,4 +581,3 @@ func _apply_buy_button_style(btn: Button) -> void:
 	btn.add_theme_color_override("font_hover_color",    UIC.COLORS["gold"])
 	btn.add_theme_color_override("font_disabled_color", UIC.COLORS["ash"])
 	btn.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
->>>>>>> 4813e484c5297a37a34de83712934715e9727acc

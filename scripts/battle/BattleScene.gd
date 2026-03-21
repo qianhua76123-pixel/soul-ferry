@@ -846,7 +846,6 @@ func _setup_layout_improvements() -> void:
 	_card_preview = CardPreviewClass.new()
 	if ui: ui.add_child(_card_preview)
 
-<<<<<<< HEAD
 ## 祭坛三栏标题：DS-00 配色 + 标题下水墨分割线
 func _setup_altar_title_style() -> void:
 	var pa = get_node_or_null("UI/AltarLayout/PlayerArea")

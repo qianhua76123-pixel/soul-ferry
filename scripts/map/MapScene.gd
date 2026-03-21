@@ -308,7 +308,6 @@ func _render_relics() -> void:
 		relic_bar.add_child(lbl)
 
 func _update_status() -> void:
-<<<<<<< HEAD
 	hp_label.text   = "%s %d/%d" % [UIConstants.ICONS["hp"], GameState.hp, GameState.max_hp]
 	gold_label.text = "%s %d" % [UIConstants.ICONS["coin"], GameState.gold]
 
@@ -319,10 +318,6 @@ func _apply_ui_theme() -> void:
 	layer_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 	hp_label.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
 	gold_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
-=======
-	hp_label.text   = "HP: %d/%d" % [int(GameState.hp), int(GameState.max_hp)]
-	gold_label.text = "💰 %d"     % int(GameState.gold)
->>>>>>> 4813e484c5297a37a34de83712934715e9727acc
 
 ## 生成层间向下箭头连接线
 func _make_layer_connector(is_active: bool) -> Control:
