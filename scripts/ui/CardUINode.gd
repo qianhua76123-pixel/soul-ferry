@@ -57,7 +57,7 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,76), name,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, TEXT_COLOR)
 	# 描述
-	var desc = card_data.get("description","")
+	var desc = card_data.get("desc", card_data.get("description",""))
 	if desc.length() > 20: desc = desc.substr(0,18) + "…"
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,90), desc,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, Color(TEXT_COLOR.r,TEXT_COLOR.g,TEXT_COLOR.b,0.7))
@@ -216,8 +216,10 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 
 func _animate_hover(on: bool) -> void:
 	var tween = create_tween()
-	tween.tween_property(self,"_hover_offset",14.0 if on else 0.0,0.12)
-	tween.step_finished.connect(func(_n): queue_redraw())
+	tween.tween_method(func(v: float):
+		_hover_offset = v
+		queue_redraw()
+		, _hover_offset, 14.0 if on else 0.0, 0.12)
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:

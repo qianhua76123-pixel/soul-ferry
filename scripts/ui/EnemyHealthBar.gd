@@ -94,7 +94,8 @@ func set_hp(new_hp: int, max_hp: int) -> void:
 	_hp_tween.tween_interval(0.3)
 	_hp_tween.tween_method(func(v: float):
 		_ghost_hp = v
-		_redraw_bar(), float(old_hp) if _ghost_hp > float(new_hp) else float(new_hp),
+		_redraw_bar()
+		, float(old_hp) if _ghost_hp > float(new_hp) else float(new_hp),
 		float(new_hp), 0.5).set_ease(Tween.EASE_OUT)
 
 	_ghost_hp = max(_ghost_hp, float(new_hp))
