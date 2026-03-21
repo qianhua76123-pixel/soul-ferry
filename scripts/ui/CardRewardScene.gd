@@ -4,11 +4,11 @@ extends Node2D
 
 signal reward_taken(card: Dictionary)
 
-@onready var title_label    = $UI/Title
-@onready var flavor_label   = $UI/Flavor
-@onready var card_container = $UI/CardRow
-@onready var skip_btn       = $UI/SkipBtn
-@onready var gold_label     = $UI/GoldLabel
+@onready var title_label:    Label          = $UI/Title
+@onready var flavor_label:   Label          = $UI/Flavor
+@onready var card_container: HBoxContainer  = $UI/CardRow
+@onready var skip_btn:       Button         = $UI/SkipBtn
+@onready var gold_label:     Label          = $UI/GoldLabel
 
 var _card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
 var _reward_cards: Array = []

@@ -116,7 +116,7 @@ func _build_title_area(parent: CanvasLayer) -> void:
 	divider.offset_top = 62.0
 	divider.offset_bottom = 64.0
 	divider.layout_mode = 1
-	divider.line_color = UIC.COLORS["gold_dim"]
+	divider.ink_color = UIC.COLORS["gold_dim"]
 	parent.add_child(divider)
 
 	# 副标题（替换 tscn 里的 FlavorText）

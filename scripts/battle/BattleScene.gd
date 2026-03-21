@@ -7,14 +7,14 @@ const UIC = preload("res://scripts/ui/UIConstants.gd")
 @onready var state_machine       = $BattleStateMachine
 @onready var hand_container      = $UI/HandContainer
 @onready var turn_label          = $UI/HUD/TurnLabel
-@onready var cost_label          = $UI/HUD/CostLabel
-@onready var deck_count_label    = $UI/HUD/DeckCount
-@onready var discard_count_label = $UI/HUD/DiscardCount
-@onready var end_turn_btn        = $UI/HUD/EndTurnBtn
-@onready var du_hua_btn          = $UI/HUD/DuHuaBtn
-@onready var player_hp_bar       = $UI/AltarLayout/PlayerArea/HPBar
-@onready var player_hp_label     = $UI/AltarLayout/PlayerArea/HPLabel
-@onready var player_shield_label = $UI/AltarLayout/PlayerArea/ShieldLabel
+@onready var cost_label:          Label    = $UI/HUD/CostLabel
+@onready var deck_count_label:    Label    = $UI/HUD/DeckCount
+@onready var discard_count_label: Label    = $UI/HUD/DiscardCount
+@onready var end_turn_btn:        Button   = $UI/HUD/EndTurnBtn
+@onready var du_hua_btn:          Button   = $UI/HUD/DuHuaBtn
+@onready var player_hp_bar:       ProgressBar = $UI/AltarLayout/PlayerArea/HPBar
+@onready var player_hp_label:     Label    = $UI/AltarLayout/PlayerArea/HPLabel
+@onready var player_shield_label: Label    = $UI/AltarLayout/PlayerArea/ShieldLabel
 @onready var enemy_name_label    = $UI/AltarLayout/EnemyArea/EnemyName
 @onready var enemy_hp_bar        = $UI/AltarLayout/EnemyArea/HPBar
 @onready var enemy_shield_label  = $UI/AltarLayout/EnemyArea/ShieldLabel
@@ -112,19 +112,20 @@ func _deferred_layout_setup() -> void:
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
 	RelicManager.on_battle_start(enemy_data)
-	enemy_hp_bar.max_value  = enemy_data.get("hp", 100)
-	enemy_hp_bar.value      = enemy_data.get("hp", 100)
-	_setup_enemy_sprite(enemy_data)
-	# B-02 敌人新血条初始化
+	# 新血条（主显示）
+	var enemy_max := int(enemy_data.get("hp", 100))
 	if _enemy_hbar and _enemy_hbar.has_method("set_hp"):
-		_enemy_hbar.set_hp(int(enemy_data.get("hp", 100)), int(enemy_data.get("hp", 100)))
+		_enemy_hbar.set_hp(enemy_max, enemy_max)
+	# 旧 ProgressBar 隐藏，仅保留数据同步（给依赖它的其他代码用）
+	enemy_hp_bar.max_value = enemy_max
+	enemy_hp_bar.value     = enemy_max
+	_setup_enemy_sprite(enemy_data)
 	enemy_shield_label.text = "🛡 0"
 	du_hua_hint_label.text  = ""
-	# B-06 渡化条件面板初始化
 	if _purif_panel and _purif_panel.has_method("setup_conditions"):
 		_purif_panel.setup_conditions(enemy_data)
 	_update_hud()
-	var is_boss = enemy_data.get("type", "") == "boss"
+	var is_boss := enemy_data.get("type", "") == "boss"
 	SoundManager.play_battle_bgm(GameState.current_layer, is_boss)
 	# 成就：Boss 战开始追踪
 	if is_boss:
@@ -179,9 +180,16 @@ func _spawn_special_text(msg: String, color: Color) -> void:
 	tw.tween_callback(lbl.queue_free)
 
 func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
-	enemy_hp_bar.value       = state_machine.enemy_hp
+	# 敌人血条（新 + 旧同步）
+	enemy_hp_bar.value = state_machine.enemy_hp
+	if _enemy_hbar and _enemy_hbar.has_method("set_hp"):
+		_enemy_hbar.set_hp(state_machine.enemy_hp, state_machine.enemy_max_hp)
+	if _enemy_hbar and _enemy_hbar.has_method("set_shield"):
+		_enemy_hbar.set_shield(state_machine.enemy_shield)
 	enemy_shield_label.text  = "🛡 %d" % int(state_machine.enemy_shield)
 	player_shield_label.text = "🛡 %d" % int(state_machine.player_shield)
+	if _player_hbar and _player_hbar.has_method("set_shield"):
+		_player_hbar.set_shield(state_machine.player_shield)
 	_update_hud()
 	var rtype = result.get("type","")
 	var rval  = int(result.get("value", 0))
@@ -410,14 +418,15 @@ func _on_disorder_cleared(_e: String) -> void:
 	disorder_warning.text = ""
 
 func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
+	# 旧 ProgressBar（已隐藏，仅保留数据）
 	player_hp_bar.max_value = GameState.max_hp
 	player_hp_bar.value     = new_hp
-	player_hp_label.text    = "%d / %d" % [int(new_hp), int(GameState.max_hp)]
-	# B-02 同步新双层血条
+	player_hp_label.text    = "%s %d / %d" % [UIConstants.ICONS["hp"], int(new_hp), int(GameState.max_hp)]
+	# 新双层血条（主显示）
 	if _player_hbar and _player_hbar.has_method("set_hp"):
 		_player_hbar.set_hp(new_hp, GameState.max_hp)
 	# 浮字：受伤/回血
-	var diff = new_hp - old_hp
+	var diff := new_hp - old_hp
 	if diff < 0:
 		_spawn_player_number(-diff, "damage")
 		_set_player_sprite_state("hurt")
@@ -436,9 +445,15 @@ func _update_hud() -> void:
 	cost_label.text          = "费用: %d" % int(DeckManager.current_cost)
 	deck_count_label.text    = "▤ 牌库: %d" % int(len(DeckManager.deck))
 	discard_count_label.text = "↓ 弃牌: %d" % int(len(DeckManager.discard_pile))
-	player_hp_bar.max_value  = GameState.max_hp
-	player_hp_bar.value      = GameState.hp
-	player_hp_label.text     = "%s %d / %d" % [UIConstants.ICONS["hp"], int(GameState.hp), int(GameState.max_hp)]
+	# 旧血条数据同步（已隐藏，仅备份）
+	player_hp_bar.max_value = GameState.max_hp
+	player_hp_bar.value     = GameState.hp
+	player_hp_label.text    = "%s %d / %d" % [UIConstants.ICONS["hp"], int(GameState.hp), int(GameState.max_hp)]
+	# 新血条同步
+	if _player_hbar and _player_hbar.has_method("set_hp"):
+		_player_hbar.set_hp(GameState.hp, GameState.max_hp)
+	if _player_hbar and _player_hbar.has_method("set_shield"):
+		_player_hbar.set_shield(state_machine.player_shield)
 
 func _setup_hud_theme() -> void:
 	turn_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))

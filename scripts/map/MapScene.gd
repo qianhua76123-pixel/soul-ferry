@@ -2,12 +2,12 @@ extends Node2D
 
 ## MapScene.gd - 路线地图（三层节点）
 
-@onready var node_container = $UI/NodeContainer
-@onready var layer_label    = $UI/LayerLabel
-@onready var title_label    = $UI/TopBar/Title
-@onready var hp_label       = $UI/TopBar/HPLabel
-@onready var gold_label     = $UI/TopBar/GoldLabel
-@onready var relic_bar      = $UI/RelicBar
+@onready var node_container: VBoxContainer  = $UI/NodeContainer
+@onready var layer_label:    Label          = $UI/LayerLabel
+@onready var title_label:    Label          = $UI/TopBar/Title
+@onready var hp_label:       Label          = $UI/TopBar/HPLabel
+@onready var gold_label:     Label          = $UI/TopBar/GoldLabel
+@onready var relic_bar:      HBoxContainer  = $UI/RelicBar
 
 const NODE_WEIGHTS      = {"battle":50,"event":25,"shop":15,"rest":10}
 const LAYER_NODE_COUNTS = [5,5,4]

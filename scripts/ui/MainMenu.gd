@@ -5,14 +5,14 @@ extends Node2D
 const UIC = preload("res://scripts/ui/UIConstants.gd")
 const WaterInkDividerClass = preload("res://scripts/ui/WaterInkDivider.gd")
 
-@onready var title_label    = $UI/TitleLabel
-@onready var subtitle_label = $UI/SubtitleLabel
-@onready var new_game_btn   = $UI/ButtonContainer/NewGameBtn
-@onready var continue_btn   = $UI/ButtonContainer/ContinueBtn
-@onready var quit_btn       = $UI/ButtonContainer/QuitBtn
-@onready var version_label  = $UI/VersionLabel
-@onready var ink_particles  = $InkParticles
-@onready var bg_canvas      = $BgCanvas
+@onready var title_label:    Label           = $UI/TitleLabel
+@onready var subtitle_label: Label           = $UI/SubtitleLabel
+@onready var new_game_btn:   Button          = $UI/ButtonContainer/NewGameBtn
+@onready var continue_btn:   Button          = $UI/ButtonContainer/ContinueBtn
+@onready var quit_btn:       Button          = $UI/ButtonContainer/QuitBtn
+@onready var version_label:  Label           = $UI/VersionLabel
+@onready var ink_particles:  GPUParticles2D  = $InkParticles
+@onready var bg_canvas:      Node2D          = $BgCanvas
 
 const VERSION = "✦ v0.1 Demo"
 
