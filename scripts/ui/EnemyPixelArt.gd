@@ -19,7 +19,7 @@ static func _get_rng(seed_val: int = 12345) -> RandomNumberGenerator:
 	return _rng
 
 static func create_texture(enemy_id: String) -> ImageTexture:
-	var img = Image.create(32, 48, false, Image.FORMAT_RGBA8)
+	var img: Image = Image.create(32, 48, false, Image.FORMAT_RGBA8)
 	img.fill(Color.TRANSPARENT)
 	_draw_enemy(img, enemy_id)
 	img.resize(64, 96, Image.INTERPOLATE_NEAREST)   # 2x 放大保持像素感
@@ -134,7 +134,7 @@ static func _draw_she_mi(img: Image) -> void:
 	_circle(img, 16, 18,  9, c_sclera)
 	# 血丝
 	for angle_deg in [30, 120, 210, 300]:
-		var a = deg_to_rad(angle_deg)
+		var a: float = deg_to_rad(angle_deg)
 		for r in range(6, 9):
 			_px(img, int(16 + cos(a)*r), int(18 + sin(a)*r), c_vein)
 	# 虹膜
@@ -270,7 +270,7 @@ static func _draw_hanba(img: Image) -> void:
 
 	# 背后火焰光环
 	for angle_deg in range(0, 360, 15):
-		var a = deg_to_rad(angle_deg)
+		var a: float = deg_to_rad(angle_deg)
 		for r in range(10, 14):
 			var fx: int = int(16 + cos(a)*r)
 			var fy: int = int(16 + sin(a)*r)

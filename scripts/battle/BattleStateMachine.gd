@@ -294,7 +294,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"remove_enemy_shield":
 			# 清除敌人护盾并转化为伤害
-			var removed = enemy_shield
+			var removed: int = enemy_shield
 			enemy_shield = 0
 			if removed > 0:
 				_deal_damage_to_enemy(removed)

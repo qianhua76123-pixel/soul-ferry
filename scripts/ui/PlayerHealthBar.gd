@@ -52,7 +52,7 @@ func _ready() -> void:
 	_update_label_color()
 
 func _draw_bar(area: Control) -> void:
-	var w = area.size.x
+	var w: float = area.size.x
 	if w <= 0.0:
 		w = 220.0
 	var ratio       = float(_cur_hp) / float(max(1, _max_hp))
@@ -85,8 +85,8 @@ func _draw_chamfered_rect(area: Control, rect: Rect2, color: Color, c: float) ->
 	# 用多边形实现切角矩形（左上右上右下左下四个角各切 c px）
 	var x: float = rect.position.x
 	var y: float = rect.position.y
-	var rw = rect.size.x
-	var rh = rect.size.y
+	var rw: float = rect.size.x
+	var rh: float = rect.size.y
 	var pts = PackedVector2Array([
 		Vector2(x + c,      y),
 		Vector2(x + rw - c, y),
@@ -141,7 +141,7 @@ func _redraw_bar() -> void:
 func _update_label_color() -> void:
 	if not _info_label: return
 	var ratio: float = float(_cur_hp) / float(max(1, _max_hp))
-	var col = _get_fill_color(ratio)
+	var col: Color = _get_fill_color(ratio)
 	_info_label.add_theme_color_override("font_color", col)
 
 func set_shield(shield: int) -> void:

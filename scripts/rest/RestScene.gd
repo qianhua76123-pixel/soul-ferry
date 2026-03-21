@@ -49,7 +49,7 @@ func _on_upgrade_mode() -> void:
 
 	var card_scene: GDScript = preload("res://scenes/CardUI.tscn")
 	for card in DeckManager.get_full_deck():
-		var card_ui = card_scene.instantiate() as CardUINode
+		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
 		card_ui.set_playable(true)
 		# 悬停时显示升级预览 tooltip

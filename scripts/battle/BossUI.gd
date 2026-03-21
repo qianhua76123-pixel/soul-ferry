@@ -199,7 +199,7 @@ func _spawn_phase_text() -> void:
 # ══════════════════════════════════════════════════════
 func _shake_sprite(times: int, magnitude: float) -> void:
 	if not _sprite_node: return
-	var origin = _sprite_node.position
+	var origin: Vector2 = _sprite_node.position
 	var tw: Tween = _sprite_node.create_tween()
 	for i in times:
 		var dx: float = randf_range(-magnitude * 20, magnitude * 20)

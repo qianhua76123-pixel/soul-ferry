@@ -426,7 +426,7 @@ class _BgArt extends Node2D:
 		draw_line(Vector2(pos.x, pos.y - 8), Vector2(pos.x, pos.y - 40), Color(0.55, 0.45, 0.30), 1)
 		# 金色横纹
 		for i in 3:
-			var y = pos.y + (i + 1) * (h / 4)
+			var y: float = pos.y + (i + 1) * (h / 4)
 			draw_line(Vector2(pos.x - w/2, y), Vector2(pos.x + w/2, y),
 				Color(0.90, 0.75, 0.15, 0.6), 1)
 		# 穗子

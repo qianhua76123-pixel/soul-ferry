@@ -26,7 +26,7 @@ func _show_rewards() -> void:
 	for child in card_container.get_children():
 		child.queue_free()
 	for card in _reward_cards:
-		var slot = _build_slot(card)
+		var slot: Control = _build_slot(card)
 		card_container.add_child(slot)
 
 func _build_slot(card: Dictionary) -> VBoxContainer:

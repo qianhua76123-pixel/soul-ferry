@@ -19,30 +19,30 @@ func _on_emotion_changed(emotion: String, _old: int, new_value: int) -> void:
 func _on_dominant_changed(_old: String, new_dominant: String) -> void:
 	# 更新主导情绪高亮
 	for emotion in emotion_bars:
-		var bar = emotion_bars[emotion]
+		var bar: ProgressBar = emotion_bars[emotion]
 		if is_instance_valid(bar):
 			bar.modulate = Color.WHITE
 	if new_dominant != "" and new_dominant in emotion_bars:
-		var dominant_bar = emotion_bars[new_dominant]
+		var dominant_bar: ProgressBar = emotion_bars[new_dominant]
 		if is_instance_valid(dominant_bar):
 			dominant_bar.modulate = EmotionManager.get_emotion_color(new_dominant)
 
 func _on_disorder_triggered(emotion: String) -> void:
 	# 显示失调警告（闪烁/变色）
 	if emotion in emotion_bars:
-		var bar = emotion_bars[emotion]
+		var bar: ProgressBar = emotion_bars[emotion]
 		if is_instance_valid(bar):
 			bar.modulate = Color.RED
 
 func _on_disorder_cleared(emotion: String) -> void:
 	if emotion in emotion_bars:
-		var bar = emotion_bars[emotion]
+		var bar: ProgressBar = emotion_bars[emotion]
 		if is_instance_valid(bar):
 			bar.modulate = Color.WHITE
 
 func _update_bar(emotion: String, value: int) -> void:
 	if emotion in emotion_bars:
-		var bar = emotion_bars[emotion]
+		var bar: ProgressBar = emotion_bars[emotion]
 		if is_instance_valid(bar):
 			bar.value = value
 			bar.max_value = EmotionManager.MAX_VALUE

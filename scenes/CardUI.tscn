@@ -4,5 +4,5 @@
 
 ; 单张牌卡场景（由 BattleScene 动态实例化）
 [node name="CardUI" type="Control"]
-custom_minimum_size = Vector2(90, 130)
+custom_minimum_size = Vector2(90, 145)
 script = ExtResource("1_card")

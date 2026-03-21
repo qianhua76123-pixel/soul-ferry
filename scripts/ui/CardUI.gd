@@ -83,7 +83,7 @@ func _on_mouse_entered() -> void:
 	tw.tween_property(self, "position:y", position.y - 10, 0.12)
 	tw.parallel().tween_property(self, "scale", Vector2(1.05, 1.05), 0.12)
 	# 触发 BattleScene 显示预览
-	var battle = get_tree().root.find_child("BattleScene", true, false)
+	var battle: Node = get_tree().root.find_child("BattleScene", true, false)
 	if battle and battle.has_method("show_card_preview"):
 		battle.show_card_preview(card_data, get_global_rect().get_center())
 
@@ -92,6 +92,6 @@ func _on_mouse_exited() -> void:
 	var tw: Tween = create_tween()
 	tw.tween_property(self, "position:y", _base_y, 0.10)
 	tw.parallel().tween_property(self, "scale", Vector2(1.0, 1.0), 0.10)
-	var battle = get_tree().root.find_child("BattleScene", true, false)
+	var battle: Node = get_tree().root.find_child("BattleScene", true, false)
 	if battle and battle.has_method("hide_card_preview"):
 		battle.hide_card_preview()

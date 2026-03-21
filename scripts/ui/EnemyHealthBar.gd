@@ -33,7 +33,7 @@ func _ready() -> void:
 	add_child(bar_area)
 
 func _draw_bar(area: Control) -> void:
-	var w = area.size.x
+	var w: float = area.size.x
 	if w <= 0.0:
 		w = 220.0
 	var ratio       = float(_cur_hp) / float(max(1, _max_hp))
@@ -62,8 +62,8 @@ func _draw_bar(area: Control) -> void:
 func _draw_chamfered_rect(area: Control, rect: Rect2, color: Color, c: float) -> void:
 	var x  = rect.position.x
 	var y  = rect.position.y
-	var rw = rect.size.x
-	var rh = rect.size.y
+	var rw: float = rect.size.x
+	var rh: float = rect.size.y
 	var pts = PackedVector2Array([
 		Vector2(x + c,      y),
 		Vector2(x + rw - c, y),

@@ -110,7 +110,7 @@ func _build_title_area(parent: CanvasLayer) -> void:
 	parent.add_child(title_lbl)
 
 	# WaterInkDivider
-	var divider = WaterInkDividerClass.new()
+	var divider: Node = WaterInkDividerClass.new()
 	divider.custom_minimum_size = Vector2(0, 2)
 	divider.anchor_right = 1.0
 	divider.offset_top = 62.0
@@ -302,7 +302,7 @@ func _build_shop_slot(card: Dictionary) -> VBoxContainer:
 	vbox.add_theme_constant_override("separation", 6)
 
 	# 牌卡 UI（110×160px）
-	var card_ui = _card_scene.instantiate() as CardUINode
+	var card_ui: CardUINode = _card_scene.instantiate() as CardUINode
 	card_ui.setup(card)
 	card_ui.set_playable(false)
 	card_ui.custom_minimum_size = Vector2(110, 160)
@@ -404,7 +404,7 @@ func _on_remove_pressed() -> void:
 
 	var full_deck: Array = DeckManager.get_full_deck()
 	for card in full_deck:
-		var card_ui = _card_scene.instantiate() as CardUINode
+		var card_ui: CardUINode = _card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
 		card_ui.set_playable(true)
 		var captured: Dictionary = card
@@ -517,7 +517,7 @@ func _setup_shop_visual() -> void:
 
 	# 底部横向细线（5条，从底部向上，间隔40px）
 	var vp_h = 600.0  # 默认视口高度
-	var vp = get_viewport()
+	var vp: Viewport = get_viewport()
 	if vp:
 		vp_h = float(vp.get_visible_rect().size.y)
 	for i in range(5):

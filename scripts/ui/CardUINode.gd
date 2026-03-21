@@ -7,7 +7,7 @@ class_name CardUINode
 signal card_clicked(card_data: Dictionary)
 
 const CARD_W = 90.0
-const CARD_H = 130.0
+const CARD_H = 145.0
 
 var card_data: Dictionary = {}
 var is_playable: bool = true
@@ -63,11 +63,14 @@ func _draw() -> void:
 	var tc := UIConstants.color_of("text_primary")
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,76), name,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, tc)
-	# 描述
-	var desc: String = card_data.get("desc", card_data.get("description",""))
-	if desc.length() > 20: desc = desc.substr(0,18) + "…"
-	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,90), desc,
-		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, UIConstants.color_of("text_muted"))
+	# 描述（去除 BBCode 标签，多行换行显示）
+	var raw_desc: String = card_data.get("desc", card_data.get("description",""))
+	var desc: String = raw_desc.replace("[color=#f0c040]","").replace("[/color]","") \
+		.replace("[b]","").replace("[/b]","") \
+		.replace("[i]","").replace("[/i]","")
+	var muted := UIConstants.color_of("text_muted")
+	draw_multiline_string(ThemeDB.fallback_font, ofs+Vector2(4,88), desc,
+		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, 3, muted)
 	# 费用圆
 	var ink := UIConstants.color_of("ink")
 	draw_circle(ofs+Vector2(14,14), 11.0, Color(ink.r * 1.2, ink.g * 1.2, ink.b * 1.2))
@@ -75,7 +78,7 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(9,19), _cost_text,
 		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, tc)
 	# 情绪图标
-	var c = _emotion_color; c.a = 0.85
+	var c: Color = _emotion_color; c.a = 0.85
 	draw_circle(ofs+Vector2(CARD_W-14, CARD_H-14), 7.0, c)
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(CARD_W-19, CARD_H-9),
 		EmotionManager.get_emotion_name(card_data.get("emotion_tag","calm")),
@@ -83,10 +86,10 @@ func _draw() -> void:
 
 func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 	# 底色
-	var bg = _emotion_color; bg.a = 0.08
+	var bg: Color = _emotion_color; bg.a = 0.08
 	draw_rect(Rect2(pos, size), bg)
-	var cx = pos.x + size.x / 2.0
-	var cy = pos.y + size.y / 2.0
+	var cx: float = pos.x + size.x / 2.0
+	var cy: float = pos.y + size.y / 2.0
 	var c  = _emotion_color
 	var cd = Color(c.r * 0.6, c.g * 0.6, c.b * 0.6, 0.9)  # 暗色
 	var cl = Color(min(c.r+0.3,1.0), min(c.g+0.3,1.0), min(c.b+0.3,1.0), 0.5) # 亮色
@@ -95,7 +98,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 
 		"rage":
 			# 烈焰：三层火舌+中心爆点
-			var flame_c = [
+			var flame_c: Array = [
 				Color(0.95, 0.30, 0.05, 0.9),
 				Color(0.98, 0.60, 0.05, 0.85),
 				Color(1.00, 0.90, 0.20, 0.8),
@@ -126,8 +129,8 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			draw_circle(Vector2(cx, cy), 15.0, Color(0.70, 0.68, 0.62, 0.9))  # 巩膜
 			# 血丝
 			for ang in [0.4, 1.8, 3.2, 4.8]:
-				var ex = cx + cos(ang) * 14
-				var ey = cy + sin(ang) * 11
+				var ex: float = cx + cos(ang) * 14
+				var ey: float = cy + sin(ang) * 11
 				draw_line(Vector2(cx + cos(ang)*6, cy + sin(ang)*5),
 					Vector2(ex, ey), Color(0.7, 0.1, 0.1, 0.5), 0.8)
 			# 虹膜
@@ -173,7 +176,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			# 双喜：八芒星光+旋转花瓣+中心喜字笔画
 			# 光芒（8道）
 			for i in 8:
-				var a = i * PI / 4.0
+				var a: float = i * PI / 4.0
 				var inner = 6.0; var outer = 20.0
 				draw_line(
 					Vector2(cx + cos(a) * inner, cy + sin(a) * inner),
@@ -181,7 +184,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 					Color(0.98, 0.88, 0.20, 0.6 - i * 0.02), 1.5)
 			# 花瓣（4片）
 			for i in 4:
-				var a_2 = i * PI / 2.0 + PI/4.0
+				var a_2: float = i * PI / 2.0 + PI/4.0
 				draw_circle(
 					Vector2(cx + cos(a_2)*9, cy + sin(a_2)*9), 6.0,
 					Color(0.95, 0.75, 0.10, 0.55))
@@ -199,16 +202,16 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			draw_arc(Vector2(cx, cy), 16.0, 0, TAU, 64, Color(c.r,c.g,c.b,0.35), 1.0)
 			# 八方分割线
 			for i in range(8):
-				var a_2_2 = i * PI / 4.0
+				var a_2_2: float = i * PI / 4.0
 				draw_line(
 					Vector2(cx + cos(a_2_2) * 10, cy + sin(a_2_2) * 10),
 					Vector2(cx + cos(a_2_2) * 19, cy + sin(a_2_2) * 19),
 					Color(c.r, c.g, c.b, 0.5), 1.0)
 			# 八卦爻（外圈）
 			for i in range(8):
-				var a_2_2_2 = i * PI / 4.0
-				var bx = cx + cos(a_2_2_2) * 13
-				var by = cy + sin(a_2_2_2) * 13
+				var a_2_2_2: float = i * PI / 4.0
+				var bx: float = cx + cos(a_2_2_2) * 13
+				var by: float = cy + sin(a_2_2_2) * 13
 				# 实线或虚线（阴阳）
 				if i % 2 == 0:
 					draw_line(Vector2(bx-3,by), Vector2(bx+3,by), Color(c.r,c.g,c.b,0.7), 1.5)

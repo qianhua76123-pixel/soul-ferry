@@ -41,7 +41,7 @@ func _build_labels() -> void:
 
 func _build_edge_vignettes() -> void:
 	# 找 BattleScene 的 UI 根节点挂晕染层
-	var root_ui = get_tree().root.find_child("UI", true, false)
+	var root_ui: Node = get_tree().root.find_child("UI", true, false)
 	if not root_ui:
 		root_ui = get_parent()
 	for i in range(4):
@@ -59,18 +59,18 @@ func _build_edge_vignettes() -> void:
 		_edge_rects.append(r)
 
 func _refresh_labels() -> void:
-	var effective_size = size if size.x > 4 else custom_minimum_size
-	var center = effective_size / 2.0
+	var effective_size: Vector2 = size if size.x > 4 else custom_minimum_size
+	var center: Vector2 = effective_size / 2.0
 	for emotion in EMOTIONS:
 		var lbl: Variant = _label_nodes.get(emotion)
 		if not lbl: continue
 		var val   = EmotionManager.values.get(emotion, 0)
-		var angle = deg_to_rad(EMOTION_ANGLES[emotion])
+		var angle: float = deg_to_rad(EMOTION_ANGLES[emotion])
 		var r     = RADIUS + 22.0
 		var lpos  = center + Vector2(cos(angle), sin(angle)) * r
 		lbl.position = lpos - Vector2(22, 20)
 		lbl.custom_minimum_size = Vector2(44, 40)
-		var c = EMOTION_COLORS[emotion]
+		var c: Color = EMOTION_COLORS[emotion]
 		lbl.add_theme_color_override("font_color", c)
 		var bars = ""
 		for b in range(MAX_VAL):
@@ -79,8 +79,8 @@ func _refresh_labels() -> void:
 
 func _draw() -> void:
 	# 布局未计算完时 size 可能为 (0,0)，用 custom_minimum_size 兜底
-	var effective_size = size if size.x > 4 else custom_minimum_size
-	var center = effective_size / 2.0
+	var effective_size: Vector2 = size if size.x > 4 else custom_minimum_size
+	var center: Vector2 = effective_size / 2.0
 	# 背景面板
 	var bg_rect = Rect2(center - Vector2(RADIUS + 24, RADIUS + 24),
 						Vector2((RADIUS + 24) * 2, (RADIUS + 24) * 2))
@@ -93,16 +93,16 @@ func _draw() -> void:
 		draw_polyline(PackedVector2Array(pts), GRID_COLOR, 1.0)
 	# 轴线
 	for emotion in EMOTIONS:
-		var angle = deg_to_rad(EMOTION_ANGLES[emotion])
+		var angle: float = deg_to_rad(EMOTION_ANGLES[emotion])
 		draw_line(center, center + Vector2(cos(angle), sin(angle)) * RADIUS, GRID_COLOR, 0.8)
 	# 填充多边形
 	var fill_pts: PackedVector2Array = PackedVector2Array()
 	for emotion in EMOTIONS:
 		var val   = EmotionManager.values.get(emotion, 0)
 		var ratio: float = float(val) / float(MAX_VAL)
-		var angle_2 = deg_to_rad(EMOTION_ANGLES[emotion])
+		var angle_2: float = deg_to_rad(EMOTION_ANGLES[emotion])
 		fill_pts.append(center + Vector2(cos(angle_2), sin(angle_2)) * RADIUS * max(ratio, 0.04))
-	var fill_color = _get_fill_color()
+	var fill_color: Color = _get_fill_color()
 	draw_colored_polygon(fill_pts, fill_color)
 	# 填充边线
 	var border_pts = PackedVector2Array(fill_pts)
@@ -118,7 +118,7 @@ func _draw() -> void:
 func _get_pentagon(center: Vector2, r: float) -> Array:
 	var pts = []
 	for i in range(5):
-		var a = deg_to_rad(EMOTION_ANGLES[EMOTIONS[i]])
+		var a: float = deg_to_rad(EMOTION_ANGLES[EMOTIONS[i]])
 		pts.append(center + Vector2(cos(a), sin(a)) * r)
 	return pts
 
@@ -148,7 +148,7 @@ func _update_edge_vignette(emotion: String, val: int) -> void:
 
 func _play_shake() -> void:
 	if _warn_tween: _warn_tween.kill()
-	var orig_x = position.x
+	var orig_x: float = position.x
 	_warn_tween = create_tween()
 	for i in range(4):
 		_warn_tween.tween_property(self, "position:x",

@@ -38,7 +38,7 @@ func _ready() -> void:
 func spawn(value: int, type: String, pos: Vector2, extra: String = "") -> void:
 	global_position = pos + Vector2(randf_range(-14.0, 14.0), 0.0)   # 轻微横向抖动
 
-	var prefix = _prefix_for_type(type)
+	var prefix: String = _prefix_for_type(type)
 
 	if type == "emotion" and extra != "":
 		_label.text = extra
