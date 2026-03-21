@@ -16,7 +16,7 @@ color = Color(0.03, 0.03, 0.05, 1)
 [node name="Title" type="Label" parent="UI"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 45.0
+offset_top = 30.0
 anchor_right = 1.0
 horizontal_alignment = 1
 text = "🏮 渡魂商店"
@@ -25,7 +25,7 @@ theme_override_font_sizes/font_size = 22
 [node name="FlavorText" type="Label" parent="UI"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 123.8
+offset_top = 82.5
 anchor_right = 1.0
 horizontal_alignment = 1
 text = "「有些东西，走这一程才能用得上。」"
@@ -33,7 +33,7 @@ text = "「有些东西，走这一程才能用得上。」"
 [node name="GoldLabel" type="Label" parent="UI"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 191.2
+offset_top = 127.5
 anchor_right = 1.0
 horizontal_alignment = 1
 text = "金币: 100"
@@ -43,10 +43,10 @@ layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.0
-offset_left = -810.0
-offset_top = 270.0
-offset_right = 810.0
-offset_bottom = 855.0
+offset_left = -540.0
+offset_top = 180.0
+offset_right = 540.0
+offset_bottom = 570.0
 alignment = 1
 
 [node name="RemoveSection" type="VBoxContainer" parent="UI"]
@@ -54,10 +54,10 @@ layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.0
-offset_left = -450.0
-offset_top = 877.5
-offset_right = 450.0
-offset_bottom = 1035.0
+offset_left = -300.0
+offset_top = 585.0
+offset_right = 300.0
+offset_bottom = 690.0
 alignment = 1
 
 [node name="RemoveLabel" type="Label" parent="UI/RemoveSection"]
@@ -65,7 +65,7 @@ text = "移除一张牌（75金币）"
 horizontal_alignment = 1
 
 [node name="RemoveButton" type="Button" parent="UI/RemoveSection"]
-custom_minimum_size = Vector2(300.0, 60.0)
+custom_minimum_size = Vector2(200.0, 40.0)
 text = "🗑 选择要移除的牌"
 
 ; --- 移除面板（全屏选牌）---
@@ -74,13 +74,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 135.0
+offset_top = 90.0
 visible = false
 
 [node name="RemoveTitle" type="Label" parent="UI/RemovePanel"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 22.5
+offset_top = 15.0
 anchor_right = 1.0
 horizontal_alignment = 1
 text = "选择要移除的牌"
@@ -91,10 +91,10 @@ anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 112.5
-offset_bottom = -135.0
-offset_left = 22.5
-offset_right = -22.5
+offset_top = 75.0
+offset_bottom = -90.0
+offset_left = 15.0
+offset_right = -15.0
 columns = 8
 
 [node name="CancelBtn" type="Button" parent="UI/RemovePanel"]
@@ -104,10 +104,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -112.5
-offset_right = 180.0
-offset_bottom = -22.5
+offset_left = -120.0
+offset_top = -75.0
+offset_right = 120.0
+offset_bottom = -15.0
 text = "取消"
 
 [node name="LeaveButton" type="Button" parent="UI"]
@@ -117,8 +117,8 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -112.5
-offset_right = 180.0
-offset_bottom = -22.5
+offset_left = -120.0
+offset_top = -75.0
+offset_right = 120.0
+offset_bottom = -15.0
 text = "离开"

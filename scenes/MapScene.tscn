@@ -18,10 +18,10 @@ color = Color(0.04, 0.025, 0.02, 1)
 ; ---- 顶栏 ----
 [node name="TopBar" type="HBoxContainer" parent="UI"]
 layout_mode = 1
-offset_left = 27.0
-offset_top = 18.0
-offset_right = 2853.0
-offset_bottom = 99.0
+offset_left = 18.0
+offset_top = 12.0
+offset_right = 1902.0
+offset_bottom = 66.0
 
 [node name="Title" type="Label" parent="UI/TopBar"]
 layout_mode = 2
@@ -42,25 +42,25 @@ text = "金币: 100"
 ; ---- 层标题 ----
 [node name="LayerLabel" type="Label" parent="UI"]
 layout_mode = 1
-offset_left = 27.0
-offset_top = 117.0
-offset_right = 1800.0
-offset_bottom = 180.0
+offset_left = 18.0
+offset_top = 78.0
+offset_right = 1200.0
+offset_bottom = 120.0
 text = "第一层：荒村"
 
 ; ---- 节点容器（由脚本动态填充）----
 [node name="NodeContainer" type="VBoxContainer" parent="UI"]
 layout_mode = 1
-offset_left = 22.5
-offset_top = 193.5
-offset_right = 2857.5
-offset_bottom = 1507.5
+offset_left = 15.0
+offset_top = 129.0
+offset_right = 1905.0
+offset_bottom = 1005.0
 alignment = 1
 
 ; ---- 底部遗物栏 ----
 [node name="RelicBar" type="HBoxContainer" parent="UI"]
 layout_mode = 1
-offset_left = 22.5
-offset_top = 1525.5
-offset_right = 2857.5
-offset_bottom = 1602.0
+offset_left = 15.0
+offset_top = 1017.0
+offset_right = 1905.0
+offset_bottom = 1068.0

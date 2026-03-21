@@ -6,8 +6,8 @@ class_name CardUINode
 
 signal card_clicked(card_data: Dictionary)
 
-const CARD_W = 120.0   # 1920x1080 下加大卡牌
-const CARD_H = 180.0
+const CARD_W = 100.0   # 1280x720 设计分辨率（引擎缩放到1920x1080）
+const CARD_H = 155.0
 
 var card_data: Dictionary = {}
 var is_playable: bool = true

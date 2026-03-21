@@ -16,17 +16,17 @@ color = Color(0.04, 0.03, 0.02, 1)
 [node name="Title" type="Label" parent="UI"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 67.5
+offset_top = 45.0
 anchor_right = 1.0
 horizontal_alignment = 1
 text = "🕯 休息之所"
 
 [node name="FlavorText" type="Label" parent="UI"]
 layout_mode = 1
-offset_left = 225.0
-offset_top = 157.5
-offset_right = -225.0
-offset_bottom = 247.5
+offset_left = 150.0
+offset_top = 105.0
+offset_right = -150.0
+offset_bottom = 165.0
 anchor_left = 0.0
 anchor_right = 1.0
 text = "「渡魂人不能总是走。偶尔停下来，是为了走得更远。」"
@@ -36,7 +36,7 @@ autowrap_mode = 3
 [node name="HPStatus" type="Label" parent="UI"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 270.0
+offset_top = 180.0
 anchor_right = 1.0
 horizontal_alignment = 1
 text = "HP: 80 / 80"
@@ -44,7 +44,7 @@ text = "HP: 80 / 80"
 [node name="StatusLabel" type="Label" parent="UI"]
 layout_mode = 1
 offset_left = 0.0
-offset_top = 337.5
+offset_top = 225.0
 anchor_right = 1.0
 horizontal_alignment = 1
 text = ""
@@ -55,17 +55,17 @@ layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.4
-offset_left = -405.0
+offset_left = -270.0
 offset_top = 0.0
-offset_right = 405.0
-offset_bottom = 135.0
+offset_right = 270.0
+offset_bottom = 90.0
 
 [node name="HealBtn" type="Button" parent="UI/Options"]
-custom_minimum_size = Vector2(240.0, 75.0)
+custom_minimum_size = Vector2(160.0, 50.0)
 text = "🩸 休息回复 HP\n（回复最大HP的30%）"
 
 [node name="UpgradeBtn" type="Button" parent="UI/Options"]
-custom_minimum_size = Vector2(240.0, 75.0)
+custom_minimum_size = Vector2(160.0, 50.0)
 text = "✨ 升级一张牌\n（费用 -1）"
 
 [node name="DeckPanel" type="Panel" parent="UI"]
@@ -73,8 +73,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 540.0
-offset_bottom = -135.0
+offset_top = 360.0
+offset_bottom = -90.0
 visible = false
 
 [node name="DeckGrid" type="GridContainer" parent="UI/DeckPanel"]
@@ -91,8 +91,8 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -112.5
-offset_right = 180.0
-offset_bottom = -22.5
+offset_left = -120.0
+offset_top = -75.0
+offset_right = 120.0
+offset_bottom = -15.0
 text = "离开"

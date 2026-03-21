@@ -895,10 +895,10 @@ func _setup_layout_improvements() -> void:
 	var H: float = vp_size.y   # 1080 (基于视口，自适应)
 
 	# 卡盘顶部 Y（tscn HandContainer 从 828 开始，卡盘稍高留边）
-	var tray_top: float    = H - 260.0   # 820px
-	var tray_line: float   = H - 265.0   # 水墨分割线
-	var energy_top: float  = H - 280.0   # 能量面板顶
-	var energy_bot: float  = H - 240.0   # 能量面板底（高40px）
+	var tray_top: float    = H - 185.0   # ~535px（对应1280x720手牌区顶部）
+	var tray_line: float   = H - 190.0   # 水墨分割线
+	var energy_top: float  = H - 205.0   # 能量面板顶
+	var energy_bot: float  = H - 168.0   # 能量面板底（高37px）
 
 	var ui: Node = get_node_or_null("UI")
 
@@ -945,8 +945,8 @@ func _setup_layout_improvements() -> void:
 		var energy_panel := Panel.new()
 		energy_panel.name     = "CardTrayEnergy"
 		energy_panel.z_index  = 3
-		energy_panel.position = Vector2(W - 130, energy_top)
-		energy_panel.size     = Vector2(118, energy_bot - energy_top)
+		energy_panel.position = Vector2(W - 95, energy_top)
+		energy_panel.size     = Vector2(82, energy_bot - energy_top)
 		var ep_style: StyleBoxFlat = StyleBoxFlat.new()
 		ep_style.bg_color = Color(0.08, 0.06, 0.04, 0.90)
 		ep_style.border_width_top    = 1; ep_style.border_width_bottom = 1
@@ -988,7 +988,7 @@ func _build_card_tray(char_id: String, W: float, H: float, tray_top: float) -> C
 	tray.z_index       = 0
 	tray.position      = Vector2(0, tray_top)
 	tray.size          = Vector2(W, tray_h)
-	tray.expand_mode   = TextureRect.EXPAND_FILL_PARENT_AND_KEEP_ASPECT
+	tray.expand_mode   = TextureRect.EXPAND_IGNORE_SIZE
 	tray.stretch_mode  = TextureRect.STRETCH_SCALE
 	return tray
 
