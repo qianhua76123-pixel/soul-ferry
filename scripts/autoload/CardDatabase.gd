@@ -81,8 +81,8 @@ func get_desc(card_id: String, level: int = 0) -> String:
 	var bval = upbonus if level > 0 and upbonus != bonus_int  else bonus_int
 
 	# 升级变化数值标金色
-	var vs: int = str(int(val)) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)
-	var bs: int = str(int(bval)) if (level == 0 or bval == bonus_int) else ("[color=#f0c040]%d[/color]" % bval)
+	var vs: String = str(int(val)) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)
+	var bs: String = str(int(bval)) if (level == 0 or bval == bonus_int) else ("[color=#f0c040]%d[/color]" % bval)
 
 	# 情绪偏移文字
 	var shift_str = ""
@@ -116,7 +116,7 @@ func _cond_text(cond) -> String:
 		"grief >= 3":     return "悲≥3时"
 		"joy >= 3":       return "喜≥3时"
 	if " >= " in str(cond):
-		var parts: String = str(cond).split(" >= ")
+		var parts: PackedStringArray = str(cond).split(" >= ")
 		return "%s≥%s时" % [EmotionManager.get_emotion_name(parts[0].strip_edges()), parts[1].strip_edges()]
 	return str(cond)
 
