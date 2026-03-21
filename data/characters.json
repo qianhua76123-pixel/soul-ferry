@@ -1,0 +1,65 @@
+{
+  "characters": [
+    {
+      "id": "ruan_ruyue",
+      "name": "阮如月",
+      "display_name": "阮如月",
+      "hp": 80,
+      "max_hp": 80,
+      "energy": 3,
+      "draw_per_turn": 5,
+      "hand_limit": 8,
+      "starting_deck": "ruan_starter",
+      "affinity": ["grief", "fear", "joy", "calm"],
+      "victory_bias": "purification",
+      "passive": "seal_affinity",
+      "description": "游走于庙宇与渡口间的年轻庙祝，以五情印记渡化困于世间的魂魄。",
+      "pixel_colors": {
+        "primary": "#9b59b6",
+        "secondary": "#d7bde2",
+        "outline": "#6c3483"
+      }
+    },
+    {
+      "id": "shen_tiejun",
+      "name": "沈铁钧",
+      "display_name": "沈铁钧",
+      "hp": 100,
+      "max_hp": 100,
+      "energy": 3,
+      "draw_per_turn": 5,
+      "hand_limit": 8,
+      "starting_deck": "shen_starter",
+      "affinity": ["rage", "calm"],
+      "victory_bias": "suppression",
+      "passive": "veteran_instinct",
+      "description": "已退休的老捕快，用铁链与怒气镇压不肯离去的亡魂。",
+      "pixel_colors": {
+        "primary": "#2e4057",
+        "secondary": "#84a9ac",
+        "outline": "#1a252f"
+      }
+    },
+    {
+      "id": "wumian",
+      "name": "无名",
+      "display_name": "无名",
+      "hp": 60,
+      "max_hp": 60,
+      "energy": 4,
+      "draw_per_turn": 4,
+      "hand_limit": 7,
+      "starting_deck": "wumian_starter",
+      "affinity": [],
+      "victory_bias": "balanced",
+      "passive": "wumian_faceless",
+      "special_mechanic": "emptiness",
+      "description": "把自己情绪全部给出去的守护者，脸的位置是平的。以「空」为武器，转移情绪，渡化或清零一切。",
+      "pixel_colors": {
+        "primary": "#d0cfc0",
+        "face": "#e8e8e0",
+        "outline": "#909080"
+      }
+    }
+  ]
+}

@@ -623,6 +623,216 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			result["attack_bonus_this_turn"] = _armor_to_attack_bonus
 			result.value = _armor_to_attack_bonus
 
+		# ── 无面人·空系统卡牌效果 ──────────────────────────────
+		"wumian_attack_emptiness":
+			# 空手道：伤害8+空度效果倍率，分段变化时抽牌
+			var old_tier: int = WumianManager.current_tier
+			var dmg: int = int(base_val * WumianManager.get_effect_multiplier() * WumianManager.get_damage_modifier() * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg)
+			WumianManager.on_card_played()  # 空度+1（通用打牌+1）
+			WumianManager.modify_emptiness(1)  # 空手道额外+1（共+2）
+			if WumianManager.current_tier != old_tier:
+				DeckManager.draw_cards(1)
+			result.value = dmg
+
+		"wumian_set_emptiness_5":
+			# 无为：空度强制归5
+			var was_above: bool = WumianManager.emptiness > 5
+			WumianManager.modify_emptiness(5 - WumianManager.emptiness)
+			if was_above:
+				DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+			else:
+				GameState.heal(4)
+			result.value = 5
+
+		"wumian_invert_emptiness":
+			# 虚实互换：空度变为(10-空度)
+			var new_e: int = 10 - WumianManager.emptiness
+			WumianManager.modify_emptiness(new_e - WumianManager.emptiness)
+			result.value = WumianManager.emptiness
+
+		"wumian_emptiness_surge":
+			# 空溢：空度+3，到10立即触发空鸣
+			WumianManager.modify_emptiness(3)
+			if WumianManager.emptiness >= 10:
+				WumianManager.trigger_kongming_forced()
+			result.value = WumianManager.emptiness
+
+		"wumian_emptiness_absorb":
+			# 空收：空度-3，护盾=减少量×4
+			var reduce: int = min(3, WumianManager.emptiness)
+			WumianManager.modify_emptiness(-reduce)
+			var sv: int = reduce * 4
+			player_shield += sv
+			result.value = sv
+
+		"wumian_force_kongming":
+			# 空鸣诀：直接触发空鸣
+			WumianManager.trigger_kongming_forced()
+			result.value = 0
+
+		"wumian_float_sink":
+			# 浮沉：≤5时+3；>5时-3；无论如何抽1张
+			if WumianManager.emptiness <= 5:
+				WumianManager.modify_emptiness(3)
+			else:
+				WumianManager.modify_emptiness(-3)
+			DeckManager.draw_cards(1)
+			result.value = WumianManager.emptiness
+
+		"wumian_borrow_emotion":
+			# 借情：目标最高情绪-2，可选转移或消散（BattleScene 处理玩家选择）
+			result["borrow_emotion"] = true
+			result["amount"] = 2
+			result.value = 2
+
+		"wumian_transfer_emotion_to_enemy":
+			# 情渡：自身任意情绪→敌人（BattleScene 处理情绪选择）
+			result["transfer_to_enemy"] = true
+			result["max_amount"] = 3
+			result.value = 0
+
+		"wumian_mirror_emotions":
+			# 情镜：BattleScene 处理双目标选择
+			result["mirror_emotions"] = true
+			result.value = 0
+
+		"wumian_borrow_power":
+			# 借力打力：穿甲伤害=目标最高情绪×5，该情绪归零
+			var top_e: String = "grief"
+			var top_v: int = 0
+			for e: String in EmotionManager.EMOTIONS:
+				var ev: int = EmotionManager.values.get(e, 0)
+				if ev > top_v:
+					top_v = ev
+					top_e = e
+			var dmg2: int = int(top_v * 5 * WumianManager.get_effect_multiplier() * WumianManager.get_damage_modifier())
+			_deal_damage_to_enemy(dmg2)
+			EmotionManager.modify(top_e, -top_v)
+			result["emotion_cleared"] = top_e
+			result.value = dmg2
+
+		"wumian_emotion_debt":
+			# 情债：对敌人施加标记（BattleScene 处理 Buff 应用）
+			result["apply_emotion_debt"] = true
+			result.value = 0
+
+		"wumian_swap_emotions":
+			# 移情别恋：BattleScene 处理三种情绪选择
+			result["swap_emotions"] = true
+			result.value = 0
+
+		"wumian_void_emotions":
+			# 空情：目标所有情绪归零，空度-1；清除≥5点时穿甲伤15
+			var total_cleared: int = 0
+			for e: String in EmotionManager.EMOTIONS:
+				total_cleared += EmotionManager.values.get(e, 0)
+				EmotionManager.modify(e, -EmotionManager.values.get(e, 0))
+			WumianManager.modify_emptiness(-1)
+			if total_cleared >= 5:
+				_deal_damage_to_enemy(15)
+				result.value = 15
+			result["cleared_total"] = total_cleared
+
+		"wumian_attack_by_emptiness":
+			# 虚无掌：伤害=5+空度×2
+			var dmg3: int = int((5 + WumianManager.emptiness * 2) * WumianManager.get_effect_multiplier() * WumianManager.get_damage_modifier() * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(dmg3)
+			result.value = dmg3
+
+		"wumian_attack_all_disorder":
+			# 空中劈：全体伤害6，失调敌人额外+超出量×4
+			var base_dmg: int = int(6 * WumianManager.get_effect_multiplier() * WumianManager.get_damage_modifier() * EmotionManager.get_attack_multiplier())
+			_deal_damage_to_enemy(base_dmg)
+			result.value = base_dmg
+
+		"wumian_attack_void_solid":
+			# 以空击实：空度≥7时穿甲15+强制失调；否则伤害6
+			if WumianManager.emptiness >= 7:
+				var dmg4: int = int(15 * WumianManager.get_effect_multiplier())
+				_deal_damage_to_enemy(dmg4)
+				result["force_disorder"] = true
+				result.value = dmg4
+			else:
+				var dmg5: int = int(6 * WumianManager.get_effect_multiplier() * WumianManager.get_damage_modifier() * EmotionManager.get_attack_multiplier())
+				_deal_damage_to_enemy(dmg5)
+				result.value = dmg5
+
+		"wumian_emotion_burst":
+			# 情绪炸裂：触发所有≥3情绪失调效果，每个+10点伤害
+			var total_dmg: int = 0
+			for e: String in EmotionManager.EMOTIONS:
+				if EmotionManager.values.get(e, 0) >= 3:
+					_deal_damage_to_enemy(10)
+					total_dmg += 10
+			result.value = total_dmg
+
+		"wumian_counter_damage":
+			# 空手还魂：伤害=本回合已受伤害，空度减少=受伤/4
+			var counter_dmg: int = _damage_taken_this_turn
+			if counter_dmg > 0:
+				_deal_damage_to_enemy(counter_dmg)
+				WumianManager.modify_emptiness(-(counter_dmg / 4))
+			result["counter_damage"] = counter_dmg
+			result.value = counter_dmg
+
+		"wumian_void_shield":
+			# 空盾：空度-2，护盾=6-当前空度（最低2，最高6）
+			var reduce2: int = min(2, WumianManager.emptiness)
+			WumianManager.modify_emptiness(-reduce2)
+			var sv2: int = clamp(6 - WumianManager.emptiness, 2, 6)
+			player_shield += sv2
+			result.value = sv2
+
+		"wumian_mirror_shield":
+			# 镜面护：护盾8，受伤30%反弹为情绪转移
+			player_shield += 8
+			result["mirror_reflect_ratio"] = 0.30
+			result.value = 8
+
+		"wumian_etherealize":
+			# 虚化：免疫下一次攻击，空度+3
+			_dodge_charges += 1
+			WumianManager.modify_emptiness(3)
+			result.value = 0
+
+		"wumian_omnipresent":
+			# 无处不在：每次受伤自动空度-1，积累护盾=触发次数×2（BattleScene 监听处理）
+			result["omnipresent_active"] = true
+			result.value = 0
+
+		"wumian_explore":
+			# 空·探：抽2张，空度+1
+			DeckManager.draw_cards(2)
+			WumianManager.modify_emptiness(1)
+			result.value = 2
+
+		"wumian_observe":
+			# 观形：揭示敌人全部情绪/Buff/3回合意图，空度-1
+			WumianManager.modify_emptiness(-1)
+			result["reveal_enemy_full"] = true
+			result["reveal_turns_ahead"] = 3
+			result.value = 0
+
+		"wumian_one_thought":
+			# 一念：弃全部手牌，抽同等数量+1张，空度+弃牌数
+			var discard_count: int = DeckManager.hand.size()
+			DeckManager.discard_hand()
+			WumianManager.modify_emptiness(discard_count)
+			DeckManager.draw_cards(discard_count + 1)
+			result.value = discard_count
+
+		"wumian_ferry_token":
+			# 渡口令：渡化进度+15%，空鸣后额外追加+20%
+			result["du_hua_progress"] = 0.15
+			result["kongming_bonus_progress"] = 0.20
+			result.value = 0
+
+		"wumian_set_emptiness_custom":
+			# 调息：BattleScene 处理玩家选择0-10的空度值
+			result["set_emptiness_custom"] = true
+			result.value = 0
+
 		_:
 			pass
 	return result
