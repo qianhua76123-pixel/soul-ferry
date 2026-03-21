@@ -2,6 +2,8 @@ extends Node2D
 
 ## BattleScene.gd - 战斗场景主控（祭坛式布局）
 
+const UIC = preload("res://scripts/ui/UIConstants.gd")
+
 @onready var state_machine       = $BattleStateMachine
 @onready var hand_container      = $UI/HandContainer
 @onready var turn_label          = $UI/HUD/TurnLabel
@@ -811,7 +813,8 @@ func _setup_layout_improvements() -> void:
 	# 地面线（BattleGround）：深墨绿细条，衬托立绘站位
 	var ground = ColorRect.new()
 	ground.name = "BattleGround"
-	ground.color = Color(0.05, 0.10, 0.06, 0.6)
+	ground.color = UIC.COLORS["ding"].darkened(0.7)
+	ground.color.a = 0.6
 	# 全宽固定高度：anchor 左右拉满，高度固定 4px
 	ground.set_anchor_and_offset(SIDE_LEFT,  0.0, 0)
 	ground.set_anchor_and_offset(SIDE_RIGHT, 1.0, 0)
@@ -824,7 +827,6 @@ func _setup_layout_improvements() -> void:
 	# HandContainer：居中对齐 + 卡牌间距
 	if hand_container:
 		hand_container.add_theme_constant_override("separation", 12)
-		# 左右各 80px 通过 MarginContainer 包裹已无法做到，改用 alignment
 		hand_container.alignment = BoxContainer.ALIGNMENT_CENTER
 		# 手牌区上方水墨分割线（与 HandContainer 左右边距对齐）
 		if ui and not ui.get_node_or_null("HandAreaDivider"):
@@ -844,6 +846,7 @@ func _setup_layout_improvements() -> void:
 	_card_preview = CardPreviewClass.new()
 	if ui: ui.add_child(_card_preview)
 
+<<<<<<< HEAD
 ## 祭坛三栏标题：DS-00 配色 + 标题下水墨分割线
 func _setup_altar_title_style() -> void:
 	var pa = get_node_or_null("UI/AltarLayout/PlayerArea")

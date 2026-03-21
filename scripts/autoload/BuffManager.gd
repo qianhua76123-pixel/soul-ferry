@@ -5,6 +5,7 @@ extends Node
 
 signal buff_changed(target: String, buff_id: String, stacks: int)
 signal buff_expired(target: String, buff_id: String)
+signal buff_damage_to_enemy(amount: int)
 
 # ── 目标常量（避免硬编码字符串）
 const TARGET_PLAYER = "player"
@@ -226,5 +227,3 @@ func _deal_buff_damage(target: String, amount: int) -> void:
 	else:
 		# 敌人受 Buff 伤害：通过信号通知 BattleStateMachine
 		buff_damage_to_enemy.emit(amount)
-
-signal buff_damage_to_enemy(amount: int)

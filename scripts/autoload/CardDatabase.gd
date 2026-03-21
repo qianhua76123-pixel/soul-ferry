@@ -81,8 +81,8 @@ func get_desc(card_id: String, level: int = 0) -> String:
 	var bval = upbonus if level > 0 and upbonus != bonus_int  else bonus_int
 
 	# 升级变化数值标金色
-	var vs = str(val) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)
-	var bs = str(bval) if (level == 0 or bval == bonus_int) else ("[color=#f0c040]%d[/color]" % bval)
+	var vs = str(int(val)) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)
+	var bs = str(int(bval)) if (level == 0 or bval == bonus_int) else ("[color=#f0c040]%d[/color]" % bval)
 
 	# 情绪偏移文字
 	var shift_str = ""

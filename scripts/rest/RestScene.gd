@@ -33,7 +33,7 @@ func _on_heal() -> void:
 	var amount = int(GameState.max_hp * HEAL_AMOUNT_PERCENT)
 	GameState.heal(amount)
 	heal_btn.disabled  = true
-	status_label.text  = "休息后回复了 %d HP。" % amount
+	status_label.text  = "休息后回复了 %d HP。" % int(amount)
 	_update_status()
 	SoundManager.play_sfx("heal")
 
@@ -68,7 +68,7 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 
 	# 费用降低（除0费外）
 	if cost >= 1:
-		lines.append("• 费用 %d → %d" % [cost, max(0, cost - 1)])
+		lines.append("• 费用 %d → %d" % [int(cost), int(max(0, cost - 1))])
 
 	# 效果值提升（数值类效果+20%）
 	if eval_ > 0 and etype in [
@@ -77,11 +77,11 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 		"mass_heal_shield","attack_all_triple","weaken","weaken_fear"
 	]:
 		var new_val = int(eval_ * 1.25)
-		lines.append("• 效果值 %d → %d (+25%%)" % [eval_, new_val])
+		lines.append("• 效果值 %d → %d (+25%%)" % [int(eval_), int(new_val)])
 
 	# 条件加成提升
 	if bonus > 0:
-		lines.append("• 条件加成 +%d → +%d" % [bonus, bonus + int(bonus * 0.5) + 1])
+		lines.append("• 条件加成 +%d → +%d" % [int(bonus), int(bonus) + int(int(bonus) * 0.5) + 1])
 
 	# 传说牌额外说明
 	if card.get("rarity","") == "legendary":
@@ -103,7 +103,7 @@ func _on_card_upgrade_selected(card: Dictionary) -> void:
 	var old_cost = card.get("cost", 1)
 	if old_cost >= 1:
 		card["cost"] = old_cost - 1
-		upgrades.append("费用 %d→%d" % [old_cost, card["cost"]])
+		upgrades.append("费用 %d→%d" % [int(old_cost), int(card["cost"])])
 
 	# 效果值+25%
 	var etype = card.get("effect_type", "")
@@ -115,14 +115,14 @@ func _on_card_upgrade_selected(card: Dictionary) -> void:
 	]:
 		var new_val = int(eval_ * 1.25)
 		card["effect_value"] = new_val
-		upgrades.append("效果 %d→%d" % [eval_, new_val])
+		upgrades.append("效果 %d→%d" % [int(eval_), int(new_val)])
 
 	# 条件加成+50%+1
 	var bonus = card.get("condition_bonus", 0)
 	if bonus > 0:
 		var new_bonus = bonus + int(bonus * 0.5) + 1
 		card["condition_bonus"] = new_bonus
-		upgrades.append("加成 +%d→+%d" % [bonus, new_bonus])
+		upgrades.append("加成 +%d→+%d" % [int(bonus), int(new_bonus)])
 
 	# 传说牌额外：情绪偏移翻倍
 	if card.get("rarity","") == "legendary":

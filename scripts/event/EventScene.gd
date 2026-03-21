@@ -111,16 +111,16 @@ func _get_result_preview(result: Dictionary) -> String:
 	var parts = []
 	var rtype = result.get("type","")
 	match rtype:
-		"hp_gain":        parts.append("HP +%d" % result.get("value",0))
-		"hp_loss":        parts.append("HP -%d" % result.get("value",0))
-		"gold":           parts.append("金币 +%d" % result.get("value",0))
-		"max_hp_gain":    parts.append("最大HP +%d" % result.get("value",0))
+		"hp_gain":        parts.append("HP +%d" % int(result.get("value",0)))
+		"hp_loss":        parts.append("HP -%d" % int(result.get("value",0)))
+		"gold":           parts.append("金币 +%d" % int(result.get("value",0)))
+		"max_hp_gain":    parts.append("最大HP +%d" % int(result.get("value",0)))
 		"relic_reward":   parts.append("获得遗物")
 		"card_reward":    parts.append("获得牌")
 		"curse_card":     parts.append("获得诅咒牌")
 		"emotion_gain":
 			var e = EmotionManager.get_emotion_name(result.get("emotion",""))
-			parts.append("%s +%d" % [e, result.get("value",0)])
+			parts.append("%s +%d" % [e, int(result.get("value",0))])
 		"multi":
 			for eff in result.get("effects", []):
 				parts.append(_get_result_preview(eff))

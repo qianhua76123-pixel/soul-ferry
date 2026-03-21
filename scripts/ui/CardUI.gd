@@ -31,7 +31,9 @@ func setup(data: Dictionary) -> void:
 		card_cost_label.text = str(max(0, cost))
 	
 	if card_desc_label:
-		card_desc_label.text = data.get("description", "")
+		# 优先用 CardDatabase 动态生成的 desc（含 BBCode 升级高亮），回退到静态 description
+		var desc_text = data.get("desc", data.get("description", ""))
+		card_desc_label.text = desc_text
 	
 	# 情绪颜色条
 	if emotion_color_bar:

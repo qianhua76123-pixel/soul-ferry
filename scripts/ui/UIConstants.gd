@@ -43,6 +43,14 @@ const COLORS := {
 	"card_face": Color(0.08, 0.06, 0.05),
 }
 
+const EMOTION_COLORS = {
+	"rage":  Color(0.753, 0.224, 0.169),
+	"fear":  Color(0.424, 0.204, 0.514),
+	"grief": Color(0.102, 0.322, 0.463),
+	"joy":   Color(0.718, 0.467, 0.051),
+	"calm":  Color(0.114, 0.416, 0.329),
+}
+
 const FONT_SIZES := {
 	"title":   32,
 	"heading": 18,
@@ -83,7 +91,6 @@ static func make_button_style(fill_key: String = "parch", border_key: String = "
 	style.set_corner_radius_all(3)
 	return style
 
-## 弹窗/结算面板用（略不透明纸色底 + 暗金边）
 static func make_panel_style() -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	var p := color_of("parch")

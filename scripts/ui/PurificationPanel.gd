@@ -78,7 +78,7 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 		var lbl = Label.new()
 		lbl.add_theme_font_size_override("font_size", 11)
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.text = "%s 0/%d" % [EMOTION_CN.get(emotion, emotion), required]
+		lbl.text = "%s 0/%d" % [EMOTION_CN.get(emotion, emotion), int(required)]
 		col.add_child(lbl)
 
 		var bar = ProgressBar.new()
@@ -114,7 +114,7 @@ func update_display() -> void:
 		item["bar"].value  = min(cur, req)
 		item["label"].text = "%s %d/%d%s" % [
 			EMOTION_CN.get(item["emotion"], item["emotion"]),
-			cur, req, " ✓" if met else ""]
+			int(cur), int(req), " ✓" if met else ""]
 		# 进度条颜色
 		var fill_sty = StyleBoxFlat.new()
 		var unfilled := UIConstants.color_of("text_dim")

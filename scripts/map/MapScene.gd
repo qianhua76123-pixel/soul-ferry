@@ -68,14 +68,14 @@ func _generate_map() -> void:
 		var layer_nodes = []
 		for node_idx in LAYER_NODE_COUNTS[layer_idx]:
 			layer_nodes.append({
-				"id":   "n_%d_%d" % [layer_idx+1, node_idx],
+				"id":   "n_%d_%d" % [int(layer_idx+1), int(node_idx)],
 				"type": _roll_type(),
 				"layer": layer_idx+1,
 				"visited": false,
 				"enemy_id": "",
 			})
 		layer_nodes.append({
-			"id":       "boss_%d" % (layer_idx+1),
+			"id":       "boss_%d" % int(layer_idx+1),
 			"type":     "boss",
 			"layer":    layer_idx+1,
 			"visited":  false,
@@ -107,7 +107,7 @@ func _render_map() -> void:
 		var is_current = layer_num == GameState.current_layer
 
 		var lbl = Label.new()
-		lbl.text = LAYER_NAMES.get(layer_num, "第%d层" % layer_num)
+		lbl.text = LAYER_NAMES.get(layer_num, "第%d层" % int(layer_num))
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 		lbl.modulate = Color(0.90, 0.84, 0.72) if is_current else Color(0.45,0.45,0.45)
@@ -308,6 +308,7 @@ func _render_relics() -> void:
 		relic_bar.add_child(lbl)
 
 func _update_status() -> void:
+<<<<<<< HEAD
 	hp_label.text   = "%s %d/%d" % [UIConstants.ICONS["hp"], GameState.hp, GameState.max_hp]
 	gold_label.text = "%s %d" % [UIConstants.ICONS["coin"], GameState.gold]
 
@@ -318,6 +319,10 @@ func _apply_ui_theme() -> void:
 	layer_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 	hp_label.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
 	gold_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+=======
+	hp_label.text   = "HP: %d/%d" % [int(GameState.hp), int(GameState.max_hp)]
+	gold_label.text = "💰 %d"     % int(GameState.gold)
+>>>>>>> 4813e484c5297a37a34de83712934715e9727acc
 
 ## 生成层间向下箭头连接线
 func _make_layer_connector(is_active: bool) -> Control:
