@@ -294,7 +294,7 @@ func _on_menu() -> void:
 #  工具函数
 # ══════════════════════════════════════════════════════
 func _make_label(text: String, font_size: int, color: Color) -> Label:
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = text
 	lbl.add_theme_font_size_override("font_size", font_size)
 	lbl.add_theme_color_override("font_color", color)
@@ -307,7 +307,7 @@ func _make_separator(color: Color) -> ColorRect:
 	return sep
 
 func _make_button(text: String, color: Color) -> Button:
-	var btn = Button.new()
+	var btn: Button = Button.new()
 	btn.text = text
 	btn.custom_minimum_size = Vector2(140, 44)
 	btn.add_theme_font_size_override("font_size", 16)
@@ -350,10 +350,10 @@ class _BgArt extends Node2D:
 		# 金色散点（祝福粒子）
 		_rng.seed = 11111
 		for i in 40:
-			var x = _rng.randf_range(50, 1100)
-			var y = _rng.randf_range(50, 600)
-			var r = _rng.randf_range(1.5, 3.5)
-			var a = _rng.randf_range(0.2, 0.6)
+			var x: float = _rng.randf_range(50, 1100)
+			var y: float = _rng.randf_range(50, 600)
+			var r: float = _rng.randf_range(1.5, 3.5)
+			var a: float = _rng.randf_range(0.2, 0.6)
 			draw_circle(Vector2(x, y), r, Color(0.95, 0.82, 0.20, a))
 
 		# 边框装饰
@@ -370,19 +370,19 @@ class _BgArt extends Node2D:
 		# 裂缝线
 		_rng.seed = 22222
 		for i in 8:
-			var sx = _rng.randf_range(0, 1152)
-			var sy = _rng.randf_range(0, 648)
-			var ex = sx + _rng.randf_range(-200, 200)
-			var ey = sy + _rng.randf_range(-100, 100)
+			var sx: float = _rng.randf_range(0, 1152)
+			var sy: float = _rng.randf_range(0, 648)
+			var ex: float = sx + _rng.randf_range(-200, 200)
+			var ey: float = sy + _rng.randf_range(-100, 100)
 			draw_line(Vector2(sx, sy), Vector2(ex, ey),
 				Color(0.45, 0.08, 0.08, 0.25), 1)
 
 		# 血迹散点
 		_rng.seed = 33333
 		for i in 25:
-			var x = _rng.randf_range(100, 1050)
-			var y = _rng.randf_range(100, 548)
-			var r = _rng.randf_range(2.0, 6.0)
+			var x: float = _rng.randf_range(100, 1050)
+			var y: float = _rng.randf_range(100, 548)
+			var r: float = _rng.randf_range(2.0, 6.0)
 			draw_circle(Vector2(x, y), r,
 				Color(0.55, 0.05, 0.05, _rng.randf_range(0.1, 0.35)))
 
@@ -405,7 +405,7 @@ class _BgArt extends Node2D:
 		# 游魂萤光点
 		_rng.seed = 44444
 		for i in 50:
-			var angle = _rng.randf_range(0, TAU)
+			var angle: float = _rng.randf_range(0, TAU)
 			var dist  = _rng.randf_range(60, 280)
 			var x     = center.x + cos(angle) * dist
 			var y     = center.y + sin(angle) * dist * 0.6

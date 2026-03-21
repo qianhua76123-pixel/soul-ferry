@@ -52,7 +52,7 @@ func spawn(value: int, type: String, pos: Vector2, extra: String = "") -> void:
 	_label.visible    = true
 
 	# 三段 Tween 动画
-	var tw = create_tween()
+	var tw: Tween = create_tween()
 
 	# 0 ~ 0.25s：向上 40px + 淡入
 	tw.tween_property(self, "position:y", position.y - 40.0, 0.25) \

@@ -30,7 +30,7 @@ func _show_rewards() -> void:
 		card_container.add_child(slot)
 
 func _build_slot(card: Dictionary) -> VBoxContainer:
-	var vbox = VBoxContainer.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.custom_minimum_size = Vector2(110, 200)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	var card_ui = _card_scene.instantiate()
@@ -41,7 +41,7 @@ func _build_slot(card: Dictionary) -> VBoxContainer:
 	card_ui.card_clicked.connect(func(c): _on_card_chosen(c))
 	vbox.add_child(card_ui)
 	# 稀有度标签
-	var rarity_lbl = Label.new()
+	var rarity_lbl: Label = Label.new()
 	rarity_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rarity_lbl.text = {"common":"普通","rare":"★ 稀有","legendary":"★★ 传说"}.get(card.get("rarity","common"),"普通")
 	vbox.add_child(rarity_lbl)
@@ -71,7 +71,7 @@ func _setup_reward_visual() -> void:
 	move_child(bg, 0)
 
 	# 顶部金色细线装饰
-	var line = WaterInkDivider.new()
+	var line: WaterInkDivider = WaterInkDivider.new()
 	line.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	line.custom_minimum_size = Vector2(0, 8)
 	line.position.y = 52
@@ -84,7 +84,7 @@ func _setup_reward_visual() -> void:
 		title_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 		# 入场浮动
 		title_label.modulate.a = 0.0
-		var tw = title_label.create_tween()
+		var tw: Tween = title_label.create_tween()
 		tw.tween_property(title_label, "modulate:a", 1.0, 0.6)
 
 	# 跳过按钮样式
@@ -99,7 +99,7 @@ func _setup_reward_visual() -> void:
 	var delay = 0.15
 	for slot in card_container.get_children():
 		slot.modulate.a = 0.0
-		var tw2 = slot.create_tween()
+		var tw2: Tween = slot.create_tween()
 		tw2.tween_interval(delay)
 		tw2.tween_property(slot, "modulate:a", 1.0, 0.25)
 		tw2.parallel().tween_property(slot, "position:y", slot.position.y,  0.25)

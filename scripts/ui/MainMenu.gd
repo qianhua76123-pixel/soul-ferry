@@ -58,7 +58,7 @@ func _ready() -> void:
 ## 按钮样式 ─────────────────────────────────────
 
 func _make_flat_style(bg: Color, border: Color, border_w: int = 1) -> StyleBoxFlat:
-	var s = StyleBoxFlat.new()
+	var s: StyleBoxFlat = StyleBoxFlat.new()
 	s.bg_color = bg
 	s.border_color = border
 	s.set_border_width_all(border_w)
@@ -118,7 +118,7 @@ func _style_quit_btn() -> void:
 	btn.add_theme_color_override("font_color", Color(0.604, 0.565, 0.502))
 
 	# 透明底无边框
-	var transparent = StyleBoxFlat.new()
+	var transparent: StyleBoxFlat = StyleBoxFlat.new()
 	transparent.bg_color = Color(0, 0, 0, 0)
 	transparent.set_border_width_all(0)
 	transparent.set_corner_radius_all(0)
@@ -145,7 +145,7 @@ func _style_quit_btn() -> void:
 ## 水墨背景竖线（叠加在 BgCanvas 上，用新 Node2D） ──
 
 func _draw_ink_bg() -> void:
-	var overlay = Node2D.new()
+	var overlay: Node2D = Node2D.new()
 	overlay.name = "InkLinesOverlay"
 
 	# 用内部类持有绘制逻辑
@@ -163,16 +163,16 @@ func _draw_ink_bg() -> void:
 	overlay.queue_redraw()
 
 func _draw_ink_lines(node: Node2D) -> void:
-	var rng = RandomNumberGenerator.new()
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 42
 	var W = 1280.0
 	var H = 720.0
 
 	for _i in 30:
 		var x      = rng.randf_range(0.0, W)
-		var w_line = rng.randf_range(1.0, 2.0)
-		var h_line = rng.randf_range(400.0, 700.0)
-		var y_start = rng.randf_range(0.0, H - h_line)
+		var w_line: float = rng.randf_range(1.0, 2.0)
+		var h_line: float = rng.randf_range(400.0, 700.0)
+		var y_start: float = rng.randf_range(0.0, H - h_line)
 		var alpha  = rng.randf_range(0.03, 0.05)
 		var col    = Color(0.784, 0.663, 0.431, alpha)
 		node.draw_line(Vector2(x, y_start), Vector2(x, y_start + h_line), col, w_line)
@@ -234,7 +234,7 @@ func _play_enter_animation() -> void:
 			btn.modulate.a = 0.0
 
 	# 构建链式 Tween
-	var tw = create_tween().set_parallel(false)
+	var tw: Tween = create_tween().set_parallel(false)
 
 	# a. 标题淡入 + 上移归位（0.8s）
 	if tl:
@@ -270,7 +270,7 @@ func _play_enter_animation() -> void:
 	# ── 标题永久轻微浮动（进场后启动） ──
 	if tl:
 		tw.tween_callback(func():
-			var float_tw = tl.create_tween().set_loops()
+			var float_tw: Tween = tl.create_tween().set_loops()
 			float_tw.tween_property(tl, "offset_top",
 				_title_origin_y - 6.0, 2.2).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 			float_tw.tween_property(tl, "offset_top",

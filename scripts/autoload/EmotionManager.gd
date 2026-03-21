@@ -72,8 +72,8 @@ func get_enemy_damage_multiplier() -> float:
 	return 1.2 if disorders.get("joy", false) else 1.0
 
 func can_play_card(card: Dictionary) -> bool:
-	var tag = card.get("emotion_tag", "")
-	var etype = card.get("effect_type", "")
+	var tag: String = card.get("emotion_tag", "")
+	var etype: String = card.get("effect_type", "")
 	if disorders.get("rage", false):
 		if tag == "calm" or etype == "shield": return false
 	if disorders.get("grief", false):
@@ -102,15 +102,15 @@ func get_emotion_name(emotion: String) -> String:
 	return "?"
 
 func get_total_value() -> int:
-	var total = 0
+	var total: int = 0
 	for e in EMOTIONS: total += values[e]
 	return total
 
 func _check_disorder(emotion: String) -> void:
 	if emotion == "calm":
 		disorders["calm"] = false; return
-	var was = disorders.get(emotion, false)
-	var now = values[emotion] >= DISORDER_THRESHOLD
+	var was: bool = disorders.get(emotion, false)
+	var now: bool = values[emotion] >= DISORDER_THRESHOLD
 	disorders[emotion] = now
 	if not was and now:
 		disorder_triggered.emit(emotion)
@@ -118,17 +118,17 @@ func _check_disorder(emotion: String) -> void:
 		disorder_cleared.emit(emotion)
 
 func _update_dominant() -> void:
-	var max_val = -1
-	var new_dom = ""
+	var max_val: int = -1
+	var new_dom: String = ""
 	for emotion in ["rage","fear","grief","joy"]:
 		if values[emotion] > max_val:
 			max_val = values[emotion]; new_dom = emotion
 	if max_val == 0: new_dom = ""
 	if new_dom == dominant_emotion: return
-	var tied = []
+	var tied: Array = []
 	for emotion in ["rage","fear","grief","joy"]:
 		if values[emotion] == max_val: tied.append(emotion)
 	if len(tied) > 1 and dominant_emotion in tied: return
-	var old = dominant_emotion
+	var old: String = dominant_emotion
 	dominant_emotion = new_dom
 	dominant_changed.emit(old, new_dom)

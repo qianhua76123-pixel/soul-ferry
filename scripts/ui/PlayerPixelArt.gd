@@ -47,7 +47,7 @@ static func _circle(img: Image, cx:int, cy:int, r:int, c:Color) -> void:
 				_px(img, cx+dx, cy+dy, c)
 
 static func _line(img: Image, x0:int, y0:int, x1:int, y1:int, c:Color) -> void:
-	var dx = abs(x1-x0); var dy = abs(y1-y0)
+	var dx: int = abs(x1-x0); var dy = abs(y1-y0)
 	var sx = 1 if x0 < x1 else -1
 	var sy = 1 if y0 < y1 else -1
 	var err = dx - dy

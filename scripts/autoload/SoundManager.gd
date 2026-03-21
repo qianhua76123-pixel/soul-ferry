@@ -115,7 +115,7 @@ func _ready() -> void:
 
 	# SFX 播放池
 	for i in SFX_POOL_SIZE:
-		var p = AudioStreamPlayer.new()
+		var p: AudioStreamPlayer = AudioStreamPlayer.new()
 		p.name      = "SFXPlayer_%d" % i
 		p.bus       = "SFX"
 		p.volume_db = linear_to_db(sfx_volume)
@@ -141,19 +141,19 @@ func play_bgm(track_name: String, fade_time: float = 0.5) -> void:
 	_current_bgm = track_name
 	bgm_changed.emit(track_name)
 
-	var path = BGM_TRACKS[track_name]
+	var path: String = BGM_TRACKS[track_name]
 	if path == "" or not ResourceLoader.exists(path, ""):
 		# 占位符模式：静默跳过，不报错
 		_log_stub("BGM", track_name)
 		return
 
-	var stream = load(path) as AudioStream
+	var stream: AudioStream = load(path) as AudioStream
 	if not stream:
 		return
 
 	if fade_time > 0.0 and _bgm_player.playing:
 		# 淡出旧音乐，再切换
-		var tw = create_tween()
+		var tw: Tween = create_tween()
 		tw.tween_property(_bgm_player, "volume_db",
 			linear_to_db(0.001), fade_time)
 		tw.tween_callback(func():
@@ -173,7 +173,7 @@ func stop_bgm(fade_time: float = 0.5) -> void:
 	if not _bgm_player.playing:
 		return
 	if fade_time > 0.0:
-		var tw = create_tween()
+		var tw: Tween = create_tween()
 		tw.tween_property(_bgm_player, "volume_db", linear_to_db(0.001), fade_time)
 		tw.tween_callback(_bgm_player.stop)
 	else:
@@ -190,17 +190,17 @@ func play_sfx(sfx_name: String, pitch_scale: float = 1.0) -> void:
 
 	sfx_played.emit(sfx_name)
 
-	var path = SFX_CLIPS[sfx_name]
+	var path: String = SFX_CLIPS[sfx_name]
 	if path == "" or not ResourceLoader.exists(path, ""):
 		_log_stub("SFX", sfx_name)
 		return
 
-	var stream = load(path) as AudioStream
+	var stream: AudioStream = load(path) as AudioStream
 	if not stream:
 		return
 
 	# 轮询 SFX 池
-	var player = _sfx_players[_sfx_pool_idx % SFX_POOL_SIZE]
+	var player: AudioStreamPlayer = _sfx_players[_sfx_pool_idx % SFX_POOL_SIZE]
 	_sfx_pool_idx = (_sfx_pool_idx + 1) % SFX_POOL_SIZE
 	player.stream      = stream
 	player.pitch_scale = pitch_scale

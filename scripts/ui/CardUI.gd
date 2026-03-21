@@ -37,7 +37,7 @@ func setup(data: Dictionary) -> void:
 	
 	# 情绪颜色条
 	if emotion_color_bar:
-		var emotion = data.get("emotion_tag", "calm")
+		var emotion: String = data.get("emotion_tag", "calm")
 		emotion_color_bar.color = EmotionManager.get_emotion_color(emotion)
 	
 	# 稀有度边框颜色
@@ -70,7 +70,7 @@ func _gui_input(event: InputEvent) -> void:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 			if is_playable:
 				# 出牌消失动画
-				var tw = create_tween()
+				var tw: Tween = create_tween()
 				tw.tween_property(self, "scale", Vector2(0.0, 0.0), 0.15)\
 					.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_BACK)
 				tw.tween_callback(func(): card_clicked.emit(card_data))
@@ -79,7 +79,7 @@ func _gui_input(event: InputEvent) -> void:
 func _on_mouse_entered() -> void:
 	if not is_playable: return
 	# 上移 + 轻微放大
-	var tw = create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(self, "position:y", position.y - 10, 0.12)
 	tw.parallel().tween_property(self, "scale", Vector2(1.05, 1.05), 0.12)
 	# 触发 BattleScene 显示预览
@@ -89,7 +89,7 @@ func _on_mouse_entered() -> void:
 
 ## B-05 鼠标离开：恢复位置 + 隐藏预览
 func _on_mouse_exited() -> void:
-	var tw = create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(self, "position:y", _base_y, 0.10)
 	tw.parallel().tween_property(self, "scale", Vector2(1.0, 1.0), 0.10)
 	var battle = get_tree().root.find_child("BattleScene", true, false)

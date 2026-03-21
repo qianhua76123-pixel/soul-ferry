@@ -258,7 +258,7 @@ func _setup_event_visual() -> void:
 	# 事件主面板切角描边（DS-00）
 	var event_panel: Node = get_node_or_null("UI/EventPanel")
 	if event_panel:
-		var inked = InkedPanel.new()
+		var inked: InkedPanel = InkedPanel.new()
 		inked.set_anchors_preset(Control.PRESET_FULL_RECT)
 		inked.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.78)
 		inked.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.55)

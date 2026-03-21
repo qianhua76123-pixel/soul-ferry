@@ -1,0 +1,24 @@
+# Godot 生成文件
+.godot/
+*.uid
+
+# OpenClaw 工作区私有文件（不推送到 game repo）
+AGENTS.md
+BOOTSTRAP.md
+HEARTBEAT.md
+IDENTITY.md
+MEMORY.md
+SOUL.md
+TOOLS.md
+USER.md
+NEWS.md
+DEBUG.md
+DEBUG_RELICS.md
+GAME_CONTEXT.md
+memory/
+.openclaw/
+skills/
+soul-ferry/
+渡魂录_GDD_v0.1.docx
+渡魂录_深度扩展设计_卷二.md
+渡魂录_全场景设计感提升提示词.md

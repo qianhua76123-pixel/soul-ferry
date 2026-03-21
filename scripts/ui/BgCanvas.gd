@@ -20,7 +20,7 @@ func _draw() -> void:
 		draw_line(Vector2(0, y * 9.0), Vector2(W, y * 9.0), col, 9.1)
 
 	# 墨迹装饰（程序化不规则色块，模拟晕染）
-	var rng = RandomNumberGenerator.new()
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 20260319
 	for _i in 18:
 		var cx  = rng.randf_range(60, W - 60)

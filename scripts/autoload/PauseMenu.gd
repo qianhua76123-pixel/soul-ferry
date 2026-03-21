@@ -35,7 +35,7 @@ func toggle() -> void:
 
 func _build_ui() -> void:
 	# 半透明遮罩
-	var overlay = ColorRect.new()
+	var overlay: ColorRect = ColorRect.new()
 	overlay.color = UIConstants.color_of("overlay_dim")
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -50,10 +50,10 @@ func _build_ui() -> void:
 	_panel.add_theme_stylebox_override("panel", UIConstants.make_panel_style())
 	add_child(_panel)
 
-	var vbox = VBoxContainer.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vbox.add_theme_constant_override("separation", 14)
-	var margin = MarginContainer.new()
+	var margin: MarginContainer = MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left",  24)
 	margin.add_theme_constant_override("margin_right", 24)
@@ -63,14 +63,14 @@ func _build_ui() -> void:
 	_panel.add_child(margin)
 
 	# 标题
-	var title = Label.new()
+	var title: Label = Label.new()
 	title.text = "— 暂停 —"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 	title.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
 	vbox.add_child(title)
 
-	var div = WaterInkDivider.new()
+	var div: WaterInkDivider = WaterInkDivider.new()
 	div.custom_minimum_size = Vector2(280, 8)
 	div.ink_color = UIConstants.color_of("gold_dim")
 	vbox.add_child(div)
@@ -95,13 +95,13 @@ func _build_ui() -> void:
 	_sfx_slider.value_changed.connect(func(v): SoundManager.set_sfx_volume(v / 100.0))
 	vbox.add_child(_sfx_slider)
 
-	var div_mid = WaterInkDivider.new()
+	var div_mid: WaterInkDivider = WaterInkDivider.new()
 	div_mid.custom_minimum_size = Vector2(280, 8)
 	div_mid.ink_color = UIConstants.color_of("gold_dim")
 	vbox.add_child(div_mid)
 
 	# 当前状态信息
-	var info = Label.new()
+	var info: Label = Label.new()
 	info.name = "InfoLabel"
 	info.text = _get_status_text()
 	info.add_theme_color_override("font_color", UIConstants.color_of("text_dim"))
@@ -109,31 +109,31 @@ func _build_ui() -> void:
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(info)
 
-	var div2 = WaterInkDivider.new()
+	var div2: WaterInkDivider = WaterInkDivider.new()
 	div2.custom_minimum_size = Vector2(280, 8)
 	div2.ink_color = UIConstants.color_of("gold_dim")
 	vbox.add_child(div2)
 
 	# 按钮区
-	var continue_btn = _make_btn("继续游戏")
+	var continue_btn: Button = _make_btn("继续游戏")
 	continue_btn.pressed.connect(func(): toggle())
 	vbox.add_child(continue_btn)
 
-	var menu_btn = _make_btn("返回主菜单")
+	var menu_btn: Button = _make_btn("返回主菜单")
 	menu_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "nu"))
 	menu_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
 	menu_btn.pressed.connect(_on_return_to_menu)
 	vbox.add_child(menu_btn)
 
 func _make_label(text: String) -> Label:
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = text
 	lbl.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
 	lbl.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 	return lbl
 
 func _make_btn(text: String) -> Button:
-	var btn = Button.new()
+	var btn: Button = Button.new()
 	btn.text = text
 	btn.custom_minimum_size = Vector2(0, 40)
 	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))

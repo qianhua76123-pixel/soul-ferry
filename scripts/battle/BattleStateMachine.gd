@@ -56,7 +56,7 @@ var joy_cards_played_this_turn: int = 0
 var du_hua_triggered: bool = false
 
 func start_battle(enemy_id: String) -> void:
-	var enemy = _load_enemy(enemy_id)
+	var enemy: Dictionary = _load_enemy(enemy_id)
 	if enemy.is_empty():
 		push_error("BattleStateMachine: 未找到敌人 " + enemy_id)
 		enemy = {"id": enemy_id, "name": "亡魂", "hp": 50, "actions": [{"type":"attack","value":8,"weight":100}]}
@@ -125,7 +125,7 @@ func play_card(card: Dictionary) -> bool:
 	if not DeckManager.play_card(card):
 		current_state = STATE_PLAYER_TURN
 		return false
-	var result = _apply_card_effect(card)
+	var result: Dictionary = _apply_card_effect(card)
 	card_effect_applied.emit(card, result)
 	if card.get("emotion_tag", "") == "joy":
 		joy_cards_played_this_turn += 1
@@ -156,7 +156,7 @@ var boss_phase: int = 1
 func _begin_enemy_turn() -> void:
 	current_state = STATE_ENEMY_TURN
 	enemy_turn_started.emit()
-	var action = _choose_enemy_action()
+	var action: Dictionary = _choose_enemy_action()
 	# 记录行动类型供 BattleScene UI 读取
 	enemy_data["_last_action_type"] = action.get("type", "")
 	_execute_enemy_action(action)
@@ -168,48 +168,48 @@ func _begin_enemy_turn() -> void:
 		_end_battle("defeat")
 
 func _apply_card_effect(card: Dictionary) -> Dictionary:
-	var effect_type = card.get("effect_type", "")
-	var base_val    = card.get("effect_value", 0)
-	var bonus       = card.get("condition_bonus", 0) if _check_condition(card) else 0
-	var result      = {"type": effect_type, "value": 0}
+	var effect_type: String = card.get("effect_type", "")
+	var base_val: int    = card.get("effect_value", 0)
+	var bonus: int       = card.get("condition_bonus", 0) if _check_condition(card) else 0
+	var result: Dictionary = {"type": effect_type, "value": 0}
 
 	match effect_type:
 		"attack", "attack_all":
-			var dmg = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			var dmg: int = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg)
 			result.value = dmg
 
 		"attack_all_triple":
 			# 三次多段伤害
-			var dmg_each = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
-			var total = 0
+			var dmg_each: int = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			var total: int = 0
 			for _i in 3:
 				_deal_damage_to_enemy(dmg_each)
 				total += dmg_each
 			result.value = total
 
 		"attack_lifesteal":
-			var dmg_2 = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			var dmg_2: int = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg_2)
 			GameState.heal(dmg_2)
 			result.value = dmg_2
 			result["healed"] = dmg_2
 
 		"attack_dot":
-			var dmg_2_2 = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			var dmg_2_2: int = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg_2_2)
 			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "dot_fire", 4, 3)
 			result.value = dmg_2_2
 
 		"attack_scaling_rage":
 			# 伤害 = base_val × 当前怒值
-			var rage_val = EmotionManager.values.get("rage", 0)
-			var dmg_2_2_2 = int((base_val * max(1, rage_val)) * EmotionManager.get_attack_multiplier())
+			var rage_val: int = EmotionManager.values.get("rage", 0)
+			var dmg_2_2_2: int = int((base_val * max(1, rage_val)) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg_2_2_2)
 			result.value = dmg_2_2_2
 
 		"attack_and_weaken_all":
-			var dmg_2_2_2_2 = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
+			var dmg_2_2_2_2: int = int((base_val + bonus) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg_2_2_2_2)
 			result["weaken_percent"] = 50
 			result["defense_break"]  = 50
@@ -234,25 +234,25 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			result.value = sv_2_2
 
 		"heal", "heal_all_buffs":
-			var hv = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
+			var hv: int = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv)
 			result.value = hv
 
 		"heal_and_draw":
-			var hv_2 = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
+			var hv_2: int = int((base_val + bonus) * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv_2)
 			DeckManager.draw_cards(2)
 			result.value = hv_2
 
 		"heal_scale_grief":
 			# 回复 = base_val × 悲情绪值
-			var grief_val = EmotionManager.values.get("grief", 0)
-			var hv_2_2 = int(base_val * max(1, grief_val) * EmotionManager.get_heal_multiplier())
+			var grief_val: int = EmotionManager.values.get("grief", 0)
+			var hv_2_2: int = int(base_val * max(1, grief_val) * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv_2_2)
 			result.value = hv_2_2
 
 		"mass_heal_shield":
-			var hv_2_2_2 = int(base_val * EmotionManager.get_heal_multiplier())
+			var hv_2_2_2: int = int(base_val * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv_2_2_2)
 			player_shield += base_val
 			result.value = base_val
@@ -264,7 +264,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"draw_shield":
 			DeckManager.draw_cards(base_val)
-			var sv_2_2_2 = bonus if bonus > 0 else 5
+			var sv_2_2_2: int = bonus if bonus > 0 else 5
 			player_shield += sv_2_2_2
 			result.value = sv_2_2_2
 
@@ -288,7 +288,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 		"dodge_attack":
 			# 格挡并反击
 			_dodge_charges += 1
-			var dmg_2_2_2_2_2 = int(base_val * EmotionManager.get_attack_multiplier())
+			var dmg_2_2_2_2_2: int = int(base_val * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg_2_2_2_2_2)
 			result.value = dmg_2_2_2_2_2
 
@@ -302,7 +302,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"reset_shield":
 			# 五情归一：护盾 = 五情总值 × base_val
-			var total_2 = EmotionManager.get_total_value()
+			var total_2: float = EmotionManager.get_total_value()
 			var sv_2_2_2_2 = total_2 * base_val
 			player_shield += sv_2_2_2_2
 			result.value = sv_2_2_2_2
@@ -320,12 +320,12 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"balance_emotions":
 			# 将所有情绪值向均值靠拢（差值缩小 base_val）
-			var vals = EmotionManager.values
+			var vals: Dictionary = EmotionManager.values
 			var avg = 0.0
 			for k in vals: avg += vals[k]
 			avg /= float(vals.size())
 			for k in vals:
-				var diff = vals[k] - int(avg)
+				var diff: int = vals[k] - int(avg)
 				if abs(diff) > base_val:
 					EmotionManager.modify(k, -sign(diff) * base_val)
 			player_shield += 10
@@ -838,7 +838,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 	return result
 
 func _check_condition(card: Dictionary) -> bool:
-	var cond = card.get("condition", null)
+	var cond: Variant = card.get("condition", null)
 	if cond == null: return false
 	match cond:
 		"rage_dominant":  return EmotionManager.dominant_emotion == "rage"
@@ -857,9 +857,9 @@ func _check_condition(card: Dictionary) -> bool:
 
 func _check_du_hua(played_card: Dictionary) -> void:
 	if du_hua_triggered: return
-	var cond = enemy_data.get("du_hua_condition", null)
+	var cond: Variant = enemy_data.get("du_hua_condition", null)
 	if not cond: return
-	var emotion_req = cond.get("emotion_requirement", {})
+	var emotion_req: Dictionary = cond.get("emotion_requirement", {})
 	for emotion in emotion_req:
 		if EmotionManager.values.get(emotion, 0) < emotion_req[emotion]:
 			return
@@ -880,7 +880,7 @@ func _check_du_hua(played_card: Dictionary) -> void:
 
 func _trigger_du_hua() -> void:
 	du_hua_triggered = true
-	var desc = enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足")
+	var desc: Dictionary = enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足")
 	du_hua_available.emit(desc)
 
 func confirm_du_hua() -> void:
@@ -890,14 +890,14 @@ func confirm_du_hua() -> void:
 	_end_battle("du_hua")
 
 func _choose_enemy_action() -> Dictionary:
-	var actions = enemy_data.get("actions", [])
+	var actions: Array = enemy_data.get("actions", [])
 	if actions.is_empty(): return {}
 
 	# 愤怒阶段（Boss HP≤50%）：提升攻击/dot权重，降低辅助权重
-	var weighted = actions.duplicate(true)
+	var weighted: Dictionary = actions.duplicate(true)
 	if boss_phase == 2:
 		for a in weighted:
-			var t = a.get("type", "")
+			var t: String = a.get("type", "")
 			if t in ["attack", "attack_all", "dot_fire", "dot", "all_field_heat_dot",
 					 "summon_tide", "rage_card_storm"]:
 				a["weight"] = int(a.get("weight", 1) * 2.5)   # 攻击性行动权重×2.5
@@ -923,7 +923,7 @@ func _execute_enemy_action(action: Dictionary) -> void:
 	# 愤怒阶段：敌人伤害额外×1.3
 	if boss_phase == 2:
 		mul *= 1.3
-	var atype = action.get("type", "")
+	var atype: String = action.get("type", "")
 	match atype:
 		"attack":
 			# 先检查玩家闪避
@@ -931,10 +931,10 @@ func _execute_enemy_action(action: Dictionary) -> void:
 				_dodge_charges -= 1
 				# 闪避成功，不扣血，播放浮字由 BattleScene 通过 hp_changed 无变化判断
 			else:
-				var raw = int(action.get("value", 0) * mul)
+				var raw: int = int(action.get("value", 0) * mul)
 				var dmg = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
 				if player_shield > 0:
-					var blocked = min(player_shield, dmg)
+					var blocked: int = min(player_shield, dmg)
 					player_shield -= blocked
 					dmg -= blocked
 				if dmg > 0:
@@ -951,7 +951,7 @@ func _execute_enemy_action(action: Dictionary) -> void:
 
 		"draw_player":
 			# 摄魅眼：强迫玩家摸牌（手牌超上限会被迫弃牌，陷阱效果）
-			var draw_count = action.get("value", 2)
+			var draw_count: int = action.get("value", 2)
 			DeckManager.draw_cards(draw_count)
 			# 若手牌数超过上限(7)，强制弃置最新摸的牌
 			var max_hand = 7
@@ -960,13 +960,13 @@ func _execute_enemy_action(action: Dictionary) -> void:
 
 		"summon_tide":
 			# 水鬼·望归：召唤潮汐连击（连续造成多次小伤害，每次固定值）
-			var hit_count = action.get("hits", 3)
+			var hit_count: int = action.get("hits", 3)
 			var hit_val   = action.get("value", 8)
 			for _i in hit_count:
 				var raw_2  = int(hit_val * mul)
 				var dmg_2  = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw_2)
 				if player_shield > 0:
-					var blocked_2 = min(player_shield, dmg_2)
+					var blocked_2: int = min(player_shield, dmg_2)
 					player_shield -= blocked_2
 					dmg_2 -= blocked_2
 				if dmg_2 > 0:
@@ -980,10 +980,10 @@ func _execute_enemy_action(action: Dictionary) -> void:
 			var base_dmg  = action.get("value", 5)
 			var hand_size = len(DeckManager.hand)
 			# 每张手牌+2额外伤害，模拟"花嫁之怒吞噬一切"
-			var total_dmg = int((base_dmg + hand_size * 2) * mul)
+			var total_dmg: int = int((base_dmg + hand_size * 2) * mul)
 			var dmg_2_2 = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
 			if player_shield > 0:
-				var blocked_2_2 = min(player_shield, dmg_2_2)
+				var blocked_2_2: int = min(player_shield, dmg_2_2)
 				player_shield -= blocked_2_2
 				dmg_2_2 -= blocked_2_2
 			if dmg_2_2 > 0:

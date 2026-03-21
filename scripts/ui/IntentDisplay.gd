@@ -55,7 +55,7 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(220, 44)
 	add_theme_constant_override("separation", 2)
 
-	var row = HBoxContainer.new()
+	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	add_child(row)
 
@@ -120,13 +120,13 @@ func show_intent(action: Dictionary) -> void:
 	_fade_in()
 
 	# 攻击类：图标摇摆
-	var atk_types = ["attack", "attack_all", "attack_all_triple", "rage_card_storm", "summon_tide"]
+	var atk_types: Array = ["attack", "attack_all", "attack_all_triple", "rage_card_storm", "summon_tide"]
 	if atype in atk_types:
 		_play_icon_shake(int(action.get("value", 0)))
 
 func _build_description(action: Dictionary) -> String:
 	var val   = int(action.get("value", 0))
-	var atype = action.get("type", "unknown")
+	var atype: String = action.get("type", "unknown")
 	match atype:
 		"attack":            return "造成 %d 点伤害" % int(val)
 		"attack_all":        return "对全体造成 %d 伤害" % int(val)
@@ -137,7 +137,7 @@ func _build_description(action: Dictionary) -> String:
 		"shield":            return "获得 %d 护盾" % int(val)
 		"emotion_push":
 			var emo_cn = {"rage":"怒","fear":"惧","grief":"悲","joy":"喜","calm":"定"}
-			var en = action.get("emotion", "")
+			var en: String = action.get("emotion", "")
 			return "使你%s +%d" % [emo_cn.get(en, en), int(val)]
 		"summon_tide":       return "召唤潮汐 %d×%d段" % [int(val), int(action.get("hits", 3))]
 		"rage_card_storm":   return "狂暴（随手牌数增伤）"
@@ -204,7 +204,7 @@ func _play_icon_shake(dmg_value: int) -> void:
 	else:
 		_desc_label.add_theme_font_size_override("font_size", 12)
 	var orig_x = _icon_label.position.x
-	var tw = _icon_label.create_tween()
+	var tw: Tween = _icon_label.create_tween()
 	tw.tween_property(_icon_label, "position:x", orig_x + 4, 0.12)
 	tw.tween_property(_icon_label, "position:x", orig_x - 4, 0.12)
 	tw.tween_property(_icon_label, "position:x", orig_x + 2, 0.10)

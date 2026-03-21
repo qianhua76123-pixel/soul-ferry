@@ -54,12 +54,12 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 	for child in _cond_row.get_children(): child.queue_free()
 	_cond_items.clear()
 
-	var cond = enemy_data.get("du_hua_condition", {})
-	var emotion_req = cond.get("emotion_requirement", {})
+	var cond: Dictionary = enemy_data.get("du_hua_condition", {})
+	var emotion_req: Dictionary = cond.get("emotion_requirement", {})
 
 	if emotion_req.is_empty():
 		# 无情绪条件（如连续出牌型）：显示说明文字
-		var hint = Label.new()
+		var hint: Label = Label.new()
 		hint.text = cond.get("description", "满足特殊条件后触发")
 		hint.add_theme_font_size_override("font_size", 11)
 		hint.add_theme_color_override("font_color", UIConstants.color_of("text_dim"))
@@ -70,28 +70,28 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 	# 逐个情绪条件构建进度条
 	for emotion in emotion_req:
 		var required = emotion_req[emotion]
-		var col = VBoxContainer.new()
+		var col: VBoxContainer = VBoxContainer.new()
 		col.add_theme_constant_override("separation", 2)
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
 		_cond_row.add_child(col)
 
-		var lbl = Label.new()
+		var lbl: Label = Label.new()
 		lbl.add_theme_font_size_override("font_size", 11)
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.text = "%s 0/%d" % [EMOTION_CN.get(emotion, emotion), int(required)]
 		col.add_child(lbl)
 
-		var bar = ProgressBar.new()
+		var bar: ProgressBar = ProgressBar.new()
 		bar.min_value = 0
 		bar.max_value = required
 		bar.value     = 0
 		bar.show_percentage = false
 		bar.custom_minimum_size = Vector2(44, 8)
-		var sty = StyleBoxFlat.new()
+		var sty: StyleBoxFlat = StyleBoxFlat.new()
 		var track := UIConstants.color_of("text_dim")
 		sty.bg_color = Color(track.r, track.g, track.b, 0.58)
 		bar.add_theme_stylebox_override("fill", sty)
-		var sty_bg = StyleBoxFlat.new()
+		var sty_bg: StyleBoxFlat = StyleBoxFlat.new()
 		var ink := UIConstants.color_of("ink")
 		sty_bg.bg_color = Color(ink.r, ink.g, ink.b, 0.62)
 		bar.add_theme_stylebox_override("background", sty_bg)
@@ -116,7 +116,7 @@ func update_display() -> void:
 			EMOTION_CN.get(item["emotion"], item["emotion"]),
 			int(cur), int(req), " ✓" if met else ""]
 		# 进度条颜色
-		var fill_sty = StyleBoxFlat.new()
+		var fill_sty: StyleBoxFlat = StyleBoxFlat.new()
 		var unfilled := UIConstants.color_of("text_dim")
 		fill_sty.bg_color = UIConstants.color_of("gold") if met else Color(unfilled.r, unfilled.g, unfilled.b, 0.58)
 		item["bar"].add_theme_stylebox_override("fill", fill_sty)

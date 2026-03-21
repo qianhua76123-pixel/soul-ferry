@@ -38,20 +38,20 @@ func has_save() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH): return false
 	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
 	if not file: return false
-	var content = file.get_as_text().strip_edges()
+	var content: String = file.get_as_text().strip_edges()
 	file.close()
 	return content.length() > 2
 
 func save_to_file() -> void:
 	# 序列化牌库（保留每张牌的 id + 升级等级）
-	var deck_data = []
+	var deck_data: Array = []
 	for card in DeckManager.get_full_deck():
 		deck_data.append({
 			"id":    card.get("id", ""),
 			"level": card.get("level", 0),
 		})
 
-	var data = {
+	var data: Dictionary = {
 		"current_hp":    hp,
 		"max_hp":        max_hp,
 		"gold":          gold,
@@ -88,11 +88,11 @@ func load_from_file() -> bool:
 		push_error("GameState: 存档解析失败"); return false
 	file.close()
 
-	var data = json.get_data()
+	var data: Variant = json.get_data()
 	if typeof(data) != TYPE_DICTIONARY: return false
 
 	# ── 恢复 GameState ──
-	var old_hp = hp
+	var old_hp: int = hp
 	hp             = data.get("current_hp",    STARTING_HP)
 	max_hp         = data.get("max_hp",        STARTING_MAX_HP)
 	gold           = data.get("gold",          STARTING_GOLD)
@@ -109,12 +109,12 @@ func load_from_file() -> bool:
 	gold_changed.emit(0, gold)
 
 	# ── 恢复地图数据 ──
-	var map_state = data.get("map_state", [])
+	var map_state: Variant = data.get("map_state", [])
 	if map_state is Array and not map_state.is_empty():
 		set_meta("map_data", map_state)
 
 	# ── 恢复情绪 ──
-	var emotions = data.get("emotion_values", {})
+	var emotions: Dictionary = data.get("emotion_values", {})
 	EmotionManager.reset_all()
 	for emotion in emotions:
 		EmotionManager.modify(emotion, int(emotions[emotion]))
@@ -128,19 +128,19 @@ func load_from_file() -> bool:
 			RelicManager.add_relic(rid)
 
 	# ── 恢复牌库 ──
-	var deck_data = data.get("deck", [])
+	var deck_data: Array = data.get("deck", [])
 	if not deck_data.is_empty():
-		var card_ids = []
-		var upgrades = {}
+		var card_ids: Array = []
+		var upgrades: Dictionary = {}
 		for entry in deck_data:
-			var cid   = entry.get("id","")
-			var level = entry.get("level", 0)
+			var cid: String   = entry.get("id","")
+			var level: int = entry.get("level", 0)
 			card_ids.append(cid)
 			if level > 0: upgrades[cid] = level
 		DeckManager.init_deck(card_ids)
 		# 应用升级等级
 		for card in DeckManager.deck:
-			var cid_2 = card.get("id","")
+			var cid_2: String = card.get("id","")
 			if cid_2 in upgrades:
 				card["level"] = upgrades[cid_2]
 				card["cost"]  = max(0, card.get("cost",1) - upgrades[cid_2])
@@ -180,29 +180,29 @@ func new_run() -> void:
 	add_relic("duhun_ce")
 
 func take_damage(amount: int) -> void:
-	var actual = int(amount * EmotionManager.get_enemy_damage_multiplier())
-	var old_hp = hp
+	var actual: int = int(amount * EmotionManager.get_enemy_damage_multiplier())
+	var old_hp: int = hp
 	hp = max(0, hp - actual)
 	hp_changed.emit(old_hp, hp)
 	if hp <= 0: game_over.emit()
 
 func heal(amount: int) -> void:
-	var actual = int(amount * EmotionManager.get_heal_multiplier())
-	var old_hp = hp
+	var actual: int = int(amount * EmotionManager.get_heal_multiplier())
+	var old_hp: int = hp
 	hp = min(max_hp, hp + actual)
 	hp_changed.emit(old_hp, hp)
 
 func increase_max_hp(amount: int) -> void:
-	var old_max = max_hp
+	var old_max: int = max_hp
 	max_hp += amount; hp = min(max_hp, hp + amount)
 	max_hp_changed.emit(old_max, max_hp)
 
 func gain_gold(amount: int) -> void:
-	var old = gold; gold += amount; gold_changed.emit(old, gold)
+	var old: int = gold; gold += amount; gold_changed.emit(old, gold)
 
 func spend_gold(amount: int) -> bool:
 	if gold < amount: return false
-	var old = gold; gold -= amount; gold_changed.emit(old, gold); return true
+	var old: int = gold; gold -= amount; gold_changed.emit(old, gold); return true
 
 func add_relic(relic_id: String) -> void:
 	if relic_id not in relics:

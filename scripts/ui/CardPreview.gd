@@ -29,7 +29,7 @@ func _build() -> void:
 	style.set_border_width_all(2)
 	_panel.add_theme_stylebox_override("panel", style)
 
-	var vbox = VBoxContainer.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 6)
 	_panel.add_child(vbox)
 
@@ -54,7 +54,7 @@ func _build() -> void:
 	_title_lbl.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 	vbox.add_child(_title_lbl)
 
-	var sep = WaterInkDivider.new()
+	var sep: WaterInkDivider = WaterInkDivider.new()
 	sep.custom_minimum_size = Vector2(150, 6)
 	sep.ink_color = UIConstants.color_of("gold_dim")
 	vbox.add_child(sep)
@@ -78,7 +78,7 @@ func show_preview(card: Dictionary, anchor_pos: Vector2) -> void:
 	_title_lbl.text   = card.get("name", "???")
 	_cost_lbl.text    = "%s %d" % [UIConstants.ICONS["energy"], int(card.get("cost", 1))]
 	_desc_lbl.text    = card.get("description", card.get("desc", ""))
-	var rarity = card.get("rarity", "common")
+	var rarity: String = card.get("rarity", "common")
 	_rarity_lbl.text  = {"common":"普通","rare":"★ 稀有","legendary":"★★ 传说"}.get(rarity, "普通")
 	_rarity_lbl.add_theme_color_override("font_color",
 		{
@@ -88,12 +88,12 @@ func show_preview(card: Dictionary, anchor_pos: Vector2) -> void:
 		}.get(rarity, UIConstants.color_of("ash")))
 
 	# 定位：显示在悬停牌的上方，避免超出屏幕
-	var px = clamp(anchor_pos.x - 80, 4, 1050)
-	var py = max(anchor_pos.y - 240, 4)
+	var px: int = clamp(anchor_pos.x - 80, 4, 1050)
+	var py: int = max(anchor_pos.y - 240, 4)
 	position = Vector2(px, py)
 	visible  = true
 	modulate.a = 0.0
-	var tw = create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(self, "modulate:a", 1.0, 0.15)
 
 func hide_preview() -> void:

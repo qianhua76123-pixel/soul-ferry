@@ -30,7 +30,7 @@ func _ready() -> void:
 func _on_heal() -> void:
 	if _healed: return
 	_healed = true
-	var amount = int(GameState.max_hp * HEAL_AMOUNT_PERCENT)
+	var amount: int = int(GameState.max_hp * HEAL_AMOUNT_PERCENT)
 	GameState.heal(amount)
 	heal_btn.disabled  = true
 	status_label.text  = "休息后回复了 %d HP。" % int(amount)
@@ -61,10 +61,10 @@ func _on_upgrade_mode() -> void:
 func _get_upgrade_preview(card: Dictionary) -> String:
 	var lines: Array[String] = []
 	lines.append("✨ 升级效果预览：")
-	var cost = card.get("cost", 1)
-	var etype = card.get("effect_type", "")
-	var eval_ = card.get("effect_value", 0)
-	var bonus = card.get("condition_bonus", 0)
+	var cost: int = card.get("cost", 1)
+	var etype: String = card.get("effect_type", "")
+	var eval_: int = card.get("effect_value", 0)
+	var bonus: int = card.get("condition_bonus", 0)
 
 	# 费用降低（除0费外）
 	if cost >= 1:
@@ -76,7 +76,7 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 		"heal_all_buffs","attack_dot","attack_scaling_rage","shield_attack",
 		"mass_heal_shield","attack_all_triple","weaken","weaken_fear"
 	]:
-		var new_val = int(eval_ * 1.25)
+		var new_val: int = int(eval_ * 1.25)
 		lines.append("• 效果值 %d → %d (+25%%)" % [int(eval_), int(new_val)])
 
 	# 条件加成提升
@@ -100,33 +100,33 @@ func _on_card_upgrade_selected(card: Dictionary) -> void:
 	var upgrades: Array[String] = []
 
 	# 费用-1
-	var old_cost = card.get("cost", 1)
+	var old_cost: int = card.get("cost", 1)
 	if old_cost >= 1:
 		card["cost"] = old_cost - 1
 		upgrades.append("费用 %d→%d" % [int(old_cost), int(card["cost"])])
 
 	# 效果值+25%
-	var etype = card.get("effect_type", "")
-	var eval_ = card.get("effect_value", 0)
+	var etype: String = card.get("effect_type", "")
+	var eval_: int = card.get("effect_value", 0)
 	if eval_ > 0 and etype in [
 		"attack","attack_all","attack_lifesteal","shield","heal",
 		"heal_all_buffs","attack_dot","attack_scaling_rage","shield_attack",
 		"mass_heal_shield","attack_all_triple","weaken","weaken_fear"
 	]:
-		var new_val = int(eval_ * 1.25)
+		var new_val: int = int(eval_ * 1.25)
 		card["effect_value"] = new_val
 		upgrades.append("效果 %d→%d" % [int(eval_), int(new_val)])
 
 	# 条件加成+50%+1
-	var bonus = card.get("condition_bonus", 0)
+	var bonus: int = card.get("condition_bonus", 0)
 	if bonus > 0:
-		var new_bonus = bonus + int(bonus * 0.5) + 1
+		var new_bonus: int = bonus + int(bonus * 0.5) + 1
 		card["condition_bonus"] = new_bonus
 		upgrades.append("加成 +%d→+%d" % [int(bonus), int(new_bonus)])
 
 	# 传说牌额外：情绪偏移翻倍
 	if card.get("rarity","") == "legendary":
-		var shift = card.get("emotion_shift", {})
+		var shift: Dictionary = card.get("emotion_shift", {})
 		for k in shift:
 			shift[k] = shift[k] * 2
 		card["emotion_shift"] = shift
@@ -151,13 +151,13 @@ func _show_upgrade_effect() -> void:
 	var ui: Node = get_node_or_null("UI")
 	if ui: ui.add_child(overlay)
 	else: add_child(overlay)
-	var tw = overlay.create_tween()
+	var tw: Tween = overlay.create_tween()
 	tw.tween_property(overlay, "color:a", 0.35, 0.15)
 	tw.tween_property(overlay, "color:a", 0.0,  0.5)
 	tw.tween_callback(overlay.queue_free)
 
 	# 升级浮字
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = "✨ 升级成功！"
 	lbl.add_theme_color_override("font_color", Color(0.98, 0.88, 0.10))
 	lbl.add_theme_font_size_override("font_size", 22)
@@ -165,7 +165,7 @@ func _show_upgrade_effect() -> void:
 	var root: Node = get_node_or_null("UI") if get_node_or_null("UI") else self
 	root.add_child(lbl)
 	lbl.position = Vector2(400, 280)
-	var tw2 = lbl.create_tween()
+	var tw2: Tween = lbl.create_tween()
 	tw2.tween_property(lbl, "position:y", 220.0, 1.2).set_ease(Tween.EASE_OUT)
 	tw2.parallel().tween_property(lbl, "modulate:a", 0.0, 1.2)
 	tw2.tween_callback(lbl.queue_free)
@@ -185,14 +185,14 @@ func _build_bg_candles() -> void:
 	var bg: Node = get_node_or_null("BgCanvas")
 	if not bg: return
 	for i in range(5):
-		var candle = Label.new()
+		var candle: Label = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 28)
 		candle.modulate = Color(0.9, 0.6, 0.2, 0.7)
 		candle.position = Vector2(60 + i * 180, 520 + (i % 2) * 30)
 		bg.add_child(candle)
 		# 烛火摇曳
-		var tw = candle.create_tween().set_loops()
+		var tw: Tween = candle.create_tween().set_loops()
 		tw.tween_property(candle, "rotation_degrees", 3.0 * (1 if i%2==0 else -1), 0.6 + i*0.1)\
 			.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 		tw.tween_property(candle, "rotation_degrees", -3.0 * (1 if i%2==0 else -1), 0.6 + i*0.1)\
@@ -211,7 +211,7 @@ func _setup_rest_visual() -> void:
 	move_child(bg, 0)
 
 	# 标题
-	var title_lbl = Label.new()
+	var title_lbl: Label = Label.new()
 	title_lbl.text = "古 祠 小 憩"
 	title_lbl.add_theme_font_size_override("font_size", 22)
 	title_lbl.add_theme_color_override("font_color", Color(0.75, 0.62, 0.35))
@@ -222,7 +222,7 @@ func _setup_rest_visual() -> void:
 
 	var ui_root: Node = get_node_or_null("UI")
 	if ui_root:
-		var frame = InkedPanel.new()
+		var frame: InkedPanel = InkedPanel.new()
 		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		frame.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.10)
 		frame.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.45)
@@ -230,7 +230,7 @@ func _setup_rest_visual() -> void:
 		ui_root.add_child(frame)
 		ui_root.move_child(frame, 0)
 
-	var divider = WaterInkDivider.new()
+	var divider: WaterInkDivider = WaterInkDivider.new()
 	divider.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	divider.position.y = 56
 	divider.ink_color = UIConstants.color_of("gold_dim")
@@ -238,12 +238,12 @@ func _setup_rest_visual() -> void:
 
 	# 3支烛台
 	for i in range(3):
-		var candle = Label.new()
+		var candle: Label = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 24)
 		candle.position = Vector2(460 + i * 148, 520 + (i % 2) * 20)
 		add_child(candle)
-		var tw = candle.create_tween().set_loops()
+		var tw: Tween = candle.create_tween().set_loops()
 		var period = 1.1 + i * 0.18
 		tw.tween_property(candle, "modulate:a", 0.55, period)
 		tw.tween_property(candle, "modulate:a", 1.0,  period)

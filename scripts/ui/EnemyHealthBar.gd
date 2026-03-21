@@ -26,7 +26,7 @@ func _ready() -> void:
 	add_theme_constant_override("separation", 2)
 	alignment = BoxContainer.ALIGNMENT_END
 
-	var bar_area = Control.new()
+	var bar_area: Control = Control.new()
 	bar_area.name = "BarArea"
 	bar_area.custom_minimum_size = Vector2(220, int(BAR_H) + 4)
 	bar_area.draw.connect(_draw_bar.bind(bar_area))
@@ -37,16 +37,16 @@ func _draw_bar(area: Control) -> void:
 	if w <= 0.0:
 		w = 220.0
 	var ratio       = float(_cur_hp) / float(max(1, _max_hp))
-	var ghost_ratio = float(_ghost_hp) / float(max(1, _max_hp))
+	var ghost_ratio: float = float(_ghost_hp) / float(max(1, _max_hp))
 	var fill_color  = _get_fill_color(ratio)
 
 	_draw_chamfered_rect(area, Rect2(0, 2, w, BAR_H), SLOT_COLOR, CORNER)
 
-	var ghost_w = clamp(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2)
+	var ghost_w: int = clamp(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2)
 	if ghost_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, ghost_w, BAR_H), GHOST_COLOR, CORNER * 0.5)
 
-	var fill_w = clamp(ratio, 0.0, 1.0) * (w - CORNER * 2)
+	var fill_w: int = clamp(ratio, 0.0, 1.0) * (w - CORNER * 2)
 	if fill_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, fill_w, BAR_H), fill_color, CORNER * 0.5)
 
@@ -101,7 +101,7 @@ func set_hp(new_hp: int, max_hp: int) -> void:
 	_ghost_hp = max(_ghost_hp, float(new_hp))
 	_redraw_bar()
 
-	var ratio = float(new_hp) / float(max(1, max_hp))
+	var ratio: float = float(new_hp) / float(max(1, max_hp))
 	if ratio <= 0.3:
 		_start_pulse()
 	else:

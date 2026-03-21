@@ -41,7 +41,7 @@ func change_scene(path: String, title: String = "") -> void:
 	_is_fading = true
 	_title_lbl.text = title
 
-	var tw = create_tween()
+	var tw: Tween = create_tween()
 	# 第一阶段：fade out（黑屏）
 	tw.tween_property(_overlay, "color:a", 1.0, FADE_DURATION)\
 		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
@@ -63,6 +63,6 @@ func change_scene(path: String, title: String = "") -> void:
 ## 仅执行淡入（场景 _ready() 开头调用，让场景从黑屏渐显）
 func fade_in_only() -> void:
 	_overlay.color.a = 1.0
-	var tw = create_tween()
+	var tw: Tween = create_tween()
 	tw.tween_property(_overlay, "color:a", 0.0, FADE_DURATION)\
 		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)

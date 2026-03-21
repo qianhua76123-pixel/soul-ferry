@@ -59,7 +59,7 @@ func _draw() -> void:
 	# 分割线
 	draw_line(ofs+Vector2(2,63), ofs+Vector2(CARD_W-2,63), _rarity_color, 1.0)
 	# 牌名
-	var name = card_data.get("name","???")
+	var name: String = card_data.get("name","???")
 	var tc := UIConstants.color_of("text_primary")
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,76), name,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, tc)
@@ -223,7 +223,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			draw_circle(Vector2(cx, cy + 4), 1.5, Color(c.r*0.2,c.g*0.2,c.b*0.2,0.9))
 
 func _animate_hover(on: bool) -> void:
-	var tween = create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_method(func(v: float):
 		_hover_offset = v
 		queue_redraw()
@@ -233,6 +233,6 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT and is_playable:
 			card_clicked.emit(card_data)
-			var tween = create_tween()
+			var tween: Tween = create_tween()
 			tween.tween_property(self,"scale",Vector2(0.9,0.9),0.05)
 			tween.tween_property(self,"scale",Vector2(1.0,1.0),0.1)

@@ -27,7 +27,7 @@ func _ready() -> void:
 func init_deck(card_ids: Array) -> void:
 	deck = []; hand = []; discard_pile = []; exhaust_pile = []
 	for cid in card_ids:
-		var c = CardDatabase.get_card(cid)
+		var c: Dictionary = CardDatabase.get_card(cid)
 		if not c.is_empty(): deck.append(c)
 	shuffle_deck()
 
@@ -60,7 +60,7 @@ func draw_card() -> void:
 		if discard_pile.is_empty(): return
 		deck = discard_pile.duplicate(); discard_pile = []; shuffle_deck()
 	if deck.is_empty(): return
-	var c = deck.pop_back()
+	var c: Dictionary = deck.pop_back()
 	hand.append(c)
 	card_drawn.emit(c)
 	hand_updated.emit(hand)
@@ -72,7 +72,7 @@ func on_turn_start() -> void:
 	max_cost = BASE_COST - EmotionManager.get_cost_reduction()
 	current_cost = max_cost
 	cost_changed.emit(current_cost)
-	var draw_n = BASE_DRAW + EmotionManager.get_draw_bonus()
+	var draw_n: int = BASE_DRAW + EmotionManager.get_draw_bonus()
 	if EmotionManager.is_disorder("fear"): draw_n -= 1
 	draw_cards(max(1, draw_n))
 
@@ -81,19 +81,19 @@ func on_turn_end() -> void:
 		discard_from_hand(c)
 
 func play_card(card: Dictionary) -> bool:
-	var idx = -1
+	var idx: int = -1
 	for i in len(hand):
 		if hand[i].get("id","") == card.get("id",""):
 			idx = i; break
 	if idx < 0: return false
-	var cost = max(0, card.get("cost", 0) - EmotionManager.get_cost_reduction())
+	var cost: int = max(0, card.get("cost", 0) - EmotionManager.get_cost_reduction())
 	if current_cost < cost: return false
 	if not EmotionManager.can_play_card(card): return false
 	hand.remove_at(idx)
 	current_cost -= cost
 	cost_changed.emit(current_cost)   # 更新费用圆点
 	# 应用情绪偏移
-	var shift = card.get("emotion_shift", {})
+	var shift: Dictionary = card.get("emotion_shift", {})
 	if not shift.is_empty():
 		EmotionManager.apply_shift(shift)
 	if card.get("exhaust", false):
@@ -105,7 +105,7 @@ func play_card(card: Dictionary) -> bool:
 	return true
 
 func discard_from_hand(card: Dictionary) -> void:
-	var idx = hand.find(card)
+	var idx: int = hand.find(card)
 	if idx >= 0:
 		hand.remove_at(idx)
 		discard_pile.append(card)

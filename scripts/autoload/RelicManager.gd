@@ -45,7 +45,7 @@ func _load_relic_data() -> void:
 # ════════════════════════════════════════════
 func add_relic(relic_id: String) -> void:
 	if has_relic(relic_id): return
-	var data = _all_relics_data.get(relic_id, {})
+	var data: Dictionary = _all_relics_data.get(relic_id, {})
 	if data.is_empty():
 		push_warning("RelicManager: 未知遗物 ID: " + relic_id); return
 	active_relics.append(data.duplicate(true))
@@ -121,7 +121,7 @@ func _on_emotions_reset() -> void:
 ## 铜镜碎片 — 战斗开始时显示敌人主导情绪（信息型，不影响数值）
 func _effect_tong_jing_sui_on_battle_start(enemy_data: Dictionary) -> void:
 	if not has_relic("tong_jing_sui"): return
-	var dominant = enemy_data.get("dominant_emotion", "")
+	var dominant: String = enemy_data.get("dominant_emotion", "")
 	if dominant != "":
 		relic_triggered.emit("tong_jing_sui",
 			"铜镜碎片感知到：敌人情绪以「%s」为主" % EmotionManager.get_emotion_name(dominant))
@@ -159,7 +159,7 @@ func _update_wuqing_jie() -> void:
 func _effect_yin_yang_bi_on_card_played(card: Dictionary) -> void:
 	if not has_relic("yin_yang_bi"): return
 	if card.get("emotion_tag","") != "calm": return
-	var others = ["rage","fear","grief","joy"]
+	var others: Array = ["rage","fear","grief","joy"]
 	others.shuffle()
 	for emotion in others:
 		if EmotionManager.values[emotion] < 3:   # 上限3，不触发失调
@@ -172,10 +172,10 @@ func _effect_yin_yang_bi_on_card_played(card: Dictionary) -> void:
 func _effect_hun_bo_lu_on_turn_start() -> void:
 	if not has_relic("hun_bo_lu"): return
 	if DeckManager.hand.is_empty(): return
-	var hand = DeckManager.hand
-	var target_idx = randi() % len(hand)
-	var card = hand[target_idx]
-	var old_cost = card.get("cost", 0)
+	var hand: Array = DeckManager.hand
+	var target_idx: int = randi() % len(hand)
+	var card: Dictionary = hand[target_idx]
+	var old_cost: int = card.get("cost", 0)
 	if old_cost > 0:
 		hand[target_idx]["cost"] = old_cost - 1
 		DeckManager.hand_updated.emit(DeckManager.hand)

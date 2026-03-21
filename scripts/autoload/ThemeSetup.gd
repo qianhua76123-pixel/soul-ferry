@@ -28,7 +28,7 @@ func get_theme() -> Theme:
 #  主题构建
 # ════════════════════════════════════════════
 func _build_theme() -> Theme:
-	var t = Theme.new()
+	var t: Theme = Theme.new()
 
 	# ── Label ──
 	t.set_color("font_color",        "Label", C_PAPER)
@@ -77,7 +77,7 @@ func _build_theme() -> Theme:
 	t.set_stylebox("grabber_hover", "VScrollBar", _flat(C_GOLD))
 
 	# ── HSeparator ──
-	var sep = StyleBoxFlat.new()
+	var sep: StyleBoxFlat = StyleBoxFlat.new()
 	sep.bg_color = C_BORDER
 	t.set_stylebox("separator", "HSeparator", sep)
 	t.set_constant("separation", "HSeparator", 1)
@@ -98,7 +98,7 @@ func _build_theme() -> Theme:
 	return t
 
 func _btn_style(bg: Color, border: Color, inset: bool) -> StyleBoxFlat:
-	var sb = StyleBoxFlat.new()
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color     = bg
 	sb.border_color = border
 	sb.set_border_width_all(1)
@@ -109,7 +109,7 @@ func _btn_style(bg: Color, border: Color, inset: bool) -> StyleBoxFlat:
 	return sb
 
 func _panel_style(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
-	var sb = StyleBoxFlat.new()
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color     = bg
 	sb.border_color = border
 	sb.set_border_width_all(bw)
@@ -117,7 +117,7 @@ func _panel_style(bg: Color, border: Color, bw: int) -> StyleBoxFlat:
 	return sb
 
 func _flat(bg: Color) -> StyleBoxFlat:
-	var sb = StyleBoxFlat.new()
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color = bg
 	sb.set_corner_radius_all(0)
 	return sb

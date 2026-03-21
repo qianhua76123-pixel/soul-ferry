@@ -26,7 +26,7 @@ func _load_cards() -> void:
 
 func get_card(card_id: String) -> Dictionary:
 	if not _loaded: _load_cards()
-	var card = _cards.get(card_id, {}).duplicate(true)
+	var card: Dictionary = _cards.get(card_id, {}).duplicate(true)
 	# 动态注入 desc（始终反映真实数值，支持升级）
 	if not card.is_empty():
 		card["desc"] = get_desc(card_id, card.get("level", 0))
@@ -37,17 +37,17 @@ func get_all_cards() -> Array:
 	return _cards.values()
 
 func get_reward_cards(count: int = 3) -> Array:
-	var pool = get_all_cards().filter(func(c): return not c.get("is_curse", false))
+	var pool: Array = get_all_cards().filter(func(c): return not c.get("is_curse", false))
 	pool.shuffle()
-	var weighted = []
+	var weighted: Array = []
 	for c in pool:
 		match c.get("rarity", "common"):
 			"legendary": weighted.append_array([c])
 			"rare":      weighted.append_array([c, c])
 			_:           weighted.append_array([c, c, c, c])
 	weighted.shuffle()
-	var result = []
-	var seen_ids = {}
+	var result: Array = []
+	var seen_ids: Dictionary = {}
 	for c in weighted:
 		if len(result) >= count: break
 		if c.get("id","") not in seen_ids:
@@ -62,27 +62,27 @@ func get_reward_cards(count: int = 3) -> Array:
 # ════════════════════════════════════════════════════════
 func get_desc(card_id: String, level: int = 0) -> String:
 	if not _loaded: _load_cards()
-	var card = _cards.get(card_id, {})
+	var card: Dictionary = _cards.get(card_id, {})
 	if card.is_empty(): return "???"
 
-	var etype    = card.get("effect_type", "")
-	var base     = int(card.get("effect_value", 0))
-	var bonus    = card.get("condition_bonus", null)
-	var cond     = card.get("condition", null)
-	var shift    = card.get("emotion_shift", {})
-	var ename_cn = EmotionManager.get_emotion_name(card.get("emotion_tag", "calm"))
+	var etype: String = card.get("effect_type", "")
+	var base: int     = int(card.get("effect_value", 0))
+	var bonus: Variant = card.get("condition_bonus", null)
+	var cond: Variant  = card.get("condition", null)
+	var shift: Dictionary = card.get("emotion_shift", {})
+	var ename_cn: String = EmotionManager.get_emotion_name(card.get("emotion_tag", "calm"))
 
 	# 升级值计算
 	var upval  = int(base * 1.5) if base > 0 else base
-	var bonus_int = bonus if bonus != null else 0
+	var bonus_int: int = bonus if bonus != null else 0
 	var upbonus = bonus_int + 1 if bonus_int > 0 else bonus_int
 
 	var val  = upval   if level > 0 and upval   != base       else base
 	var bval = upbonus if level > 0 and upbonus != bonus_int  else bonus_int
 
 	# 升级变化数值标金色
-	var vs = str(int(val)) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)
-	var bs = str(int(bval)) if (level == 0 or bval == bonus_int) else ("[color=#f0c040]%d[/color]" % bval)
+	var vs: int = str(int(val)) if (level == 0 or val == base) else ("[color=#f0c040]%d[/color]" % val)
+	var bs: int = str(int(bval)) if (level == 0 or bval == bonus_int) else ("[color=#f0c040]%d[/color]" % bval)
 
 	# 情绪偏移文字
 	var shift_str = ""
@@ -90,11 +90,11 @@ func get_desc(card_id: String, level: int = 0) -> String:
 		if emotion == "clear_all":
 			shift_str += "所有情绪归零"
 		else:
-			var ev = int(shift[emotion])
+			var ev: int = int(shift[emotion])
 			if ev > 0:
 				shift_str += "+%s%d" % [EmotionManager.get_emotion_name(emotion), ev]
 
-	var cond_str = _cond_text(cond)
+	var cond_str: String = _cond_text(cond)
 	var desc     = _build_desc(etype, vs, bs, cond_str, card, ename_cn)
 
 	if shift_str != "" and "归零" not in desc and "清零" not in desc:
@@ -116,13 +116,13 @@ func _cond_text(cond) -> String:
 		"grief >= 3":     return "悲≥3时"
 		"joy >= 3":       return "喜≥3时"
 	if " >= " in str(cond):
-		var parts = str(cond).split(" >= ")
+		var parts: String = str(cond).split(" >= ")
 		return "%s≥%s时" % [EmotionManager.get_emotion_name(parts[0].strip_edges()), parts[1].strip_edges()]
 	return str(cond)
 
 func _build_desc(etype: String, vs: String, bs: String,
 				 cond: String, card: Dictionary, _ename_cn: String) -> String:
-	var cid = card.get("id", "")
+	var cid: String = card.get("id", "")
 	match etype:
 		"attack":
 			if cid == "fen_nu_bao":

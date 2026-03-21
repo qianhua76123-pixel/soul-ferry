@@ -31,7 +31,7 @@ func _ready() -> void:
 
 func _build_labels() -> void:
 	for emotion in EMOTIONS:
-		var lbl = Label.new()
+		var lbl: Label = Label.new()
 		lbl.name = "EL_" + emotion
 		lbl.add_theme_font_size_override("font_size", 12)
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -88,7 +88,7 @@ func _draw() -> void:
 	draw_rect(bg_rect, BORDER_COLOR, false, 1.5)
 	# 同心五边形网格（4层）
 	for level in range(1, 5):
-		var pts = _get_pentagon(center, RADIUS * float(level) / 4.0)
+		var pts: float = _get_pentagon(center, RADIUS * float(level) / 4.0)
 		pts.append(pts[0])
 		draw_polyline(PackedVector2Array(pts), GRID_COLOR, 1.0)
 	# 轴线
@@ -99,7 +99,7 @@ func _draw() -> void:
 	var fill_pts: PackedVector2Array = PackedVector2Array()
 	for emotion in EMOTIONS:
 		var val   = EmotionManager.values.get(emotion, 0)
-		var ratio = float(val) / float(MAX_VAL)
+		var ratio: float = float(val) / float(MAX_VAL)
 		var angle_2 = deg_to_rad(EMOTION_ANGLES[emotion])
 		fill_pts.append(center + Vector2(cos(angle_2), sin(angle_2)) * RADIUS * max(ratio, 0.04))
 	var fill_color = _get_fill_color()
@@ -142,7 +142,7 @@ func _on_emotion_changed(emotion: String, _old: int, new_val: int) -> void:
 func _update_edge_vignette(emotion: String, val: int) -> void:
 	if _edge_rects.is_empty(): return
 	var ec    = EMOTION_COLORS.get(emotion, Color.RED)
-	var alpha = clamp(float(val - 1) / 3.0, 0.0, 0.22)
+	var alpha: float = clamp(float(val - 1) / 3.0, 0.0, 0.22)
 	for r in _edge_rects:
 		r.color = Color(ec.r, ec.g, ec.b, alpha)
 
@@ -160,7 +160,7 @@ func _play_label_warn(emotion: String) -> void:
 	if not lbl: return
 	if lbl.get_meta("_warning", false): return
 	lbl.set_meta("_warning", true)
-	var tw = lbl.create_tween().set_loops(3)
+	var tw: Tween = lbl.create_tween().set_loops(3)
 	tw.tween_property(lbl, "modulate:a", 0.35, 0.4)
 	tw.tween_property(lbl, "modulate:a", 1.0,  0.4)
 	tw.tween_callback(func(): lbl.set_meta("_warning", false))

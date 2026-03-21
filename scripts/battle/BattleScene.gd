@@ -101,7 +101,7 @@ func _ready() -> void:
 	call_deferred("_deferred_layout_setup")
 
 	# ── 第五步：启动战斗逻辑（最后执行，保证 UI 节点全部就位）──
-	var enemy_id = GameState.get_meta("pending_enemy_id", "yuan_gui")
+	var enemy_id: String = str(GameState.get_meta("pending_enemy_id", "yuan_gui"))
 	state_machine.start_battle(str(enemy_id))
 
 func _deferred_layout_setup() -> void:
@@ -137,8 +137,8 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 		_setup_boss_ui(enemy_data)
 
 func _on_player_turn_started(turn: int) -> void:
-	var moon_icons = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
-	var moon = moon_icons[int(turn - 1) % 8]
+	var moon_icons: Array = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
+	var moon: int = moon_icons[int(turn - 1) % 8]
 	turn_label.text       = "%s 第 %d 回合" % [moon, int(turn)]
 	end_turn_btn.disabled = false
 	du_hua_btn.visible    = false
@@ -155,7 +155,7 @@ func _on_enemy_turn_started() -> void:
 	# 敌人行动时锁定结束回合按钮
 	end_turn_btn.disabled = true
 	# 特殊行动UI反馈：摸牌陷阱提示
-	var last_action = state_machine.enemy_data.get("_last_action_type", "")
+	var last_action: String = state_machine.enemy_data.get("_last_action_type", "")
 	match last_action:
 		"draw_player":
 			_spawn_special_text("💀 摄魅凝视！强迫摸牌", Color(0.55, 0.10, 0.75))
@@ -165,7 +165,7 @@ func _on_enemy_turn_started() -> void:
 			_spawn_special_text("💢 花嫁之怒！手牌越多伤越高", Color(0.88, 0.15, 0.18))
 
 func _spawn_special_text(msg: String, color: Color) -> void:
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = msg
 	lbl.add_theme_color_override("font_color", color)
 	lbl.add_theme_font_size_override("font_size", 16)
@@ -174,7 +174,7 @@ func _spawn_special_text(msg: String, color: Color) -> void:
 	if ui: ui.add_child(lbl)
 	else: add_child(lbl)
 	lbl.position = Vector2(576 - 160, 260)
-	var tw = lbl.create_tween()
+	var tw: Tween = lbl.create_tween()
 	tw.tween_property(lbl, "position:y", lbl.position.y - 60, 1.5)
 	tw.parallel().tween_property(lbl, "modulate:a", 0.0, 1.5)
 	tw.tween_callback(lbl.queue_free)
@@ -191,8 +191,8 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	if _player_hbar and _player_hbar.has_method("set_shield"):
 		_player_hbar.set_shield(state_machine.player_shield)
 	_update_hud()
-	var rtype = result.get("type","")
-	var rval  = int(result.get("value", 0))
+	var rtype: String = result.get("type","")
+	var rval: int  = int(result.get("value", 0))
 	if rval > 0:
 		var dmg_types   = ["attack","attack_all","attack_lifesteal","attack_dot","attack_scaling_rage","attack_all_triple","attack_and_weaken_all","shield_attack","remove_enemy_shield"]
 		var heal_types  = ["heal","heal_all_buffs","heal_and_draw","heal_scale_grief","mass_heal_shield"]
@@ -220,7 +220,7 @@ func _on_battle_ended(result: String) -> void:
 		RelicManager.on_victory_zhenya()
 		if _boss_ui: _boss_ui.on_boss_defeated()
 	# 成就追踪
-	var is_boss = state_machine.enemy_data.get("type","") == "boss"
+	var is_boss: bool = state_machine.enemy_data.get("type","") == "boss"
 	if is_boss:
 		AchievementManager.on_boss_battle_end(result, GameState.hp)
 	elif result == "du_hua":
@@ -255,14 +255,14 @@ const RELIC_ICONS = {
 func _build_relic_bar() -> void:
 	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if not player_area: return
-	var bar = HBoxContainer.new()
+	var bar: HBoxContainer = HBoxContainer.new()
 	bar.name = "BattleRelicBar"
 	for rid in GameState.relics:
-		var lbl = Label.new()
+		var lbl: Label = Label.new()
 		lbl.name   = "rbtn_" + rid
 		lbl.text   = RELIC_ICONS.get(rid, "◈")
 		lbl.add_theme_font_size_override("font_size", 20)
-		var data   = RelicManager._all_relics_data.get(rid, {})
+		var data: Dictionary = RelicManager._all_relics_data.get(rid, {})
 		lbl.tooltip_text = data.get("name","???") + "\n" + data.get("effect","")
 		bar.add_child(lbl)
 	player_area.add_child(bar)
@@ -284,24 +284,24 @@ func _on_relic_triggered(relic_id: String, effect_desc: String) -> void:
 ## 纯 Tween 实现图标闪光，0.25s，不使用 AnimationPlayer
 ## 多个遗物同帧触发时各自 create_tween()，互相独立不干扰
 func _flash_relic_icon(relic_id: String) -> void:
-	var bar  = get_node_or_null("UI/AltarLayout/PlayerArea/BattleRelicBar")
+	var bar: Node = get_node_or_null("UI/AltarLayout/PlayerArea/BattleRelicBar")
 	if not bar: return
-	var icon = bar.get_node_or_null("rbtn_" + relic_id)
+	var icon: Node = bar.get_node_or_null("rbtn_" + relic_id)
 	if not icon: return
 
 	# 记录原始 modulate（如果上一帧动画还没结束，先恢复）
-	var original = Color.WHITE
+	var original: Color = Color.WHITE
 
 	# 独立 Tween：白色闪光 → 金色高亮 → 恢复白色
 	# 每次 create_tween() 都是全新实例，互不影响
-	var tw = icon.create_tween()
+	var tw: Tween = icon.create_tween()
 	tw.tween_property(icon, "modulate", Color(2.0, 1.8, 0.5, 1.0), 0.08)   # 爆闪（HDR超亮）
 	tw.tween_property(icon, "modulate", Color(1.0, 0.85, 0.2, 1.0),  0.08)  # 金色留底
 	tw.tween_property(icon, "modulate", original,                     0.12)  # 恢复
 	# 总时长 0.28s，与需求 0.25s 接近
 
 func _show_relic_popup(desc: String) -> void:
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = "✦ " + desc
 	lbl.add_theme_color_override("font_color", Color(0.85, 0.72, 0.0))
 	lbl.add_theme_font_size_override("font_size", 13)
@@ -310,7 +310,7 @@ func _show_relic_popup(desc: String) -> void:
 	if ui_layer: ui_layer.add_child(lbl)
 	else:        add_child(lbl)
 	lbl.position = Vector2(12.0, 80.0 + randf_range(0.0, 20.0))
-	var tw = lbl.create_tween()
+	var tw: Tween = lbl.create_tween()
 	tw.tween_property(lbl, "position:y", lbl.position.y - 44.0, 1.2)
 	tw.parallel().tween_property(lbl, "modulate:a", 0.0, 1.2)
 	tw.tween_callback(lbl.queue_free)
@@ -331,7 +331,7 @@ func _on_du_hua_pressed() -> void:
 
 func _on_result_continue() -> void:
 	result_panel.visible = false
-	var result = _last_battle_result
+	var result: String = _last_battle_result
 	if result == "victory" or result == "du_hua":
 		# 胜利/渡化 → 选牌奖励
 		TransitionManager.change_scene("res://scenes/CardRewardScene.tscn")
@@ -345,18 +345,18 @@ func _on_hand_updated(hand: Array) -> void:
 	for child in hand_container.get_children():
 		child.queue_free()
 	for card_data in hand:
-		var card_ui = _card_scene.instantiate()
+		var card_ui: Node = _card_scene.instantiate()
 		if not card_ui: continue
 		if card_ui.has_method("setup"):
 			card_ui.setup(card_data)
-		var can_afford = DeckManager.current_cost >= max(0, card_data.get("cost", 0) - EmotionManager.get_cost_reduction())
+		var can_afford: bool = DeckManager.current_cost >= max(0, card_data.get("cost", 0) - EmotionManager.get_cost_reduction())
 		if card_ui.has_method("set_playable"):
 			card_ui.set_playable(can_afford and EmotionManager.can_play_card(card_data))
 		card_ui.card_clicked.connect(_on_card_clicked)
 		hand_container.add_child(card_ui)
 	# 根据手牌数量动态调整间距，最多7张不溢出
-	var card_count = hand_container.get_child_count()
-	var sep = 12
+	var card_count: int = hand_container.get_child_count()
+	var sep: int = 12
 	if card_count > 5:
 		sep = max(4, 12 - (card_count - 5) * 3)
 	hand_container.add_theme_constant_override("separation", sep)
@@ -366,7 +366,7 @@ func _on_hand_updated(hand: Array) -> void:
 		card_ui.modulate.a = 0.0
 		var orig_y = card_ui.position.y
 		card_ui.position.y = orig_y + 30
-		var tw = card_ui.create_tween()
+		var tw: Tween = card_ui.create_tween()
 		tw.tween_interval(delay)
 		tw.tween_property(card_ui, "position:y", orig_y, 0.18)\
 			.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
@@ -382,7 +382,7 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 	get_tree().create_timer(0.5).timeout.connect(
 		func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
 	# 根据牌型播放不同的命中动画，然后触发效果
-	var effect_type = card_data.get("effect_type", "")
+	var effect_type: String = card_data.get("effect_type", "")
 	var is_attack = effect_type in ["attack","attack_all","attack_lifesteal","attack_dot",
 		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
 		"shield_attack","remove_enemy_shield","dodge_attack"]
@@ -402,7 +402,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 			var rect = radar_area.get_global_rect()
 			var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
 							   rect.position.y + rect.size.y * 0.5)
-			var ename = EmotionManager.get_emotion_name(emotion)
+			var ename: String = EmotionManager.get_emotion_name(emotion)
 			var arrow = "↑" if diff > 0 else "↓"
 			spawn_damage_number(abs(diff), "emotion", pos,
 				"%s%s%d" % [ename, arrow, int(abs(diff))])
@@ -410,7 +410,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 func _on_disorder_triggered(emotion: String) -> void:
 	disorder_warning.text = "⚠ %s 失调！" % EmotionManager.get_emotion_name(emotion)
 	SoundManager.play_sfx("disorder_trigger")
-	var tween = create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(self, "modulate", Color(1.0, 0.3, 0.3), 0.08)
 	tween.tween_property(self, "modulate", Color.WHITE, 0.25)
 
@@ -433,7 +433,7 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 		get_tree().create_timer(0.4).timeout.connect(
 			func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
 		# 成就：Boss战伤害追踪
-		var is_boss = state_machine.enemy_data.get("type","") == "boss"
+		var is_boss: bool = state_machine.enemy_data.get("type","") == "boss"
 		if is_boss:
 			AchievementManager.on_player_damaged(-diff)
 	elif diff > 0:
@@ -496,20 +496,20 @@ func _refresh_hand() -> void:
 				card_ui.set_playable(can_afford and EmotionManager.can_play_card(cd))
 
 func _show_popup(result: Dictionary) -> void:
-	var value = int(result.get("value", 0))
+	var value: int = int(result.get("value", 0))
 	if value <= 0: return
 	var is_dmg = result.get("type", "") in [
 		"attack","attack_all","attack_lifesteal","attack_dot",
 		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
 		"shield_attack","remove_enemy_shield"]
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = ("-%d" if is_dmg else "+%d") % value
 	lbl.add_theme_color_override("font_color",
 		UIConstants.color_of("damage_flash") if is_dmg else UIConstants.color_of("heal_flash"))
 	lbl.add_theme_font_size_override("font_size", 22)
 	add_child(lbl)
 	lbl.position = Vector2(900 + randf_range(-30, 30), 280)
-	var tween = create_tween()
+	var tween: Tween = create_tween()
 	tween.tween_property(lbl, "position:y", lbl.position.y - 70, 0.7)
 	tween.parallel().tween_property(lbl, "modulate:a", 0.0, 0.7)
 	tween.tween_callback(lbl.queue_free)
@@ -518,7 +518,7 @@ func _show_popup(result: Dictionary) -> void:
 func _add_wenlu_btn() -> void:
 	var hud: Node = get_node_or_null("UI/HUD")
 	if not hud: return
-	var btn = Button.new()
+	var btn: Button = Button.new()
 	btn.name = "WenluBtn"
 	btn.text = "🕯问路香"
 	btn.custom_minimum_size = Vector2(100, 30)
@@ -535,7 +535,7 @@ func _add_wenlu_btn() -> void:
 func _on_wenlu_pressed() -> void:
 	if not RelicManager.use_wenlu_xiang(): return
 	# 展示敌人下两回合意图（从 state_machine 读取）
-	var acts = state_machine.enemy_data.get("actions", [])
+	var acts: Array = state_machine.enemy_data.get("actions", [])
 	if acts.is_empty(): return
 	var preview: Array[String] = []
 	for a in acts.slice(0, min(2, len(acts))):
@@ -564,14 +564,14 @@ func _setup_buff_ui() -> void:
 	# 玩家 Buff 栏：插入 PlayerArea 底部
 	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if player_area:
-		var bar = HBoxContainer.new()
+		var bar: HBoxContainer = HBoxContainer.new()
 		bar.name = "PlayerBuffBar"
 		player_area.add_child(bar)
 
 	# 敌人 Buff 栏：插入 EnemyArea 顶部（名字下方）
 	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if enemy_area:
-		var enemy_bar = HBoxContainer.new()
+		var enemy_bar: HBoxContainer = HBoxContainer.new()
 		enemy_bar.name = "EnemyBuffBar"
 		enemy_area.add_child(enemy_bar)
 		enemy_area.move_child(enemy_bar, 1)
@@ -619,7 +619,7 @@ func _on_buff_changed(target: String, _buff_id: String, _stacks: int) -> void:
 
 ## 重建某一目标的 Buff 图标栏（清空后重建，stacks=0 不显示）
 func _rebuild_buff_bar(target: String) -> void:
-	var bar_path = "UI/AltarLayout/PlayerArea/PlayerBuffBar" \
+	var bar_path: String = "UI/AltarLayout/PlayerArea/PlayerBuffBar" \
 		if target == BuffManager.TARGET_PLAYER \
 		else "UI/AltarLayout/EnemyArea/EnemyBuffBar"
 	var bar: Node = get_node_or_null(bar_path)
@@ -630,7 +630,7 @@ func _rebuild_buff_bar(target: String) -> void:
 		child.queue_free()
 
 	# 重建
-	var buffs = BuffManager.get_buffs(target)
+	var buffs: Array = BuffManager.get_buffs(target)
 	for buff in buffs:
 		if buff["stacks"] <= 0: continue
 		var slot = _make_buff_icon(buff)
@@ -639,20 +639,20 @@ func _rebuild_buff_bar(target: String) -> void:
 ## 构建单个 Buff 图标：半透明色块 + 层数文字 + Tooltip
 func _make_buff_icon(buff: Dictionary) -> Control:
 	# 外层 Control 作为槽位
-	var slot = Control.new()
+	var slot: Control = Control.new()
 	slot.custom_minimum_size = Vector2(32, 32)
 
 	# 背景色 Panel
-	var bg = Panel.new()
+	var bg: Panel = Panel.new()
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var sb = StyleBoxFlat.new()
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
 	sb.bg_color = buff.get("icon_color", Color(0.5, 0.5, 0.5, 0.8))
 	sb.set_corner_radius_all(3)
 	bg.add_theme_stylebox_override("panel", sb)
 	slot.add_child(bg)
 
 	# 层数 Label（右下角）
-	var stacks_lbl = Label.new()
+	var stacks_lbl: Label = Label.new()
 	stacks_lbl.text                = str(buff["stacks"])
 	stacks_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	stacks_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_BOTTOM
@@ -662,7 +662,7 @@ func _make_buff_icon(buff: Dictionary) -> Control:
 	slot.add_child(stacks_lbl)
 
 	# Buff 名首字（中央）
-	var name_lbl = Label.new()
+	var name_lbl: Label = Label.new()
 	name_lbl.text                 = buff.get("display_name","?").substr(0,1)
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
@@ -679,9 +679,9 @@ func _make_buff_icon(buff: Dictionary) -> Control:
 
 func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
 	if not _tooltip_panel or not _tooltip_label: return
-	var title  = buff.get("display_name", "???")
-	var tip    = buff.get("tooltip", "")
-	var stacks = buff.get("stacks", 0)
+	var title: String  = buff.get("display_name", "???")
+	var tip: String    = buff.get("tooltip", "")
+	var stacks: int = buff.get("stacks", 0)
 	_tooltip_label.text    = "%s ×%d\n%s" % [title, int(stacks), tip]
 	_tooltip_panel.visible = true
 	var pos = anchor.get_global_rect().position
@@ -725,7 +725,7 @@ func _spawn_player_number(value: int, type: String) -> void:
 ## 敌人像素立绘
 ## ══════════════════════════════════════════════════════
 func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
-	var enemy_id = enemy_data.get("id", "")
+	var enemy_id: String = enemy_data.get("id", "")
 	var sprite_node: Node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
 	if not sprite_node: return
 
@@ -735,7 +735,7 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 		var idx    = sprite_node.get_index()
 		sprite_node.queue_free()
 
-		var tr = TextureRect.new()
+		var tr: TextureRect = TextureRect.new()
 		tr.name              = "EnemySprite"
 		tr.texture_filter    = CanvasItem.TEXTURE_FILTER_NEAREST   # 保持像素感
 		# Godot 4.4+ expand_mode 枚举改名，用 stretch_mode 替代更稳定
@@ -752,9 +752,9 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 		sprite_node.texture = tex
 
 	# Boss 发光脉冲 + 慢速浮动
-	var is_boss = enemy_data.get("type","") == "boss"
+	var is_boss: bool = enemy_data.get("type","") == "boss"
 	if is_boss and sprite_node:
-		var tw = sprite_node.create_tween().set_loops()
+		var tw: Tween = sprite_node.create_tween().set_loops()
 		tw.tween_property(sprite_node, "modulate",
 			Color(1.2, 1.0, 0.8, 1.0), 1.2).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_property(sprite_node, "modulate",
@@ -781,7 +781,7 @@ func _on_boss_phase_changed(new_phase: int) -> void:
 	# 阶段2：愤怒警告文字
 	if new_phase == 2 and disorder_warning:
 		disorder_warning.text = "⚡ Boss 进入愤怒阶段！"
-		var tw = create_tween()
+		var tw: Tween = create_tween()
 		tw.tween_interval(3.0)
 		tw.tween_callback(func():
 			if disorder_warning.text == "⚡ Boss 进入愤怒阶段！":
@@ -816,7 +816,7 @@ func _start_idle_float(node: Control, amp: float = 4.0, period: float = 2.0) -> 
 	if not node: return
 	node.set_meta("_float_active", true)
 	var base_y = node.position.y
-	var tw = node.create_tween().set_loops()
+	var tw: Tween = node.create_tween().set_loops()
 	tw.tween_property(node, "position:y", base_y - amp, period * 0.5)\
 		.set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	tw.tween_property(node, "position:y", base_y + amp * 0.3, period * 0.5)\
@@ -988,7 +988,7 @@ func _play_attack_flash() -> void:
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	flash.z_index = 20
 	enemy_area.add_child(flash)
-	var tw = flash.create_tween()
+	var tw: Tween = flash.create_tween()
 	tw.tween_property(flash, "color:a", 0.55, 0.06)
 	tw.tween_property(flash, "color:a", 0.0,  0.18)
 	tw.tween_callback(flash.queue_free)

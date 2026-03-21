@@ -56,19 +56,19 @@ func _draw_bar(area: Control) -> void:
 	if w <= 0.0:
 		w = 220.0
 	var ratio       = float(_cur_hp) / float(max(1, _max_hp))
-	var ghost_ratio = float(_ghost_hp) / float(max(1, _max_hp))
+	var ghost_ratio: float = float(_ghost_hp) / float(max(1, _max_hp))
 	var fill_color  = _get_fill_color(ratio)
 
 	# 底层槽（带切角）
 	_draw_chamfered_rect(area, Rect2(0, 2, w, BAR_H), SLOT_COLOR, CORNER)
 
 	# 残影层
-	var ghost_w = clamp(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2)
+	var ghost_w: int = clamp(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2)
 	if ghost_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, ghost_w, BAR_H), GHOST_COLOR, CORNER * 0.5)
 
 	# 实际HP层
-	var fill_w = clamp(ratio, 0.0, 1.0) * (w - CORNER * 2)
+	var fill_w: int = clamp(ratio, 0.0, 1.0) * (w - CORNER * 2)
 	if fill_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, fill_w, BAR_H), fill_color, CORNER * 0.5)
 
@@ -127,7 +127,7 @@ func set_hp(new_hp: int, max_hp: int) -> void:
 	_update_label_color()
 
 	# 血红脉冲
-	var ratio = float(new_hp) / float(max(1, max_hp))
+	var ratio: float = float(new_hp) / float(max(1, max_hp))
 	if ratio <= 0.3:
 		_start_pulse()
 	else:
@@ -140,7 +140,7 @@ func _redraw_bar() -> void:
 
 func _update_label_color() -> void:
 	if not _info_label: return
-	var ratio = float(_cur_hp) / float(max(1, _max_hp))
+	var ratio: float = float(_cur_hp) / float(max(1, _max_hp))
 	var col = _get_fill_color(ratio)
 	_info_label.add_theme_color_override("font_color", col)
 

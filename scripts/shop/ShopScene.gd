@@ -71,7 +71,7 @@ func _rebuild_layout() -> void:
 	_build_title_area(ui_layer)
 
 	# ---------- 主体分栏容器 ----------
-	var body = HBoxContainer.new()
+	var body: HBoxContainer = HBoxContainer.new()
 	body.name = "BodyContainer"
 	body.set_anchors_preset(Control.PRESET_CENTER)
 	body.position = Vector2(640 - (520 + 20 + 220) / 2.0, 130)
@@ -98,7 +98,7 @@ func _build_title_area(parent: CanvasLayer) -> void:
 	if tscn_title:
 		tscn_title.visible = false
 
-	var title_lbl = Label.new()
+	var title_lbl: Label = Label.new()
 	title_lbl.text = "渡 魂 商 店"
 	title_lbl.add_theme_font_size_override("font_size", UIC.FONT_SIZES["title"])
 	title_lbl.add_theme_color_override("font_color", Color(0.95, 0.76, 0.08))
@@ -124,7 +124,7 @@ func _build_title_area(parent: CanvasLayer) -> void:
 	if tscn_flavor:
 		tscn_flavor.visible = false
 
-	var flavor = Label.new()
+	var flavor: Label = Label.new()
 	flavor.text = "「有些东西，走这一程才能用得上。」"
 	flavor.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
 	flavor.add_theme_color_override("font_color", UIC.COLORS["ash"])
@@ -137,32 +137,32 @@ func _build_title_area(parent: CanvasLayer) -> void:
 
 	# 烛火装饰（两侧各一）
 	for side in [-1, 1]:
-		var candle = Label.new()
+		var candle: Label = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 28)
 		candle.position = Vector2(640 + side * 180, 16)
 		parent.add_child(candle)
-		var tw = candle.create_tween().set_loops()
+		var tw: Tween = candle.create_tween().set_loops()
 		tw.tween_property(candle, "modulate:a", 0.65, 0.9 + side * 0.15)
 		tw.tween_property(candle, "modulate:a", 1.0,  0.9 + side * 0.15)
 
 func _build_left_panel() -> Control:
 	## 左侧卡牌区（宽520px）
 
-	var container = VBoxContainer.new()
+	var container: VBoxContainer = VBoxContainer.new()
 	container.name = "LeftCardsPanel"
 	container.custom_minimum_size = Vector2(520, 400)
 	container.add_theme_constant_override("separation", 10)
 
 	# 小标题
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = "▸ 今日商品"
 	lbl.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
 	lbl.add_theme_color_override("font_color", UIC.COLORS["gold_dim"])
 	container.add_child(lbl)
 
 	# 卡牌横排容器
-	var cards_row = HBoxContainer.new()
+	var cards_row: HBoxContainer = HBoxContainer.new()
 	cards_row.name = "CardsRow"
 	cards_row.add_theme_constant_override("separation", 24)
 	container.add_child(cards_row)
@@ -172,18 +172,18 @@ func _build_left_panel() -> Control:
 func _build_right_panel() -> Control:
 	## 右侧区域（宽220px）：移除牌区
 
-	var container = VBoxContainer.new()
+	var container: VBoxContainer = VBoxContainer.new()
 	container.name = "RightPanel"
 	container.custom_minimum_size = Vector2(220, 400)
 	container.add_theme_constant_override("separation", 12)
 
 	# 移除区面板（InkedPanel 风格 StyleBoxFlat）
-	var remove_frame = Panel.new()
+	var remove_frame: Panel = Panel.new()
 	remove_frame.name = "RemoveFrame"
 	remove_frame.custom_minimum_size = Vector2(220, 130)
 	_apply_inked_stylebox(remove_frame)
 
-	var remove_inner = VBoxContainer.new()
+	var remove_inner: VBoxContainer = VBoxContainer.new()
 	remove_inner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	remove_inner.offset_left  = 10.0
 	remove_inner.offset_top   = 10.0
@@ -193,7 +193,7 @@ func _build_right_panel() -> Control:
 	remove_frame.add_child(remove_inner)
 
 	# 移除区标题
-	var remove_title = Label.new()
+	var remove_title: Label = Label.new()
 	remove_title.text = "✦ 移除一张牌  ·  75金"
 	remove_title.add_theme_font_size_override("font_size", UIC.FONT_SIZES["body"])
 	remove_title.add_theme_color_override("font_color", UIC.COLORS["gold"])
@@ -201,7 +201,7 @@ func _build_right_panel() -> Control:
 	remove_inner.add_child(remove_title)
 
 	# 移除区描述
-	var remove_desc = Label.new()
+	var remove_desc: Label = Label.new()
 	remove_desc.text = "从牌组中永久抹去一张牌"
 	remove_desc.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
 	remove_desc.add_theme_color_override("font_color", UIC.COLORS["ash"])
@@ -210,7 +210,7 @@ func _build_right_panel() -> Control:
 	remove_inner.add_child(remove_desc)
 
 	# 移除按钮
-	var remove_btn_new = Button.new()
+	var remove_btn_new: Button = Button.new()
 	remove_btn_new.name = "RemoveBtnNew"
 	remove_btn_new.text = "🗑 选择要移除的牌"
 	remove_btn_new.custom_minimum_size = Vector2(200, 36)
@@ -230,7 +230,7 @@ func _build_bottom_area(parent: CanvasLayer) -> void:
 	if tscn_gold:
 		tscn_gold.visible = false
 
-	var bottom_bar = HBoxContainer.new()
+	var bottom_bar: HBoxContainer = HBoxContainer.new()
 	bottom_bar.name = "BottomBar"
 	bottom_bar.anchor_left  = 0.5
 	bottom_bar.anchor_top   = 1.0
@@ -246,7 +246,7 @@ func _build_bottom_area(parent: CanvasLayer) -> void:
 	parent.add_child(bottom_bar)
 
 	# 金币标签（新建，替代 tscn 的 GoldLabel，保存引用供后续更新）
-	var new_gold = Label.new()
+	var new_gold: Label = Label.new()
 	new_gold.name = "GoldLabelNew"
 	new_gold.text = "💰 %d" % int(GameState.gold)
 	new_gold.add_theme_font_size_override("font_size", 16)
@@ -259,7 +259,7 @@ func _build_bottom_area(parent: CanvasLayer) -> void:
 	gold_label = new_gold
 
 	# 离开按钮样式
-	var leave_style = StyleBoxFlat.new()
+	var leave_style: StyleBoxFlat = StyleBoxFlat.new()
 	leave_style.bg_color     = Color(0.12, 0.08, 0.04)
 	leave_style.border_color = Color(0.55, 0.42, 0.08)
 	leave_style.set_border_width_all(2)
@@ -297,7 +297,7 @@ func _generate_shop() -> void:
 
 ## 构建单个商店卡槽（牌卡 + 价格 + 购买按钮）
 func _build_shop_slot(card: Dictionary) -> VBoxContainer:
-	var vbox = VBoxContainer.new()
+	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.custom_minimum_size = Vector2(110, 260)
 	vbox.add_theme_constant_override("separation", 6)
 
@@ -310,14 +310,14 @@ func _build_shop_slot(card: Dictionary) -> VBoxContainer:
 
 	# 价格标签
 	var price = _get_price(card)
-	var price_label = Label.new()
+	var price_label: Label = Label.new()
 	price_label.text = "%s %d" % [UIConstants.ICONS["coin"], price]
 	price_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	price_label.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 	vbox.add_child(price_label)
 
 	# 购买按钮（InkedPanel 风格）
-	var buy_btn = Button.new()
+	var buy_btn: Button = Button.new()
 	buy_btn.text = "购买"
 	buy_btn.custom_minimum_size = Vector2(110, 30)
 	_apply_buy_button_style(buy_btn)
@@ -359,7 +359,7 @@ func _on_buy_card(card: Dictionary, price: int, btn: Button, slot: VBoxContainer
 # ========== 金币充足性视觉反馈 ==========
 
 func _refresh_afford() -> void:
-	var current_gold = int(GameState.gold)
+	var current_gold: int = int(GameState.gold)
 	for info in _slot_infos:
 		var card_node  = info.get("card_node")
 		var price_lbl  = info.get("price_label")
@@ -402,7 +402,7 @@ func _on_remove_pressed() -> void:
 	for child in remove_deck_container.get_children():
 		child.queue_free()
 
-	var full_deck = DeckManager.get_full_deck()
+	var full_deck: Array = DeckManager.get_full_deck()
 	for card in full_deck:
 		var card_ui = _card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
@@ -435,7 +435,7 @@ func _update_gold_display() -> void:
 	if gold_label == null:
 		return
 	gold_label.text = "💰 %d" % int(GameState.gold)
-	var tw = gold_label.create_tween()
+	var tw: Tween = gold_label.create_tween()
 	tw.tween_property(gold_label, "modulate", Color(1.5, 1.3, 0.5), 0.1)
 	tw.tween_property(gold_label, "modulate", Color(1.0, 1.0, 1.0), 0.4)
 
@@ -467,7 +467,7 @@ func _setup_shop_visual() -> void:
 	# 主体面板描边（DS-00）
 	var ui_root: Node = get_node_or_null("UI")
 	if ui_root:
-		var frame = InkedPanel.new()
+		var frame: InkedPanel = InkedPanel.new()
 		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		frame.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.12)
 		frame.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.45)
@@ -475,7 +475,7 @@ func _setup_shop_visual() -> void:
 		ui_root.add_child(frame)
 		ui_root.move_child(frame, 0)
 
-	var title_divider = WaterInkDivider.new()
+	var title_divider: WaterInkDivider = WaterInkDivider.new()
 	title_divider.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	title_divider.position.y = 58
 	title_divider.custom_minimum_size = Vector2(0, 8)
@@ -484,13 +484,13 @@ func _setup_shop_visual() -> void:
 
 	# 烛火装饰（两侧各一）
 	for side in [-1, 1]:
-		var candle = Label.new()
+		var candle: Label = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 28)
 		candle.position = Vector2(608 + side * 180, 20)
 		add_child(candle)
 		# 烛光闪烁动画
-		var tw = candle.create_tween().set_loops()
+		var tw: Tween = candle.create_tween().set_loops()
 		tw.tween_property(candle, "modulate:a", 0.65, 0.9 + side * 0.15)
 		tw.tween_property(candle, "modulate:a", 1.0,  0.9 + side * 0.15)
 
@@ -535,7 +535,7 @@ func _setup_shop_visual() -> void:
 
 func _apply_inked_stylebox(panel: Panel) -> void:
 	## 给 Panel 应用 InkedPanel 风格的 StyleBoxFlat
-	var sbox = StyleBoxFlat.new()
+	var sbox: StyleBoxFlat = StyleBoxFlat.new()
 	sbox.bg_color     = Color(0.102, 0.082, 0.031, 0.88)
 	sbox.border_color = Color(0.420, 0.353, 0.188, 0.8)
 	sbox.set_border_width_all(1)
@@ -546,28 +546,28 @@ func _apply_buy_button_style(btn: Button) -> void:
 	## 给购买按钮应用 InkedPanel 风格的三态样式
 
 	# 正常
-	var normal_style = StyleBoxFlat.new()
+	var normal_style: StyleBoxFlat = StyleBoxFlat.new()
 	normal_style.bg_color     = Color(0.102, 0.082, 0.031, 0.9)
 	normal_style.border_color = Color(0.420, 0.353, 0.188)
 	normal_style.set_border_width_all(1)
 	normal_style.set_corner_radius_all(3)
 
 	# hover
-	var hover_style = StyleBoxFlat.new()
+	var hover_style: StyleBoxFlat = StyleBoxFlat.new()
 	hover_style.bg_color     = Color(0.18, 0.15, 0.07, 0.9)
 	hover_style.border_color = Color(0.784, 0.663, 0.431)
 	hover_style.set_border_width_all(1)
 	hover_style.set_corner_radius_all(3)
 
 	# pressed（与 hover 相近）
-	var pressed_style = StyleBoxFlat.new()
+	var pressed_style: StyleBoxFlat = StyleBoxFlat.new()
 	pressed_style.bg_color     = Color(0.22, 0.18, 0.09, 0.9)
 	pressed_style.border_color = Color(0.784, 0.663, 0.431)
 	pressed_style.set_border_width_all(1)
 	pressed_style.set_corner_radius_all(3)
 
 	# disabled
-	var disabled_style = StyleBoxFlat.new()
+	var disabled_style: StyleBoxFlat = StyleBoxFlat.new()
 	disabled_style.bg_color     = Color(0.05, 0.05, 0.05, 0.5)
 	disabled_style.border_color = Color(0.25, 0.25, 0.25)
 	disabled_style.set_border_width_all(1)

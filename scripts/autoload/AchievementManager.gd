@@ -66,7 +66,7 @@ func _load_stats() -> void:
 	if not FileAccess.file_exists(STATS_PATH): return
 	var f: FileAccess = FileAccess.open(STATS_PATH, FileAccess.READ)
 	if not f: return
-	var data = JSON.parse_string(f.get_as_text())
+	var data: Variant = JSON.parse_string(f.get_as_text())
 	f.close()
 	if data is Dictionary:
 		for k in data:
@@ -118,14 +118,14 @@ func on_boss_battle_end(result: String, current_hp: int) -> void:
 
 ## 牌库检查（每次进入战斗后调用）
 func check_deck_achievements() -> void:
-	var deck = DeckManager.get_full_deck()
+	var deck: Array = DeckManager.get_full_deck()
 	# 传说牌数量
-	var legend_count = deck.filter(func(c): return c.get("rarity","") == "legendary").size()
+	var legend_count: int = deck.filter(func(c): return c.get("rarity","") == "legendary").size()
 	_check_achievement("legend_3", legend_count >= 3)
 	# 遗物数量（直接读 GameState.relics）
 	_check_achievement("relic_5", len(GameState.relics) >= 5)
 	# 五情平衡
-	var vals = EmotionManager.values
+	var vals: Dictionary = EmotionManager.values
 	var balanced = true
 	for v in vals.values():
 		if v < 3: balanced = false
@@ -142,7 +142,7 @@ func on_ending(ending_type: String) -> void:
 
 ## 游戏保存（层数记录）
 func _on_run_end() -> void:
-	var layer = GameState.current_layer
+	var layer: int = GameState.current_layer
 	if layer > stats["best_layer_reached"]:
 		stats["best_layer_reached"] = layer
 	_save_stats()
@@ -156,7 +156,7 @@ func _check_achievement(id: String, condition: bool) -> void:
 	achievement_unlocked.emit(id)
 	_show_achievement_toast(id)
 	# 检查全成就
-	var all_ids = ACHIEVEMENTS.keys().filter(func(k): return k != "completionist")
+	var all_ids: Array = ACHIEVEMENTS.keys().filter(func(k): return k != "completionist")
 	var all_done = true
 	for k in all_ids:
 		if not stats["achievements"].has(k): all_done = false
@@ -164,23 +164,23 @@ func _check_achievement(id: String, condition: bool) -> void:
 		_check_achievement("completionist", true)
 
 func _show_achievement_toast(id: String) -> void:
-	var data = ACHIEVEMENTS.get(id, {})
-	var icon = data.get("icon", "🏆")
-	var name = data.get("name", id)
-	var desc = data.get("desc", "")
+	var data: Dictionary = ACHIEVEMENTS.get(id, {})
+	var icon: String = data.get("icon", "🏆")
+	var name: String = data.get("name", id)
+	var desc: String = data.get("desc", "")
 	# 用 PauseMenu 的 CanvasLayer 发 toast（或自行创建）
 	_spawn_toast("%s %s 成就解锁！\n%s" % [icon, name, desc])
 
 func _spawn_toast(msg: String) -> void:
 	# 在根节点创建浮动通知
-	var lbl = Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = msg
 	lbl.add_theme_color_override("font_color", Color(0.98, 0.85, 0.10))
 	lbl.add_theme_font_size_override("font_size", 14)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
-	var bg = PanelContainer.new()
-	var style = StyleBoxFlat.new()
+	var bg: PanelContainer = PanelContainer.new()
+	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(0.04, 0.03, 0.02, 0.92)
 	style.border_color = Color(0.75, 0.55, 0.08)
 	style.set_border_width_all(2)
@@ -193,7 +193,7 @@ func _spawn_toast(msg: String) -> void:
 	add_child(bg)
 	bg.position = Vector2(20, 520)
 	bg.modulate.a = 0.0
-	var tw = bg.create_tween()
+	var tw: Tween = bg.create_tween()
 	tw.tween_property(bg, "modulate:a", 1.0, 0.3)
 	tw.tween_interval(3.0)
 	tw.tween_property(bg, "modulate:a", 0.0, 0.5)

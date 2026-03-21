@@ -272,8 +272,8 @@ static func _draw_hanba(img: Image) -> void:
 	for angle_deg in range(0, 360, 15):
 		var a = deg_to_rad(angle_deg)
 		for r in range(10, 14):
-			var fx = int(16 + cos(a)*r)
-			var fy = int(16 + sin(a)*r)
+			var fx: int = int(16 + cos(a)*r)
+			var fy: int = int(16 + sin(a)*r)
 			if fy < 20:   # 只画上半部分
 				_px(img, fx, fy, c_glow if r < 12 else c_fire)
 

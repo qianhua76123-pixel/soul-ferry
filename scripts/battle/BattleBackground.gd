@@ -18,18 +18,18 @@ func _draw() -> void:
 	for i in 21:
 		var y     = SCREEN_H * float(i) / 20.0
 		var t     = float(i) / 20.0
-		var color = base_color.lerp(base_color.darkened(0.35), t)
+		var color: Color = base_color.lerp(base_color.darkened(0.35), t)
 		color.a   = 1.0
 		draw_line(Vector2(0, y), Vector2(SCREEN_W, y), color, SCREEN_H / 20.0 + 1)
 
 	# 水墨竖线（固定 seed，每次图案相同）
-	var rng = RandomNumberGenerator.new()
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 1337
 	for _i in 28:
 		var x     = rng.randf_range(0.0, SCREEN_W)
 		var y_2     = rng.randf_range(0.0, SCREEN_H * 0.75)
 		var h     = rng.randf_range(55.0, 190.0)
-		var alpha = rng.randf_range(0.025, 0.075)
+		var alpha: float = rng.randf_range(0.025, 0.075)
 		var w     = rng.randf_range(0.4, 1.6)
 		draw_line(Vector2(x, y_2), Vector2(x, y_2 + h), Color(0.8, 0.82, 0.85, alpha), w)
 
