@@ -468,6 +468,54 @@ func _random_enemy_for_layer(layer: int) -> String:
 #  遗物 / 状态栏 / 主题
 # ══════════════════════════════════════════════════════
 
+## 遗物悬浮面板
+var _relic_tip: Panel = null
+var _relic_tip_lbl: RichTextLabel = null
+
+func _ensure_relic_tip() -> void:
+	if _relic_tip: return
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+	_relic_tip = Panel.new()
+	_relic_tip.name = "RelicTip"
+	_relic_tip.z_index = 200
+	_relic_tip.visible = false
+	_relic_tip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.06,0.04,0.03,0.96)
+	ps.border_width_top=1; ps.border_width_bottom=1
+	ps.border_width_left=1; ps.border_width_right=1
+	ps.border_color=Color(0.78,0.60,0.10,0.8)
+	ps.set_corner_radius_all(5)
+	ps.content_margin_left=10; ps.content_margin_right=10
+	ps.content_margin_top=8; ps.content_margin_bottom=8
+	_relic_tip.add_theme_stylebox_override("panel", ps)
+	_relic_tip_lbl = RichTextLabel.new()
+	_relic_tip_lbl.bbcode_enabled = true
+	_relic_tip_lbl.fit_content = true
+	_relic_tip_lbl.custom_minimum_size = Vector2(220, 0)
+	_relic_tip_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_relic_tip_lbl.add_theme_font_size_override("normal_font_size", 12)
+	_relic_tip.add_child(_relic_tip_lbl)
+	ui.add_child(_relic_tip)
+
+func _show_relic_tip(rid: String) -> void:
+	_ensure_relic_tip()
+	if not _relic_tip: return
+	var data: Dictionary = RelicManager._all_relics_data.get(rid, {})
+	var rname: String = data.get("name","???")
+	var effect: String = data.get("effect","（无说明）")
+	var gold: String = Color(0.78,0.60,0.10).to_html(false)
+	var parch: String = Color(0.92,0.86,0.74).to_html(false)
+	_relic_tip_lbl.text = "[color=#%s]【%s】[/color]\n[color=#%s]%s[/color]" % [gold, rname, parch, effect]
+	var mp: Vector2 = get_viewport().get_mouse_position()
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_relic_tip.position = Vector2(clamp(mp.x-110, 4, vp.x-244), clamp(mp.y-80, 4, vp.y-100))
+	_relic_tip.visible = true
+
+func _hide_relic_tip() -> void:
+	if _relic_tip: _relic_tip.visible = false
+
 func _render_relics() -> void:
 	for child: Node in relic_bar.get_children():
 		child.queue_free()

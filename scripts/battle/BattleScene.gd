@@ -256,24 +256,87 @@ const RELIC_ICONS = {
 	"nianhua_yan":"👁","yin_yang_bi":"✒","hun_bo_lu":"🔥","si_xiang_pian":"🌾",
 }
 
+## 遗物悬浮说明面板（自定义，不依赖引擎 tooltip）
+var _relic_tooltip_panel: Panel = null
+var _relic_tooltip_label: RichTextLabel = null
+
+func _ensure_relic_tooltip() -> void:
+	if _relic_tooltip_panel: return
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+	_relic_tooltip_panel = Panel.new()
+	_relic_tooltip_panel.name = "RelicTooltipPanel"
+	_relic_tooltip_panel.z_index = 200
+	_relic_tooltip_panel.visible = false
+	_relic_tooltip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.06, 0.04, 0.03, 0.96)
+	ps.border_width_top    = 1; ps.border_width_bottom = 1
+	ps.border_width_left   = 1; ps.border_width_right  = 1
+	ps.border_color = Color(0.78, 0.60, 0.10, 0.8)
+	ps.set_corner_radius_all(5)
+	ps.content_margin_left   = 10; ps.content_margin_right  = 10
+	ps.content_margin_top    = 8;  ps.content_margin_bottom = 8
+	_relic_tooltip_panel.add_theme_stylebox_override("panel", ps)
+	_relic_tooltip_label = RichTextLabel.new()
+	_relic_tooltip_label.bbcode_enabled = true
+	_relic_tooltip_label.fit_content = true
+	_relic_tooltip_label.custom_minimum_size = Vector2(220, 0)
+	_relic_tooltip_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_relic_tooltip_label.add_theme_font_size_override("normal_font_size", 12)
+	_relic_tooltip_panel.add_child(_relic_tooltip_label)
+	ui.add_child(_relic_tooltip_panel)
+
+func _show_relic_tooltip(relic_id: String, btn: Button) -> void:
+	_ensure_relic_tooltip()
+	if not _relic_tooltip_panel: return
+	var data: Dictionary = RelicManager._all_relics_data.get(relic_id, {})
+	var rname: String = data.get("name","???")
+	var effect: String = data.get("effect","（无说明）")
+	var trigger: String = data.get("trigger","")
+	var gold: String = Color(0.78,0.60,0.10).to_html(false)
+	var parch: String = Color(0.92,0.86,0.74).to_html(false)
+	var dim: String = Color(0.55,0.50,0.40).to_html(false)
+	var txt: String = "[color=#%s]【%s】[/color]\n[color=#%s]%s[/color]" % [gold, rname, parch, effect]
+	if trigger: txt += "\n[color=#%s]触发：%s[/color]" % [dim, trigger]
+	_relic_tooltip_label.text = txt
+	_relic_tooltip_panel.custom_minimum_size = Vector2(220, 0)
+	# 定位：鼠标位置上方
+	var vp_size: Vector2 = get_viewport().get_visible_rect().size
+	var mp: Vector2 = get_viewport().get_mouse_position()
+	var panel_w: float = 240.0
+	var panel_h: float = 80.0
+	var px: float = clamp(mp.x - panel_w * 0.5, 4, vp_size.x - panel_w - 4)
+	var py: float = clamp(mp.y - panel_h - 12, 4, vp_size.y - panel_h - 4)
+	_relic_tooltip_panel.position = Vector2(px, py)
+	_relic_tooltip_panel.visible = true
+
+func _hide_relic_tooltip() -> void:
+	if _relic_tooltip_panel:
+		_relic_tooltip_panel.visible = false
+
 ## 在玩家区底部动态创建迷你遗物栏
 func _build_relic_bar() -> void:
 	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if not player_area: return
 	var bar: HBoxContainer = HBoxContainer.new()
 	bar.name = "BattleRelicBar"
-	for rid in GameState.relics:
+	for rid: String in GameState.relics:
 		var data: Dictionary = RelicManager._all_relics_data.get(rid, {})
 		var relic_name: String = data.get("name","???")
-		var relic_effect: String = data.get("effect","（无说明）")
-		# Button 替代 Label，mouse_filter 可接收 hover
 		var btn: Button = Button.new()
 		btn.name = "rbtn_" + rid
 		btn.text = RELIC_ICONS.get(rid, "◈")
 		btn.flat = true
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.add_theme_font_size_override("font_size", 20)
-		btn.tooltip_text = "[%s]\n%s" % [relic_name, relic_effect]
+		btn.add_theme_color_override("font_color", Color(0.78, 0.60, 0.10, 0.85))
+		btn.add_theme_color_override("font_hover_color", Color(1.0, 0.90, 0.55))
+		# 自定义 tooltip：鼠标进入时显示
+		var captured_rid: String = rid
+		var captured_btn: Button = btn
+		btn.mouse_entered.connect(func(): _show_relic_tooltip(captured_rid, captured_btn))
+		btn.mouse_exited.connect(_hide_relic_tooltip)
 		bar.add_child(btn)
 	player_area.add_child(bar)
 

@@ -94,7 +94,7 @@ func _build_character_card(index: int) -> Control:
 	var char_id: String = char_data.get("id", "ruan_ruyue")
 
 	var panel: PanelContainer = PanelContainer.new()
-	panel.custom_minimum_size = Vector2(300, 440)
+	panel.custom_minimum_size = Vector2(300, 500)
 
 	var style: StyleBoxFlat = StyleBoxFlat.new()
 	style.bg_color = Color(0.08, 0.10, 0.14, 0.92)
@@ -131,34 +131,70 @@ func _build_character_card(index: int) -> Control:
 	portrait.texture = CharacterPortrait.create(char_id)
 	portrait_center.add_child(portrait)
 
-	# ── HP / 能量 ──
-	var stats_lbl: Label = Label.new()
-	var hp_val: int = char_data.get("hp", 80)
-	var energy_val: int = char_data.get("energy", 3)
-	stats_lbl.text = "HP %d  ·  能量 %d" % [hp_val, energy_val]
-	stats_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	stats_lbl.add_theme_font_size_override("font_size", UIC.font_size_of("small"))
-	stats_lbl.add_theme_color_override("font_color", UIC.color_of("parch"))
+	# ── 核心数值区 ──
+	var hp_val: int       = char_data.get("hp", 80)
+	var energy_val: int   = char_data.get("energy", 3)
+	var draw_val: int     = char_data.get("draw_per_turn", 5)
+	var hand_val: int     = char_data.get("hand_limit", 8)
+	var affinity: Array   = char_data.get("affinity", [])
+	var bias: String      = char_data.get("victory_bias", "")
+	var passive_key: String = char_data.get("passive", "")
 
-	# ── 被动简述 ──
-	var passive_lbl: Label = Label.new()
-	passive_lbl.text = char_data.get("passive_desc", "")
-	passive_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	passive_lbl.add_theme_font_size_override("font_size", UIC.font_size_of("small"))
-	passive_lbl.add_theme_color_override("font_color", UIC.color_of("gold_dim"))
+	# 情绪亲和映射
+	var emo_map: Dictionary = {"grief":"悲","fear":"惧","rage":"怒","joy":"喜","calm":"定"}
+	var affinity_str: String = "·".join(affinity.map(func(e: String) -> String: return emo_map.get(e, e)))
+	if affinity_str.is_empty(): affinity_str = "五情均衡"
+
+	# 胜利路线映射
+	var bias_map: Dictionary = {"purification":"渡化路线","suppression":"镇压路线","balanced":"均衡路线"}
+	var bias_str: String = bias_map.get(bias, bias)
+
+	# 被动名映射
+	var passive_map: Dictionary = {
+		"seal_affinity":     "施印亲和 — 对亲和情绪加成+20%",
+		"veteran_instinct":  "老手直觉 — 愤怒叠加时爆发伤害",
+		"wumian_faceless":   "空度系统 — 情绪清零转化为空鸣",
+	}
+	var passive_str: String = passive_map.get(passive_key, char_data.get("passive_desc",""))
+
+	# 数值标签（两列对齐）
+	var stats_rich: RichTextLabel = RichTextLabel.new()
+	stats_rich.bbcode_enabled = true
+	stats_rich.fit_content = true
+	stats_rich.custom_minimum_size = Vector2(260, 0)
+	stats_rich.add_theme_font_size_override("normal_font_size", 12)
+	var gold_hex: String = UIC.color_of("gold").to_html(false)
+	var parch_hex: String = UIC.color_of("parch").to_html(false)
+	var dim_hex: String = UIC.color_of("gold_dim").to_html(false)
+	stats_rich.text = (
+		"[color=#%s]❤ 生命[/color]  [color=#%s]%d[/color]   " % [dim_hex, parch_hex, hp_val] +
+		"[color=#%s]⚡ 能量[/color]  [color=#%s]%d[/color]\n" % [dim_hex, parch_hex, energy_val] +
+		"[color=#%s]🃏 摸牌[/color]  [color=#%s]%d/回合[/color]   " % [dim_hex, parch_hex, draw_val] +
+		"[color=#%s]✋ 手牌上限[/color]  [color=#%s]%d[/color]\n" % [dim_hex, parch_hex, hand_val] +
+		"[color=#%s]🎭 情绪亲和[/color]  [color=#%s]%s[/color]\n" % [dim_hex, gold_hex, affinity_str] +
+		"[color=#%s]⚔ 胜利路线[/color]  [color=#%s]%s[/color]" % [dim_hex, gold_hex, bias_str]
+	)
+
+	# 被动技能
+	var passive_lbl: RichTextLabel = RichTextLabel.new()
+	passive_lbl.bbcode_enabled = true
+	passive_lbl.fit_content = true
+	passive_lbl.custom_minimum_size = Vector2(260, 0)
+	passive_lbl.add_theme_font_size_override("normal_font_size", 11)
+	passive_lbl.text = "[color=#%s]◆ 被动：[/color][color=#%s]%s[/color]" % [gold_hex, parch_hex, passive_str]
 
 	# ── 简介 ──
 	var desc_lbl: RichTextLabel = RichTextLabel.new()
 	desc_lbl.bbcode_enabled = true
 	desc_lbl.text = char_data.get("description", "")
-	desc_lbl.custom_minimum_size = Vector2(260, 56)
+	desc_lbl.custom_minimum_size = Vector2(260, 48)
 	desc_lbl.fit_content = true
 	desc_lbl.add_theme_font_size_override("normal_font_size", UIC.font_size_of("small"))
 	desc_lbl.add_theme_color_override("default_color", UIC.color_of("parch_dim"))
 
 	vbox.add_child(name_lbl)
 	vbox.add_child(portrait_center)
-	vbox.add_child(stats_lbl)
+	vbox.add_child(stats_rich)
 	vbox.add_child(passive_lbl)
 	vbox.add_child(desc_lbl)
 	panel.add_child(vbox)
