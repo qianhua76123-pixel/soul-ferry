@@ -27,12 +27,12 @@ func setup(data: Dictionary) -> void:
 	
 	if card_cost_label:
 		# 计算实际费用（考虑定系减免）
-		var cost = data.get("cost", 0) - EmotionManager.get_cost_reduction()
+		var cost: int = data.get("cost", 0) - EmotionManager.get_cost_reduction()
 		card_cost_label.text = str(max(0, cost))
 	
 	if card_desc_label:
 		# 优先用 CardDatabase 动态生成的 desc（含 BBCode 升级高亮），回退到静态 description
-		var desc_text = data.get("desc", data.get("description", ""))
+		var desc_text: String = data.get("desc", data.get("description", ""))
 		card_desc_label.text = desc_text
 	
 	# 情绪颜色条

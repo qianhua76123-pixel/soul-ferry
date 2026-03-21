@@ -24,7 +24,7 @@ func _ready() -> void:
 func setup(data: Dictionary) -> void:
 	card_data = data
 	_emotion_color = EmotionManager.get_emotion_color(data.get("emotion_tag", "calm"))
-	var cost = data.get("cost", 0) - EmotionManager.get_cost_reduction()
+	var cost: int = data.get("cost", 0) - EmotionManager.get_cost_reduction()
 	_cost_text = str(max(0, cost))
 	_rarity_color = _rarity_border_color(data.get("rarity", "common"))
 	queue_redraw()
@@ -64,7 +64,7 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,76), name,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, tc)
 	# 描述
-	var desc = card_data.get("desc", card_data.get("description",""))
+	var desc: String = card_data.get("desc", card_data.get("description",""))
 	if desc.length() > 20: desc = desc.substr(0,18) + "…"
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,90), desc,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, UIConstants.color_of("text_muted"))

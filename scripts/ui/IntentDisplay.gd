@@ -110,7 +110,7 @@ func show_intent(action: Dictionary) -> void:
 	_icon_label.text = INTENT_ICONS.get(atype, "？")
 	_desc_label.text = _build_description(action)
 
-	var color = INTENT_COLORS.get(atype, Color.GRAY)
+	var color: Color = INTENT_COLORS.get(atype, Color.GRAY)
 	_desc_label.add_theme_color_override("font_color", color)
 	_icon_label.add_theme_color_override("font_color", color)
 

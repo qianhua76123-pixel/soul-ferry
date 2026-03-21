@@ -399,7 +399,7 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 	if diff != 0:
 		var radar_area: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 		if radar_area:
-			var rect = radar_area.get_global_rect()
+			var rect: Rect2 = radar_area.get_global_rect()
 			var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
 							   rect.position.y + rect.size.y * 0.5)
 			var ename: String = EmotionManager.get_emotion_name(emotion)
@@ -490,15 +490,15 @@ func _setup_result_panel_theme() -> void:
 func _refresh_hand() -> void:
 	for card_ui in hand_container.get_children():
 		if card_ui.has_method("set_playable") and card_ui.has_method("get") :
-			var cd = card_ui.get("card_data")
+			var cd: Variant = card_ui.get("card_data")
 			if cd:
-				var can_afford = DeckManager.current_cost >= max(0, cd.get("cost", 0) - EmotionManager.get_cost_reduction())
+				var can_afford: bool = DeckManager.current_cost >= max(0, cd.get("cost", 0) - EmotionManager.get_cost_reduction())
 				card_ui.set_playable(can_afford and EmotionManager.can_play_card(cd))
 
 func _show_popup(result: Dictionary) -> void:
 	var value: int = int(result.get("value", 0))
 	if value <= 0: return
-	var is_dmg = result.get("type", "") in [
+	var is_dmg: bool = result.get("type", "") in [
 		"attack","attack_all","attack_lifesteal","attack_dot",
 		"attack_scaling_rage","attack_all_triple","attack_and_weaken_all",
 		"shield_attack","remove_enemy_shield"]
@@ -601,15 +601,15 @@ func _setup_buff_ui() -> void:
 	var ea2: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if pa2:
 		# 隐藏旧版原始 ProgressBar + Label，避免与新双层血条重叠
-		var old_hpbar = pa2.get_node_or_null("HPBar")
+		var old_hpbar: Node = pa2.get_node_or_null("HPBar")
 		if old_hpbar: old_hpbar.visible = false
-		var old_hplabel = pa2.get_node_or_null("HPLabel")
+		var old_hplabel: Node = pa2.get_node_or_null("HPLabel")
 		if old_hplabel: old_hplabel.visible = false
 		_player_hbar = PlayerHealthBarClass.new()
 		pa2.add_child(_player_hbar)
 		_player_hbar.set_hp(GameState.hp, GameState.max_hp)
 	if ea2:
-		var old_ehpbar = ea2.get_node_or_null("HPBar")
+		var old_ehpbar: Node = ea2.get_node_or_null("HPBar")
 		if old_ehpbar: old_ehpbar.visible = false
 		_enemy_hbar = EnemyHealthBarClass.new()
 		ea2.add_child(_enemy_hbar)
@@ -684,7 +684,7 @@ func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
 	var stacks: int = buff.get("stacks", 0)
 	_tooltip_label.text    = "%s ×%d\n%s" % [title, int(stacks), tip]
 	_tooltip_panel.visible = true
-	var pos = anchor.get_global_rect().position
+	var pos: Vector2 = anchor.get_global_rect().position
 	_tooltip_panel.position = Vector2(clamp(pos.x - 60, 4, 1080), max(pos.y - 72, 4))
 
 func _hide_tooltip() -> void:
@@ -708,7 +708,7 @@ func spawn_damage_number(value: int, type: String, pos: Vector2, extra: String =
 func _spawn_enemy_damage(value: int, type: String) -> void:
 	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if not enemy_area: return
-	var rect = enemy_area.get_global_rect()
+	var rect: Rect2 = enemy_area.get_global_rect()
 	var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
 					   rect.position.y + rect.size.y * 0.35)
 	spawn_damage_number(value, type, pos)
@@ -717,7 +717,7 @@ func _spawn_enemy_damage(value: int, type: String) -> void:
 func _spawn_player_number(value: int, type: String) -> void:
 	var player_area: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if not player_area: return
-	var rect = player_area.get_global_rect()
+	var rect: Rect2 = player_area.get_global_rect()
 	var pos  = Vector2(rect.position.x + rect.size.x * 0.5,
 					   rect.position.y + rect.size.y * 0.4)
 	spawn_damage_number(value, type, pos)
@@ -731,7 +731,7 @@ func _setup_enemy_sprite(enemy_data: Dictionary) -> void:
 
 	# 把 ColorRect 换成 TextureRect（如果还没换过）
 	if sprite_node is ColorRect:
-		var parent = sprite_node.get_parent()
+		var parent: Node = sprite_node.get_parent()
 		var idx    = sprite_node.get_index()
 		sprite_node.queue_free()
 
@@ -867,21 +867,21 @@ func _setup_layout_improvements() -> void:
 func _setup_altar_title_style() -> void:
 	var pa: Node = get_node_or_null("UI/AltarLayout/PlayerArea")
 	if pa:
-		var pt = pa.get_node_or_null("PlayerTitle")
+		var pt: Node = pa.get_node_or_null("PlayerTitle")
 		if pt:
 			pt.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 			pt.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
 			_insert_ink_divider_below(pa, pt, 168)
 	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 	if ac:
-		var at = ac.get_node_or_null("AltarTitle")
+		var at: Node = ac.get_node_or_null("AltarTitle")
 		if at:
 			at.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 			at.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 			_insert_ink_divider_below(ac, at, 200)
 	var ea: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if ea:
-		var en = ea.get_node_or_null("EnemyName")
+		var en: Node = ea.get_node_or_null("EnemyName")
 		if en:
 			en.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
 			en.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))

@@ -62,7 +62,7 @@ func _refresh_labels() -> void:
 	var effective_size = size if size.x > 4 else custom_minimum_size
 	var center = effective_size / 2.0
 	for emotion in EMOTIONS:
-		var lbl = _label_nodes.get(emotion)
+		var lbl: Variant = _label_nodes.get(emotion)
 		if not lbl: continue
 		var val   = EmotionManager.values.get(emotion, 0)
 		var angle = deg_to_rad(EMOTION_ANGLES[emotion])
@@ -156,7 +156,7 @@ func _play_shake() -> void:
 	_warn_tween.tween_property(self, "position:x", orig_x, 0.05)
 
 func _play_label_warn(emotion: String) -> void:
-	var lbl = _label_nodes.get(emotion)
+	var lbl: Variant = _label_nodes.get(emotion)
 	if not lbl: return
 	if lbl.get_meta("_warning", false): return
 	lbl.set_meta("_warning", true)
