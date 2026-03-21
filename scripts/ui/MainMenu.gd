@@ -41,8 +41,8 @@ func _ready() -> void:
 	quit_btn.pressed.connect(get_tree().quit)
 
 	version_label.text = VERSION
-	version_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("micro"))
-	version_label.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+	version_label.add_theme_font_size_override("font_size", UIC.font_size_of("micro"))
+	version_label.add_theme_color_override("font_color", UIC.color_of("gold_dim"))
 
 	# 用代码生成水墨背景（程序化，不依赖外部贴图）
 	_draw_ink_bg()
@@ -300,17 +300,6 @@ func _transition_to(scene_path: String) -> void:
 	}
 	TransitionManager.change_scene(scene_path, title_map.get(scene_path, ""))
 
-## 程序化水墨背景 ─────────────────────────────
-
-func _draw_ink_bg() -> void:
-	if not bg_canvas: return
-	bg_canvas.draw.connect(_bg_draw)
-	bg_canvas.queue_redraw()
-
-func _bg_draw() -> void:
-	# 由 BgCanvas（Node2D）的 _draw 方法绘制
-	pass   # 实际在 BgCanvas 节点上绑定 _draw，这里留空
-
 ## 粒子参数（在 _ready 里动态设置，因为 .tscn 不存 GDScript 属性） ─────
 func _setup_particles() -> void:
 	if not ink_particles: return
@@ -348,7 +337,7 @@ func _setup_particles() -> void:
 
 func _setup_menu_visual_style() -> void:
 	for btn in [new_game_btn, continue_btn, quit_btn]:
-		btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
-		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+		btn.add_theme_stylebox_override("normal", UIC.make_button_style("parch", "gold_dim"))
+		btn.add_theme_stylebox_override("hover", UIC.make_button_style("parch", "gold"))
 		btn.add_theme_font_size_override("font_size", 16)
 		btn.add_theme_color_override("font_color", Color(0.92, 0.88, 0.80))
