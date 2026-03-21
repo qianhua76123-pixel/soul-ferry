@@ -19,7 +19,7 @@ lifetime = 8.0
 [node name="TitleLabel" type="Label" parent="UI" unique_id=1283791859]
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 170.0
+offset_top = 382.5
 theme_override_colors/font_color = Color(0.91, 0.878, 0.816, 1)
 theme_override_font_sizes/font_size = 72
 text = "渡 魂 录"
@@ -29,17 +29,17 @@ vertical_alignment = 1
 [node name="SubtitleLabel" type="Label" parent="UI" unique_id=1823014571]
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 280.0
+offset_top = 630.0
 theme_override_colors/font_color = Color(0.722, 0.525, 0.043, 0.8)
 theme_override_font_sizes/font_size = 16
 text = "SOUL FERRY  ·  替走不掉的人了结执念"
 horizontal_alignment = 1
 
 [node name="Divider" type="ColorRect" parent="UI" unique_id=239242444]
-offset_left = 440.0
-offset_top = 316.0
-offset_right = 840.0
-offset_bottom = 317.0
+offset_left = 990.0
+offset_top = 711.0
+offset_right = 1890.0
+offset_bottom = 713.2
 color = Color(0.545, 0.102, 0.102, 0.5)
 
 [node name="ButtonContainer" type="VBoxContainer" parent="UI" unique_id=995988124]
@@ -48,28 +48,28 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -110.0
-offset_top = -20.0
-offset_right = 110.0
-offset_bottom = 130.0
+offset_left = -247.5
+offset_top = -45.0
+offset_right = 247.5
+offset_bottom = 292.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 14
 
 [node name="NewGameBtn" type="Button" parent="UI/ButtonContainer" unique_id=1405187901]
-custom_minimum_size = Vector2(220, 46)
+custom_minimum_size = Vector2(330.0, 69.0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 text = "踏  上  旅  途"
 
 [node name="ContinueBtn" type="Button" parent="UI/ButtonContainer" unique_id=1525899782]
-custom_minimum_size = Vector2(220, 46)
+custom_minimum_size = Vector2(330.0, 69.0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 17
 text = "继  续  渡  魂"
 
 [node name="QuitBtn" type="Button" parent="UI/ButtonContainer" unique_id=433345776]
-custom_minimum_size = Vector2(220, 46)
+custom_minimum_size = Vector2(330.0, 69.0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.627, 0.6, 0.549, 0.75)
 theme_override_font_sizes/font_size = 17
@@ -81,10 +81,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -110.0
-offset_top = -28.0
-offset_right = -10.0
-offset_bottom = -8.0
+offset_left = -247.5
+offset_top = -63.0
+offset_right = -22.5
+offset_bottom = -18.0
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.3, 0.25, 0.2, 0.6)
 theme_override_font_sizes/font_size = 11

@@ -891,14 +891,14 @@ func _start_idle_float(node: Control, amp: float = 4.0, period: float = 2.0) -> 
 func _setup_layout_improvements() -> void:
 	# 获取实际视口尺寸（避免硬编码）
 	var vp_size: Vector2 = get_viewport().get_visible_rect().size
-	var W: float = vp_size.x   # 通常 1280
-	var H: float = vp_size.y   # 通常 600
+	var W: float = vp_size.x   # 1920 (基于视口，自适应)
+	var H: float = vp_size.y   # 1080 (基于视口，自适应)
 
-	# 卡盘顶部 Y（距底部 165px）
-	var tray_top: float    = H - 165.0
-	var tray_line: float   = H - 170.0  # 水墨分割线
-	var energy_top: float  = H - 200.0  # 能量面板顶
-	var energy_bot: float  = H - 168.0  # 能量面板底
+	# 卡盘顶部 Y（tscn HandContainer 从 828 开始，卡盘稍高留边）
+	var tray_top: float    = H - 260.0   # 820px
+	var tray_line: float   = H - 265.0   # 水墨分割线
+	var energy_top: float  = H - 280.0   # 能量面板顶
+	var energy_bot: float  = H - 240.0   # 能量面板底（高40px）
 
 	var ui: Node = get_node_or_null("UI")
 
@@ -945,8 +945,8 @@ func _setup_layout_improvements() -> void:
 		var energy_panel := Panel.new()
 		energy_panel.name     = "CardTrayEnergy"
 		energy_panel.z_index  = 3
-		energy_panel.position = Vector2(W - 90, energy_top)
-		energy_panel.size     = Vector2(78, energy_bot - energy_top)
+		energy_panel.position = Vector2(W - 130, energy_top)
+		energy_panel.size     = Vector2(118, energy_bot - energy_top)
 		var ep_style: StyleBoxFlat = StyleBoxFlat.new()
 		ep_style.bg_color = Color(0.08, 0.06, 0.04, 0.90)
 		ep_style.border_width_top    = 1; ep_style.border_width_bottom = 1

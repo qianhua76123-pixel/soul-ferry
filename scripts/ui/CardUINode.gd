@@ -6,8 +6,8 @@ class_name CardUINode
 
 signal card_clicked(card_data: Dictionary)
 
-const CARD_W = 90.0
-const CARD_H = 145.0
+const CARD_W = 120.0   # 1920x1080 下加大卡牌
+const CARD_H = 180.0
 
 var card_data: Dictionary = {}
 var is_playable: bool = true
@@ -53,36 +53,39 @@ func _draw() -> void:
 	# 底色
 	draw_rect(Rect2(ofs + Vector2(2,2), Vector2(CARD_W-4, CARD_H-4)), UIConstants.color_of("card_face"))
 	# 情绪色条
-	draw_rect(Rect2(ofs + Vector2(2,2), Vector2(CARD_W-4, 8)), _emotion_color)
-	# 占位插图
-	_draw_placeholder(ofs + Vector2(2,12), Vector2(CARD_W-4, 50))
+	draw_rect(Rect2(ofs + Vector2(2,2), Vector2(CARD_W-4, 10)), _emotion_color)
+	# 占位插图（插图区高度 = CARD_H * 0.40）
+	var art_h: float = CARD_H * 0.40
+	_draw_placeholder(ofs + Vector2(2, 14), Vector2(CARD_W-4, art_h))
 	# 分割线
-	draw_line(ofs+Vector2(2,63), ofs+Vector2(CARD_W-2,63), _rarity_color, 1.0)
+	var div_y: float = 14.0 + art_h + 4.0
+	draw_line(ofs+Vector2(2, div_y), ofs+Vector2(CARD_W-2, div_y), _rarity_color, 1.2)
 	# 牌名
+	var name_y: float = div_y + 14.0
 	var name: String = card_data.get("name","???")
 	var tc := UIConstants.color_of("text_primary")
-	draw_string(ThemeDB.fallback_font, ofs+Vector2(4,76), name,
-		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 11, tc)
+	draw_string(ThemeDB.fallback_font, ofs+Vector2(5, name_y), name,
+		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-10), 13, tc)
 	# 描述（去除 BBCode 标签，多行换行显示）
 	var raw_desc: String = card_data.get("desc", card_data.get("description",""))
 	var desc: String = raw_desc.replace("[color=#f0c040]","").replace("[/color]","") \
 		.replace("[b]","").replace("[/b]","") \
 		.replace("[i]","").replace("[/i]","")
 	var muted := UIConstants.color_of("text_muted")
-	draw_multiline_string(ThemeDB.fallback_font, ofs+Vector2(4,88), desc,
-		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-8), 9, 3, muted)
-	# 费用圆
+	draw_multiline_string(ThemeDB.fallback_font, ofs+Vector2(5, name_y+16), desc,
+		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-10), 10, 3, muted)
+	# 费用圆（左上角）
 	var ink := UIConstants.color_of("ink")
-	draw_circle(ofs+Vector2(14,14), 11.0, Color(ink.r * 1.2, ink.g * 1.2, ink.b * 1.2))
-	draw_arc(ofs+Vector2(14,14), 11.0, 0, TAU, 32, _rarity_color, 1.5)
-	draw_string(ThemeDB.fallback_font, ofs+Vector2(9,19), _cost_text,
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 14, tc)
-	# 情绪图标
+	draw_circle(ofs+Vector2(16, 16), 13.0, Color(ink.r * 1.2, ink.g * 1.2, ink.b * 1.2))
+	draw_arc(ofs+Vector2(16, 16), 13.0, 0, TAU, 32, _rarity_color, 1.8)
+	draw_string(ThemeDB.fallback_font, ofs+Vector2(10, 21), _cost_text,
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 15, tc)
+	# 情绪图标（右下角）
 	var c: Color = _emotion_color; c.a = 0.85
-	draw_circle(ofs+Vector2(CARD_W-14, CARD_H-14), 7.0, c)
-	draw_string(ThemeDB.fallback_font, ofs+Vector2(CARD_W-19, CARD_H-9),
+	draw_circle(ofs+Vector2(CARD_W-16, CARD_H-16), 10.0, c)
+	draw_string(ThemeDB.fallback_font, ofs+Vector2(CARD_W-22, CARD_H-10),
 		EmotionManager.get_emotion_name(card_data.get("emotion_tag","calm")),
-		HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color.BLACK)
+		HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color.BLACK)
 
 func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 	# 底色
