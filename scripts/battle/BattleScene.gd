@@ -125,7 +125,7 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	if _purif_panel and _purif_panel.has_method("setup_conditions"):
 		_purif_panel.setup_conditions(enemy_data)
 	_update_hud()
-	var is_boss := enemy_data.get("type", "") == "boss"
+	var is_boss: bool = enemy_data.get("type", "") == "boss"
 	SoundManager.play_battle_bgm(GameState.current_layer, is_boss)
 	# 成就：Boss 战开始追踪
 	if is_boss:
