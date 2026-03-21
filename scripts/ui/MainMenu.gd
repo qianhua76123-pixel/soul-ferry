@@ -76,7 +76,7 @@ func _style_new_game_btn() -> void:
 	btn.add_theme_font_size_override("font_size", 16)
 	btn.add_theme_color_override("font_color", Color(0.784, 0.663, 0.431))
 
-	var normal: Control = _make_flat_style(Color(0.102, 0.082, 0.031, 0.7),  Color(0.784, 0.663, 0.431))
+	var normal: StyleBoxFlat = _make_flat_style(Color(0.102, 0.082, 0.031, 0.7),  Color(0.784, 0.663, 0.431))
 	var hover  = _make_flat_style(Color(0.18,  0.15,  0.07,  0.85), Color(1.0,   0.85,  0.55))
 	var focus  = hover.duplicate()
 	btn.add_theme_stylebox_override("normal",  normal)
@@ -93,7 +93,7 @@ func _style_continue_btn(has_save: bool) -> void:
 	if has_save:
 		var gold_dim = Color(0.420, 0.353, 0.188)
 		btn.add_theme_color_override("font_color", Color(0.784, 0.663, 0.431))
-		var normal: Control = _make_flat_style(Color(0.102, 0.082, 0.031, 0.7),  gold_dim)
+		var normal: StyleBoxFlat = _make_flat_style(Color(0.102, 0.082, 0.031, 0.7),  gold_dim)
 		var hover  = _make_flat_style(Color(0.18,  0.15,  0.07,  0.85), Color(0.784, 0.663, 0.431))
 		var focus  = hover.duplicate()
 		btn.add_theme_stylebox_override("normal",  normal)
@@ -103,7 +103,7 @@ func _style_continue_btn(has_save: bool) -> void:
 		btn.disabled = false
 	else:
 		btn.add_theme_color_override("font_color", Color(0.604, 0.565, 0.502))
-		var dim: Control = _make_flat_style(Color(0.102, 0.082, 0.031, 0.3), Color(0.420, 0.353, 0.188, 0.4))
+		var dim: StyleBoxFlat = _make_flat_style(Color(0.102, 0.082, 0.031, 0.3), Color(0.420, 0.353, 0.188, 0.4))
 		btn.add_theme_stylebox_override("normal",   dim)
 		btn.add_theme_stylebox_override("hover",    dim)
 		btn.add_theme_stylebox_override("focus",    dim)
@@ -128,7 +128,7 @@ func _style_quit_btn() -> void:
 	transparent.content_margin_bottom = 8.0
 
 	# hover 底色带朱砂边
-	var hover_s: Control = _make_flat_style(Color(0.12, 0.04, 0.04, 0.3), Color(0.753, 0.224, 0.169, 0.5))
+	var hover_s: StyleBoxFlat = _make_flat_style(Color(0.12, 0.04, 0.04, 0.3), Color(0.753, 0.224, 0.169, 0.5))
 	btn.add_theme_stylebox_override("normal",  transparent)
 	btn.add_theme_stylebox_override("focus",   transparent)
 	btn.add_theme_stylebox_override("pressed", hover_s)
@@ -309,7 +309,7 @@ func _setup_particles() -> void:
 	ink_particles.emitting      = true
 	ink_particles.local_coords  = false
 
-	var mat: Node = ParticleProcessMaterial.new()
+	var mat: ParticleProcessMaterial = ParticleProcessMaterial.new()
 	mat.direction           = Vector3(0, 1, 0)
 	mat.spread              = 40.0
 	mat.gravity             = Vector3(0, 18, 0)
@@ -320,10 +320,10 @@ func _setup_particles() -> void:
 	mat.scale_min            = 2.0
 	mat.scale_max            = 5.0
 	# 颜色：深墨色，低透明度
-	var grad: Node = Gradient.new()
+	var grad: Gradient = Gradient.new()
 	grad.colors = [Color(0.10,0.08,0.07,0.0), Color(0.10,0.08,0.07,0.22), Color(0.08,0.06,0.05,0.0)]
 	grad.offsets= [0.0, 0.4, 1.0]
-	var grad_tex: Node = GradientTexture1D.new()
+	var grad_tex: GradientTexture1D = GradientTexture1D.new()
 	grad_tex.gradient = grad
 	mat.color_ramp = grad_tex
 
