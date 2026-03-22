@@ -30,17 +30,18 @@ const LAYER_NAMES: Dictionary = {
 }
 const SCENE_PATHS: Dictionary = {
 	"battle": "res://scenes/BattleScene.tscn",
+	"elite":  "res://scenes/BattleScene.tscn",
 	"event":  "res://scenes/EventScene.tscn",
 	"shop":   "res://scenes/ShopScene.tscn",
 	"boss":   "res://scenes/BattleScene.tscn",
 }
 const NODE_ICONS: Dictionary = {
 	"battle": "⚔", "event": "📜", "shop": "🏮",
-	"rest": "🕯", "boss": "☠",
+	"rest": "🕯", "boss": "☠", "elite": "💀",
 }
 const NODE_CN: Dictionary = {
 	"battle": "战斗", "event": "事件", "shop": "商店",
-	"rest": "休息", "boss": "Boss",
+	"rest": "休息", "boss": "Boss", "elite": "精英",
 }
 const LAYER_BG_COLORS: Dictionary = {
 	1: Color("#0a1008"),
@@ -117,12 +118,15 @@ func _generate_layer_nodes(layer_num: int) -> Array:
 	# 槽位 0 固定战斗
 	# 至少 1 个事件（随机插入剩余位置）
 	# 至少 1 个商店（随机插入剩余位置）
-	# 剩余槽位随机填充（战斗权重最高，无休息——休息改为随机奖励）
+	# 第2层起保证有1个精英战斗
+	# 剩余槽位随机填充
 	var fixed_types: Array = ["battle"]           # 位置0固定
 	var must_have: Array   = ["event", "shop"]    # 保证出现
+	if layer_num >= 2:
+		must_have.append("elite")   # 第2层起保证精英节点
 	var remaining_count: int = count - fixed_types.size() - must_have.size()
 
-	# 剩余槽位用权重随机填充（战斗/事件/商店，无休息避免节奏太松）
+	# 剩余槽位用权重随机填充
 	var fill_pool: Array = []
 	for _i: int in remaining_count:
 		fill_pool.append(_roll_type())
@@ -136,15 +140,17 @@ func _generate_layer_nodes(layer_num: int) -> Array:
 
 	for i: int in count:
 		var enemy_id: String = ""
-		if type_seq[i] == "battle":
+		var is_elite: bool = type_seq[i] == "elite"
+		if type_seq[i] in ["battle", "elite"]:
 			enemy_id = _random_enemy_for_layer(layer_num)
 		nodes.append({
-			"id":      "n_%d_%d" % [layer_num, i],
-			"type":    type_seq[i],
-			"layer":   layer_num,
-			"visited": false,
-			"enemy_id": enemy_id,
-			"index":   i,
+			"id":        "n_%d_%d" % [layer_num, i],
+			"type":      type_seq[i],
+			"layer":     layer_num,
+			"visited":   false,
+			"enemy_id":  enemy_id,
+			"index":     i,
+			"is_elite":  is_elite,
 		})
 
 	# Boss 节点最后
@@ -155,12 +161,13 @@ func _generate_layer_nodes(layer_num: int) -> Array:
 		"visited":  false,
 		"enemy_id": LAYER_BOSSES[layer_num],
 		"index":    count,
+		"is_elite": false,
 	})
 	return nodes
 
 func _roll_type() -> String:
-	## 填充槽位权重：战斗60 事件25 商店15（无休息）
-	var weights: Dictionary = {"battle": 60, "event": 25, "shop": 15}
+	## 填充槽位权重：战斗55 事件25 商店15 休息5（精英由 must_have 保证）
+	var weights: Dictionary = {"battle": 55, "event": 25, "shop": 15, "rest": 5}
 	var total: int = 0
 	for w: int in weights.values():
 		total += w
@@ -289,6 +296,7 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	var COLOR_MAP: Dictionary = {
 		"battle": [Color(0.22, 0.07, 0.07, 0.92), Color(0.75, 0.20, 0.15)],
 		"boss":   [Color(0.28, 0.04, 0.04, 0.95), Color(1.00, 0.25, 0.10)],
+		"elite":  [Color(0.22, 0.05, 0.22, 0.95), Color(0.85, 0.20, 0.85)],
 		"event":  [Color(0.08, 0.14, 0.08, 0.92), Color(0.35, 0.70, 0.25)],
 		"shop":   [Color(0.14, 0.11, 0.03, 0.92), Color(0.90, 0.72, 0.10)],
 		"rest":   [Color(0.05, 0.11, 0.18, 0.92), Color(0.20, 0.55, 0.80)],
@@ -391,12 +399,13 @@ func _on_node_pressed(nd: Dictionary) -> void:
 		_update_status()
 		return
 
-	# 战斗 / Boss：设置 pending enemy
-	if ntype in ["battle", "boss"]:
+	# 战斗 / Boss / 精英：设置 pending enemy
+	if ntype in ["battle", "boss", "elite"]:
 		var eid: String = nd.get("enemy_id", "")
 		if eid.is_empty():
 			eid = _random_enemy_for_layer(GameState.current_layer)
 		GameState.set_meta("pending_enemy_id", eid)
+		GameState.set_meta("is_elite_battle", ntype == "elite")
 
 	# 事件：设置 pending event
 	if ntype == "event":

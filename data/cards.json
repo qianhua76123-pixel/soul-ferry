@@ -13,7 +13,9 @@
         "calm": 1
       },
       "rarity": "common",
-      "description": "获得8点护盾，若定≥3额外获得4点"
+      "description": "获得8点护盾，若定≥3额外获得4点",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "护盾+2，持续到下回合"
     },
     {
       "id": "liguihao",
@@ -28,7 +30,9 @@
         "rage": 2
       },
       "rarity": "common",
-      "description": "造成14点伤害，若怒为主导额外+4点伤害"
+      "description": "造成14点伤害，若怒为主导额外+4点伤害",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 3
     },
     {
       "id": "wangxiangqi",
@@ -43,7 +47,8 @@
         "grief": 1
       },
       "rarity": "common",
-      "description": "目标下回合伤害-25%，若悲为主导施加「执念」状态"
+      "description": "目标下回合伤害-25%，若悲为主导施加「执念」状态",
+      "upgrade_type": "power"
     },
     {
       "id": "podan",
@@ -58,7 +63,9 @@
         "fear": 2
       },
       "rarity": "common",
-      "description": "摸2张牌，+惧2（零费但代价明显）"
+      "description": "摸2张牌，+惧2（零费但代价明显）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "duyinzhou",
@@ -73,7 +80,9 @@
         "joy": 1
       },
       "rarity": "rare",
-      "description": "回复12HP，若喜为主导对所有敌人施加「困惑」"
+      "description": "回复12HP，若喜为主导对所有敌人施加「困惑」",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "额外回复2HP"
     },
     {
       "id": "wuqingguiyi",
@@ -88,7 +97,9 @@
         "clear_all": true
       },
       "rarity": "legendary",
-      "description": "【传说】将所有情绪归零，获得等同情绪总和×3的护盾"
+      "description": "【传说】将所有情绪归零，获得等同情绪总和×3的护盾",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】【传说】将所有情绪归零，获得等同情绪总和×3的护盾（效果全面提升）"
     },
     {
       "id": "fumo_ling",
@@ -103,7 +114,9 @@
         "calm": 2
       },
       "rarity": "common",
-      "description": "获得12点护盾，下回合+定1"
+      "description": "获得12点护盾，下回合+定1",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "护盾+2，持续到下回合"
     },
     {
       "id": "yinyang_jie",
@@ -118,7 +131,9 @@
         "calm": 1
       },
       "rarity": "rare",
-      "description": "获得6护盾并造成6点伤害，定≥3时效果翻倍"
+      "description": "获得6护盾并造成6点伤害，定≥3时效果翻倍",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "护盾+2，持续到下回合"
     },
     {
       "id": "feng_hun_yin",
@@ -133,7 +148,9 @@
         "calm": 2
       },
       "rarity": "rare",
-      "description": "对目标施加「封印」状态2层，被封印的敌人无法使用特殊技能"
+      "description": "对目标施加「封印」状态2层，被封印的敌人无法使用特殊技能",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "qingming_jian",
@@ -148,7 +165,9 @@
         "calm": 1
       },
       "rarity": "common",
-      "description": "造成5点伤害，定≥3时伤害翻倍"
+      "description": "造成5点伤害，定≥3时伤害翻倍",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "hun_po_lie",
@@ -163,7 +182,9 @@
         "rage": 1
       },
       "rarity": "common",
-      "description": "造成8点伤害"
+      "description": "造成8点伤害",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "nie_huo_fen",
@@ -178,7 +199,9 @@
         "rage": 2
       },
       "rarity": "rare",
-      "description": "对所有敌人造成10点伤害，怒为主导时额外+5点"
+      "description": "对所有敌人造成10点伤害，怒为主导时额外+5点",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "xue_ku",
@@ -194,7 +217,9 @@
         "grief": 1
       },
       "rarity": "rare",
-      "description": "造成12点伤害并吸取6点HP，+怒2+悲1"
+      "description": "造成12点伤害并吸取6点HP，+怒2+悲1",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "fen_nu_bao",
@@ -209,7 +234,9 @@
         "rage": 3
       },
       "rarity": "rare",
-      "description": "造成等同当前怒×4的伤害，+怒3（危险！）"
+      "description": "造成等同当前怒×4的伤害，+怒3（危险！）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "yin_hun_zhen",
@@ -224,7 +251,9 @@
         "grief": 2
       },
       "rarity": "rare",
-      "description": "令敌人弃置3张「意图牌」，悲主导时额外+2层执念"
+      "description": "令敌人弃置3张「意图牌」，悲主导时额外+2层执念",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "ku_sha",
@@ -239,7 +268,8 @@
         "grief": 1
       },
       "rarity": "common",
-      "description": "目标下回合伤害-20%，+悲1"
+      "description": "目标下回合伤害-20%，+悲1",
+      "upgrade_type": "power"
     },
     {
       "id": "yi_hen_qian_nian",
@@ -254,7 +284,9 @@
         "grief": 2
       },
       "rarity": "legendary",
-      "description": "【传说】对目标施加持续5回合的执念DOT，悲≥3时每回合伤害+3"
+      "description": "【传说】对目标施加持续5回合的执念DOT，悲≥3时每回合伤害+3",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】【传说】对目标施加持续5回合的执念DOT，悲≥3时每回合伤害+3（效果全面提升）"
     },
     {
       "id": "lei_shang",
@@ -269,7 +301,9 @@
         "grief": 1
       },
       "rarity": "common",
-      "description": "造成6点伤害，+悲1"
+      "description": "造成6点伤害，+悲1",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "jue_liao_ling",
@@ -284,7 +318,8 @@
         "fear": 1
       },
       "rarity": "common",
-      "description": "摸1张牌，惧为主导时改为摸3张"
+      "description": "摸1张牌，惧为主导时改为摸3张",
+      "upgrade_type": "power"
     },
     {
       "id": "gui_ying_zhong",
@@ -299,7 +334,9 @@
         "fear": 2
       },
       "rarity": "rare",
-      "description": "造成10点伤害并获得闪避效果，惧≥3额外+5伤害"
+      "description": "造成10点伤害并获得闪避效果，惧≥3额外+5伤害",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "hun_fei_po_san",
@@ -314,7 +351,9 @@
         "fear": 3
       },
       "rarity": "rare",
-      "description": "对所有敌人施加「恐惧」状态，惧主导时持续回合+2"
+      "description": "对所有敌人施加「恐惧」状态，惧主导时持续回合+2",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "yin_lu_ling",
@@ -329,7 +368,8 @@
         "fear": 1
       },
       "rarity": "common",
-      "description": "预览敌人下回合意图，+惧1"
+      "description": "预览敌人下回合意图，+惧1",
+      "upgrade_type": "power"
     },
     {
       "id": "xi_yue_zhen",
@@ -344,7 +384,9 @@
         "joy": 2
       },
       "rarity": "rare",
-      "description": "回复8HP，喜为主导时额外回复4HP并施加「祝福」"
+      "description": "回复8HP，喜为主导时额外回复4HP并施加「祝福」",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "额外回复2HP"
     },
     {
       "id": "hong_chen_yi_xiao",
@@ -359,7 +401,9 @@
         "joy": 1
       },
       "rarity": "common",
-      "description": "回复5HP，+喜1"
+      "description": "回复5HP，+喜1",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "额外回复2HP"
     },
     {
       "id": "wan_gui_chao_zong",
@@ -374,7 +418,9 @@
         "joy": 3
       },
       "rarity": "legendary",
-      "description": "【传说】本回合所有牌效果+2，喜≥3时效果翻倍"
+      "description": "【传说】本回合所有牌效果+2，喜≥3时效果翻倍",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】【传说】本回合所有牌效果+2，喜≥3时效果翻倍（效果全面提升）"
     },
     {
       "id": "ci_bei_gan_hua",
@@ -389,7 +435,9 @@
         "joy": 2
       },
       "rarity": "rare",
-      "description": "降低目标情绪压力2点，喜主导时额外降低2点并回复HP"
+      "description": "降低目标情绪压力2点，喜主导时额外降低2点并回复HP",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "du_hua_yin",
@@ -405,7 +453,9 @@
         "calm": 1
       },
       "rarity": "rare",
-      "description": "推进渡化进度+1，+悲1+定1（渡化路线专用牌）"
+      "description": "推进渡化进度+1，+悲1+定1（渡化路线专用牌）",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "yin_du",
@@ -420,7 +470,9 @@
         "grief": 2
       },
       "rarity": "rare",
-      "description": "悲≥3时触发渡化判定（水鬼·望归渡化专用）"
+      "description": "悲≥3时触发渡化判定（水鬼·望归渡化专用）",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "lie_yan_zhan",
@@ -435,7 +487,9 @@
         "rage": 1
       },
       "rarity": "common",
-      "description": "造成10点伤害并回复等量HP，若怒主导额外+8伤"
+      "description": "造成10点伤害并回复等量HP，若怒主导额外+8伤",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "bao_lie_chong",
@@ -450,7 +504,9 @@
         "rage": 1
       },
       "rarity": "common",
-      "description": "造成6点伤害，若怒≥3额外+6点"
+      "description": "造成6点伤害，若怒≥3额外+6点",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "zhu_hun_huo",
@@ -465,7 +521,9 @@
         "rage": 2
       },
       "rarity": "rare",
-      "description": "造成16点伤害并附加4层灼烧"
+      "description": "造成16点伤害并附加4层灼烧",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "fen_nu_gong_ji",
@@ -480,7 +538,9 @@
         "rage": 1
       },
       "rarity": "rare",
-      "description": "造成3×怒情绪值的伤害（费用0）"
+      "description": "造成3×怒情绪值的伤害（费用0）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "qian_hun_lie",
@@ -495,7 +555,9 @@
         "rage": -2
       },
       "rarity": "legendary",
-      "description": "对敌人造成三次8点伤害，怒主导额外各+4，怒情绪-2"
+      "description": "对敌人造成三次8点伤害，怒主导额外各+4，怒情绪-2",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】对敌人造成三次8点伤害，怒主导额外各+4，怒情绪-2（效果全面提升）"
     },
     {
       "id": "yin_ying_dun",
@@ -510,7 +572,8 @@
         "fear": 1
       },
       "rarity": "common",
-      "description": "下次受击无效，若惧≥2获得额外一次格挡"
+      "description": "下次受击无效，若惧≥2获得额外一次格挡",
+      "upgrade_type": "power"
     },
     {
       "id": "gui_ku_zhen",
@@ -525,7 +588,9 @@
         "fear": 2
       },
       "rarity": "rare",
-      "description": "使敌人的攻击降低30%，持续2回合"
+      "description": "使敌人的攻击降低30%，持续2回合",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "huang_hun_mi",
@@ -540,7 +605,9 @@
         "fear": 1
       },
       "rarity": "rare",
-      "description": "摸3张牌并获得5点护盾，若惧主导护盾+5"
+      "description": "摸3张牌并获得5点护盾，若惧主导护盾+5",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "po_jie_fu",
@@ -556,7 +623,9 @@
         "calm": 1
       },
       "rarity": "legendary",
-      "description": "清除敌人全部护盾，造成等同护盾量的伤害，惧-1定+1"
+      "description": "清除敌人全部护盾，造成等同护盾量的伤害，惧-1定+1",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】清除敌人全部护盾，造成等同护盾量的伤害，惧-1定+1（效果全面提升）"
     },
     {
       "id": "shu_hun_lei",
@@ -571,7 +640,8 @@
         "grief": 1
       },
       "rarity": "common",
-      "description": "降低敌人攻击20%，摸1张牌"
+      "description": "降低敌人攻击20%，摸1张牌",
+      "upgrade_type": "power"
     },
     {
       "id": "wang_chuan_yin",
@@ -586,7 +656,9 @@
         "grief": 1
       },
       "rarity": "rare",
-      "description": "渡化进度+2，若悲≥3额外+1"
+      "description": "渡化进度+2，若悲≥3额外+1",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "chen_yuan_ge",
@@ -601,7 +673,9 @@
         "grief": 1
       },
       "rarity": "rare",
-      "description": "造成8点伤害，附加3层中毒，悲主导额外+3伤害"
+      "description": "造成8点伤害，附加3层中毒，悲主导额外+3伤害",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "ku_hai_du_zhou",
@@ -616,7 +690,9 @@
         "grief": -1
       },
       "rarity": "rare",
-      "description": "回复4×悲情绪值的HP，悲-1"
+      "description": "回复4×悲情绪值的HP，悲-1",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "wan_gu_chou",
@@ -631,7 +707,9 @@
         "grief": 2
       },
       "rarity": "legendary",
-      "description": "造成12点伤害，敌人攻击和防御各降50%，悲主导+8伤"
+      "description": "造成12点伤害，敌人攻击和防御各降50%，悲主导+8伤",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】造成12点伤害，敌人攻击和防御各降50%，悲主导+8伤（效果全面提升）"
     },
     {
       "id": "hua_guang_san",
@@ -646,7 +724,9 @@
         "joy": 1
       },
       "rarity": "common",
-      "description": "回复8HP，若喜≥3额外回复4HP"
+      "description": "回复8HP，若喜≥3额外回复4HP",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "额外回复2HP"
     },
     {
       "id": "du_hua_guang",
@@ -661,7 +741,9 @@
         "joy": 1
       },
       "rarity": "rare",
-      "description": "渡化进度+2，喜主导额外+2"
+      "description": "渡化进度+2，喜主导额外+2",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "xi_lei_jiao_rong",
@@ -677,7 +759,9 @@
         "grief": -1
       },
       "rarity": "rare",
-      "description": "回复10HP并摸2张牌，悲≥2时额外回复5HP，悲-1"
+      "description": "回复10HP并摸2张牌，悲≥2时额外回复5HP，悲-1",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "chao_du_fa_hui",
@@ -692,7 +776,9 @@
         "joy": 2
       },
       "rarity": "legendary",
-      "description": "回复15HP并获得15点护盾，渡化进度+1"
+      "description": "回复15HP并获得15点护盾，渡化进度+1",
+      "upgrade_type": "transform",
+      "upgrade_transform_effect": "【强化】回复15HP并获得15点护盾，渡化进度+1（效果全面提升）"
     },
     {
       "id": "jie_jie_fu",
@@ -707,7 +793,9 @@
         "calm": 1
       },
       "rarity": "common",
-      "description": "获得10点护盾，定≥3额外+6护盾"
+      "description": "获得10点护盾，定≥3额外+6护盾",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "护盾+2，持续到下回合"
     },
     {
       "id": "tai_xu_jing",
@@ -722,7 +810,9 @@
         "calm": 1
       },
       "rarity": "rare",
-      "description": "获得8点护盾并摸2张牌，定主导额外+4护盾"
+      "description": "获得8点护盾并摸2张牌，定主导额外+4护盾",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "ling_hun_ping_heng",
@@ -737,7 +827,9 @@
         "calm": 1
       },
       "rarity": "rare",
-      "description": "将所有情绪值调整至均值附近（差值缩小2），获得10点护盾"
+      "description": "将所有情绪值调整至均值附近（差值缩小2），获得10点护盾",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "po_wang_xiang",
@@ -752,7 +844,9 @@
         "calm": -1
       },
       "rarity": "rare",
-      "description": "获得10护盾并造成等量伤害，定主导+8，定-1"
+      "description": "获得10护盾并造成等量伤害，定主导+8，定-1",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "护盾+2，持续到下回合"
     },
     {
       "id": "xi_dao",
@@ -770,7 +864,9 @@
       },
       "rarity": "common",
       "description": "对目标施加喜印×2，自身回复5点HP。若目标已有喜印，改为回复8点HP。",
-      "desc": "[color=#b7770d]喜印[/color]×2，回血5（目标已有喜印时回血8）"
+      "desc": "[color=#b7770d]喜印[/color]×2，回血5（目标已有喜印时回血8）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "额外回复2HP"
     },
     {
       "id": "ding_cheng",
@@ -795,7 +891,9 @@
       },
       "rarity": "common",
       "description": "定+1，对目标施加定印×1。若当前定≥2，定印改为×2。",
-      "desc": "[color=#1d6a54]定[/color]+1，定印×1（定≥2时×2）"
+      "desc": "[color=#1d6a54]定[/color]+1，定印×1（定≥2时×2）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "同时对所有敌人施加印记×1"
     },
     {
       "id": "hua_kai",
@@ -814,7 +912,8 @@
       "on_resonance_bonus": "next_card_free",
       "rarity": "uncommon",
       "description": "若目标身上喜印≥2，触发喜共鸣（回复8HP+下一张牌免费）。若喜印<2此牌无效。",
-      "desc": "喜印≥2时触发[color=#b7770d]喜共鸣[/color]，回血8，下一张牌免费"
+      "desc": "喜印≥2时触发[color=#b7770d]喜共鸣[/color]，回血8，下一张牌免费",
+      "upgrade_type": "power"
     },
     {
       "id": "ding_xin_jiejie",
@@ -834,7 +933,8 @@
       },
       "rarity": "uncommon",
       "description": "获得护盾12点（不清零），对目标施加定印×3（直接触发定共鸣：本回合所有牌费用-1）。",
-      "desc": "护盾12（不清零），定印×3→触发[color=#1d6a54]定共鸣[/color]，本回合降费"
+      "desc": "护盾12（不清零），定印×3→触发[color=#1d6a54]定共鸣[/color]，本回合降费",
+      "upgrade_type": "power"
     },
     {
       "id": "xi_yi",
@@ -850,7 +950,8 @@
       "heal_equal_to": "joy_mark_after",
       "rarity": "uncommon",
       "description": "对目标身上喜印层数×2（最高10层），自身回复等于喜印当前层数点HP。",
-      "desc": "喜印×2（上限10），回血=当前喜印层数"
+      "desc": "喜印×2（上限10），回血=当前喜印层数",
+      "upgrade_type": "power"
     },
     {
       "id": "kongling_huti",
@@ -867,7 +968,8 @@
       },
       "rarity": "common",
       "description": "获得护盾等于当前定情绪值×4点，喜+1。",
-      "desc": "护盾=定×4，[color=#b7770d]喜[/color]+1"
+      "desc": "护盾=定×4，[color=#b7770d]喜[/color]+1",
+      "upgrade_type": "power"
     },
     {
       "id": "shuang_yin_huiliu",
@@ -888,7 +990,9 @@
       "on_trigger": "both_resonance",
       "rarity": "rare",
       "description": "对目标同时施加喜印×2和定印×2，若两种印记总层数≥6，立即触发喜共鸣和定共鸣。",
-      "desc": "喜印×2+定印×2，总层数≥6时触发[color=#b7770d]喜[/color]和[color=#1d6a54]定[/color]共鸣"
+      "desc": "喜印×2+定印×2，总层数≥6时触发[color=#b7770d]喜[/color]和[color=#1d6a54]定[/color]共鸣",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "xi_quan",
@@ -906,7 +1010,9 @@
       "max_per_turn": 2,
       "rarity": "common",
       "description": "喜+1，若当前喜≥2，额外回复2点HP。每回合最多打出2次。",
-      "desc": "[color=#b7770d]喜[/color]+1，喜≥2时额外回血2（每回合最多2次）"
+      "desc": "[color=#b7770d]喜[/color]+1，喜≥2时额外回血2（每回合最多2次）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "额外回复2HP"
     },
     {
       "id": "yu_ling_jue",
@@ -925,7 +1031,8 @@
       "draw": 1,
       "rarity": "uncommon",
       "description": "回复HP等于场上喜印+定印总层数（最少4最高15），抽1张牌。",
-      "desc": "回血=喜印+定印总数（4-15），抽1张"
+      "desc": "回血=喜印+定印总数（4-15），抽1张",
+      "upgrade_type": "power"
     },
     {
       "id": "ding_nian_fengyin",
@@ -942,7 +1049,8 @@
       "enemy_action_delay": 1,
       "rarity": "uncommon",
       "description": "对目标施加定印×2，该目标本回合行动延迟（你行动结束后敌人才行动）。",
-      "desc": "定印×2，目标本回合行动延迟"
+      "desc": "定印×2，目标本回合行动延迟",
+      "upgrade_type": "power"
     },
     {
       "id": "xi_ding_tongliu",
@@ -959,7 +1067,9 @@
       "trigger_resonance_after": "joy",
       "rarity": "rare",
       "description": "将目标身上所有定印转化为喜印（层数不变），触发一次喜共鸣。",
-      "desc": "所有定印→喜印，触发[color=#b7770d]喜共鸣[/color]"
+      "desc": "所有定印→喜印，触发[color=#b7770d]喜共鸣[/color]",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "guang_yu_he",
@@ -978,7 +1088,9 @@
       "condition_bonus_purification": 0.1,
       "rarity": "rare",
       "description": "回复20点HP，渡化进度+20%，对目标施加喜印×5。若目标喜印已≥3，渡化进度追加+10%。",
-      "desc": "回血20，渡化进度+20%，喜印×5（已有≥3时再+10%进度）"
+      "desc": "回血20，渡化进度+20%，喜印×5（已有≥3时再+10%进度）",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "jing_hua_a",
@@ -992,7 +1104,9 @@
       "rarity": "rare",
       "description": "将本回合已触发的最后一次印记共鸣效果再触发一次（不消耗印记）。",
       "desc": "复制本回合最后一次共鸣效果",
-      "copies": 2
+      "copies": 2,
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "jing_hua_b",
@@ -1006,7 +1120,9 @@
       "rarity": "rare",
       "description": "将本回合已触发的最后一次印记共鸣效果再触发一次（不消耗印记）。",
       "desc": "复制本回合最后一次共鸣效果",
-      "is_copy": true
+      "is_copy": true,
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "wu_wei_guangyu",
@@ -1026,7 +1142,9 @@
       "on_end_check_purification": true,
       "rarity": "epic",
       "description": "持续3回合：每回合开始对目标施加喜印×1和定印×1，并回复3点HP。3回合结束时若渡化条件满足自动触发渡化判定。",
-      "desc": "持续3回合：每回合喜印+定印各×1+回血3；结束时自动触发渡化判定"
+      "desc": "持续3回合：每回合喜印+定印各×1+回血3；结束时自动触发渡化判定",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "tie_qu",
@@ -1044,7 +1162,9 @@
       },
       "rarity": "common",
       "description": "获得护盾12点，定+1。若打出前已有护盾，额外获得护盾4点。",
-      "desc": "护盾12，[color=#1d6a54]定[/color]+1（已有护盾时额外+4）"
+      "desc": "护盾12，[color=#1d6a54]定[/color]+1（已有护盾时额外+4）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "ding_xin_ru_shan",
@@ -1061,7 +1181,8 @@
       "shield_multiplier_emotion": "calm",
       "rarity": "uncommon",
       "description": "定+3，获得护盾等于定情绪值×3点（定+3后计算）。",
-      "desc": "[color=#1d6a54]定[/color]+3，护盾=定×3"
+      "desc": "[color=#1d6a54]定[/color]+3，护盾=定×3",
+      "upgrade_type": "power"
     },
     {
       "id": "dun_fan",
@@ -1074,7 +1195,9 @@
       "effect_value": 0.5,
       "rarity": "uncommon",
       "description": "本回合受到的下一次伤害，将50%以护盾伤害形式反弹给攻击者。",
-      "desc": "下一次受到伤害，50%反弹为护盾伤害"
+      "desc": "下一次受到伤害，50%反弹为护盾伤害",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "tiejia_futi",
@@ -1088,7 +1211,9 @@
       "shield_no_expire_this_turn": true,
       "rarity": "rare",
       "description": "将当前护盾值的40%转化为永久铁甲（固定减伤），本回合护盾不清零。",
-      "desc": "护盾40%→铁甲，本回合护盾不清零"
+      "desc": "护盾40%→铁甲，本回合护盾不清零",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "ding_zhen",
@@ -1105,7 +1230,8 @@
       "all_enemies_debuff": "static_1_turn",
       "rarity": "uncommon",
       "description": "定+2，对所有敌人施加「静滞」1回合（无法获得护盾和增益技能）。",
-      "desc": "[color=#1d6a54]定[/color]+2，所有敌人静滞1回合"
+      "desc": "[color=#1d6a54]定[/color]+2，所有敌人静滞1回合",
+      "upgrade_type": "power"
     },
     {
       "id": "shan_yue",
@@ -1120,7 +1246,8 @@
       "reflect_max_times": 3,
       "rarity": "uncommon",
       "description": "获得护盾18点，激活「山岳反甲」：本回合受到的所有伤害将40%反弹（最多3次）。",
-      "desc": "护盾18，反甲40%（本回合最多3次）"
+      "desc": "护盾18，反甲40%（本回合最多3次）",
+      "upgrade_type": "power"
     },
     {
       "id": "yi_rou_ke_gang",
@@ -1135,7 +1262,9 @@
       "damage_multiplier_stat": "armor",
       "rarity": "uncommon",
       "description": "造成伤害等于当前铁甲值×3点（铁甲=0时造成5点基础伤害）。",
-      "desc": "伤害=铁甲×3（最低5）"
+      "desc": "伤害=铁甲×3（最低5）",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "tiebi_tuzhi",
@@ -1149,7 +1278,9 @@
       "requires_shield": true,
       "rarity": "rare",
       "description": "造成伤害等于当前护盾值的30%（护盾=0时不可打出）。",
-      "desc": "伤害=护盾×30%（需有护盾）"
+      "desc": "伤害=护盾×30%（需有护盾）",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "ning_ding",
@@ -1168,7 +1299,9 @@
       "condition_bonus_chain": 1,
       "rarity": "common",
       "description": "定+2。若当前定≥4，额外：下回合+1能量，并对血量最高的敌人施加锁链×1。",
-      "desc": "[color=#1d6a54]定[/color]+2（定≥4时：下回合+1能量+锁链×1）"
+      "desc": "[color=#1d6a54]定[/color]+2（定≥4时：下回合+1能量+锁链×1）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "bai_lian_cheng_gang",
@@ -1182,7 +1315,9 @@
       "clears_shield_after": true,
       "rarity": "epic",
       "description": "将本回合受到的所有伤害总和转化为等量永久铁甲（本局有效），打出后本回合防御归零。",
-      "desc": "本回合已受伤害→铁甲（1:1），护盾清零"
+      "desc": "本回合已受伤害→铁甲（1:1），护盾清零",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     },
     {
       "id": "shou_tu",
@@ -1198,7 +1333,8 @@
       "condition_bonus": 4,
       "rarity": "common",
       "description": "对目标施加锁链×1，获得护盾6点。若已有锁链≥3，护盾改为10点。",
-      "desc": "锁链×1，护盾6（目标锁链≥3时护盾10）"
+      "desc": "锁链×1，护盾6（目标锁链≥3时护盾10）",
+      "upgrade_type": "power"
     },
     {
       "id": "wu_dong_yu_zhong",
@@ -1215,7 +1351,9 @@
       "immune_next_debuff": 1,
       "rarity": "common",
       "description": "定+1，免疫本回合的下一次状态效果（不免疫伤害）。",
-      "desc": "[color=#1d6a54]定[/color]+1，免疫下一次状态效果"
+      "desc": "[color=#1d6a54]定[/color]+1，免疫下一次状态效果",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "wan_fu_mo_kai",
@@ -1229,7 +1367,9 @@
       "duration_turns": 1,
       "rarity": "rare",
       "description": "本回合内，每次护盾被攻击减少时，立即回复减少量20%的护盾（等效护盾只损失80%）。",
-      "desc": "本回合护盾损失20%自动回复（损失=80%）"
+      "desc": "本回合护盾损失20%自动回复（损失=80%）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "jing_ruo_pan_shi",
@@ -1245,7 +1385,9 @@
       "shield_no_expire": true,
       "rarity": "rare",
       "description": "持续3回合：每回合开始时获得护盾等于定情绪值×3，该护盾本回合不清零。",
-      "desc": "持续3回合：每回合护盾+=定×3（不清零）"
+      "desc": "持续3回合：每回合护盾+=定×3（不清零）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "ding_er_wu_ji",
@@ -1262,7 +1404,9 @@
       },
       "rarity": "epic",
       "description": "将铁甲值转化为本回合攻击力加成（每1点铁甲=攻击力+4），使用后铁甲归零，定+3。",
-      "desc": "铁甲→攻击加成（×4），铁甲归零，[color=#1d6a54]定[/color]+3"
+      "desc": "铁甲→攻击加成（×4），铁甲归零，[color=#1d6a54]定[/color]+3",
+      "upgrade_type": "unlock",
+      "upgrade_remove_requirement": true
     }
   ]
 }

@@ -14,7 +14,9 @@
       "rarity": "common",
       "copies": 3,
       "description": "造成8点伤害，空度+2。若空度因此触发分段变化，额外抽1张牌。",
-      "desc": "伤害8，空度+2（分段变化时抽1张）"
+      "desc": "伤害8，空度+2（分段变化时抽1张）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "wu_wei",
@@ -29,7 +31,9 @@
       "rarity": "uncommon",
       "copies": 2,
       "description": "空度强制归5。若原空度>5，+1能量；若原空度<5，回复4HP。",
-      "desc": "空度归5；>5则+1能量，<5则回HP4"
+      "desc": "空度归5；>5则+1能量，<5则回HP4",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "xu_shi_hu_huan",
@@ -43,7 +47,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "空度变为(10-当前空度)。",
-      "desc": "空度变为(10-空度)"
+      "desc": "空度变为(10-空度)",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "kong_yi",
@@ -58,7 +64,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "空度+3。若因此达到10，立即触发空鸣。",
-      "desc": "空度+3（达10则触发空鸣）"
+      "desc": "空度+3（达10则触发空鸣）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "kong_shou",
@@ -73,7 +81,9 @@
       "rarity": "common",
       "copies": 1,
       "description": "空度-3（最少减少0），获得护盾=减少量×4。",
-      "desc": "空度-3，护盾+减少量×4"
+      "desc": "空度-3，护盾+减少量×4",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "tiao_xi",
@@ -87,7 +97,9 @@
       "rarity": "rare",
       "copies": 1,
       "description": "精确设定空度为0–10任意值（玩家选择）。",
-      "desc": "精确设定空度（0–10）"
+      "desc": "精确设定空度（0–10）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "kong_ming_jue",
@@ -102,7 +114,8 @@
       "rarity": "rare",
       "copies": 1,
       "description": "直接触发空鸣，空度归零。",
-      "desc": "强制触发空鸣（空度归零）"
+      "desc": "强制触发空鸣（空度归零）",
+      "upgrade_type": "cost"
     },
     {
       "id": "fu_chen",
@@ -118,7 +131,9 @@
       "rarity": "common",
       "copies": 1,
       "description": "空度≤5时+3；空度>5时-3。无论如何额外抽1张牌。",
-      "desc": "≤5时空度+3，>5时空度-3；抽1张"
+      "desc": "≤5时空度+3，>5时空度-3；抽1张",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "jie_qing",
@@ -132,7 +147,9 @@
       "rarity": "common",
       "copies": 2,
       "description": "目标最高情绪-2，可选：转移给自己或消散。",
-      "desc": "敌人最高情绪-2（可选转移或消散）"
+      "desc": "敌人最高情绪-2（可选转移或消散）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "qing_du",
@@ -147,7 +164,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "将自身任意情绪最多3点转移给目标，渡化进度+转移量×5%。",
-      "desc": "自身情绪→敌人（最多3点），渡化进度+X×5%"
+      "desc": "自身情绪→敌人（最多3点），渡化进度+X×5%",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "qing_jing",
@@ -161,7 +180,8 @@
       "rarity": "rare",
       "copies": 1,
       "description": "将目标所有情绪值复制到另一目标（取复制方的值）。",
-      "desc": "将一目标全部情绪值复制到另一目标"
+      "desc": "将一目标全部情绪值复制到另一目标",
+      "upgrade_type": "cost"
     },
     {
       "id": "jie_li_da_li",
@@ -175,7 +195,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "伤害=目标最高情绪×5（穿甲），该情绪归零。",
-      "desc": "穿甲伤害=最高情绪×5（情绪归零）"
+      "desc": "穿甲伤害=最高情绪×5（情绪归零）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "qing_zhai",
@@ -189,7 +211,9 @@
       "rarity": "common",
       "copies": 1,
       "description": "对目标施加「情债」标记：下回合行动后情绪增量减半。",
-      "desc": "敌人施加情债（下回合情绪增量减半）"
+      "desc": "敌人施加情债（下回合情绪增量减半）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "yi_qing_bie_lian",
@@ -203,7 +227,8 @@
       "rarity": "rare",
       "copies": 1,
       "description": "选择三种情绪互换位置（A→B→C→A）。",
-      "desc": "选三种情绪循环互换（A→B→C→A）"
+      "desc": "选三种情绪循环互换（A→B→C→A）",
+      "upgrade_type": "cost"
     },
     {
       "id": "kong_qing",
@@ -220,7 +245,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "目标所有情绪归零，空度-1。清除≥5点时造成15点穿甲伤害。",
-      "desc": "敌人全情绪清零，空度-1（清≥5点则穿甲伤15）"
+      "desc": "敌人全情绪清零，空度-1（清≥5点则穿甲伤15）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "xu_wu_zhang",
@@ -235,7 +262,9 @@
       "rarity": "common",
       "copies": 1,
       "description": "造成伤害=5+空度×2。",
-      "desc": "伤害=5+空度×2"
+      "desc": "伤害=5+空度×2",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "kong_zhong_pi",
@@ -250,7 +279,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "对所有敌人造成6点伤害。对失调敌人额外+失调超出量×4点伤害。",
-      "desc": "全体伤害6，失调敌人+超出量×4"
+      "desc": "全体伤害6，失调敌人+超出量×4",
+      "upgrade_type": "power",
+      "upgrade_bonus_damage": 2
     },
     {
       "id": "yi_kong_ji_shi",
@@ -266,7 +297,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "空度≥7时：15点穿甲伤害并强制触发最高情绪失调；否则造成6点伤害。",
-      "desc": "空度≥7时穿甲15+强制失调，<7时伤害6"
+      "desc": "空度≥7时穿甲15+强制失调，<7时伤害6",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "qing_xu_zha_lie",
@@ -281,7 +314,8 @@
       "rarity": "rare",
       "copies": 1,
       "description": "触发目标所有≥3情绪的失调效果，每个情绪额外造成10点伤害。",
-      "desc": "触发≥3情绪的失调，每个+10伤害"
+      "desc": "触发≥3情绪的失调，每个+10伤害",
+      "upgrade_type": "cost"
     },
     {
       "id": "kong_shou_huan_hun",
@@ -296,7 +330,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "仅本回合受过伤害时可打出。造成伤害=本回合已受伤害值，空度-受伤/4（向下取整）。",
-      "desc": "伤害=本回合受伤总量（需本回合受过伤）"
+      "desc": "伤害=本回合受伤总量（需本回合受过伤）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "kong_dun",
@@ -311,7 +347,9 @@
       "rarity": "common",
       "copies": 2,
       "description": "空度-2，获得护盾=6-当前空度（最低2，最高6）。",
-      "desc": "空度-2，护盾=6-空度（2–6）"
+      "desc": "空度-2，护盾=6-空度（2–6）",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "jing_mian_hu",
@@ -322,11 +360,13 @@
       "cost": 1,
       "effect_type": "wumian_mirror_shield",
       "effect_value": 8,
-      "reflect_ratio": 0.30,
+      "reflect_ratio": 0.3,
       "rarity": "uncommon",
       "copies": 1,
       "description": "获得8点护盾。本回合受伤的30%以情绪转移形式反弹给攻击者。",
-      "desc": "护盾8，受伤30%反弹为情绪转移"
+      "desc": "护盾8，受伤30%反弹为情绪转移",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "xu_hua",
@@ -341,7 +381,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "免疫下一次攻击，空度+3。",
-      "desc": "免疫下次攻击，空度+3"
+      "desc": "免疫下次攻击，空度+3",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "wu_chu_bu_zai",
@@ -355,7 +397,8 @@
       "rarity": "rare",
       "copies": 1,
       "description": "本回合每次受伤自动空度-1，同时积累护盾=触发次数×2。",
-      "desc": "受伤时空度-1，积累护盾=触发次数×2"
+      "desc": "受伤时空度-1，积累护盾=触发次数×2",
+      "upgrade_type": "cost"
     },
     {
       "id": "kong_tan",
@@ -370,7 +413,9 @@
       "rarity": "common",
       "copies": 1,
       "description": "抽2张牌，空度+1。",
-      "desc": "抽2张，空度+1"
+      "desc": "抽2张，空度+1",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "guan_xing",
@@ -385,7 +430,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "揭示目标所有情绪/Buff/接下来3回合意图，空度-1。",
-      "desc": "揭示敌人全情绪/Buff/3回合意图，空度-1"
+      "desc": "揭示敌人全情绪/Buff/3回合意图，空度-1",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "yi_nian",
@@ -399,7 +446,9 @@
       "rarity": "uncommon",
       "copies": 1,
       "description": "弃置全部手牌，抽同等数量+1张，空度+弃牌数。",
-      "desc": "弃全手牌，抽等量+1张，空度+弃牌数"
+      "desc": "弃全手牌，抽等量+1张，空度+弃牌数",
+      "upgrade_type": "extend",
+      "upgrade_extra_effect": "打出时抽1张牌"
     },
     {
       "id": "du_kou_ling",
@@ -411,11 +460,12 @@
       "effect_type": "wumian_ferry_token",
       "effect_value": 0,
       "du_hua_progress": 0.15,
-      "kongming_bonus_progress": 0.20,
+      "kongming_bonus_progress": 0.2,
       "rarity": "rare",
       "copies": 1,
       "description": "渡化进度+15%。空鸣触发后额外追加+20%渡化进度。",
-      "desc": "渡化进度+15%（空鸣后额外+20%）"
+      "desc": "渡化进度+15%（空鸣后额外+20%）",
+      "upgrade_type": "cost"
     }
   ]
 }

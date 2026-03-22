@@ -73,9 +73,16 @@ func _rebuild_layout() -> void:
 	# ---------- 主体分栏容器 ----------
 	var body: HBoxContainer = HBoxContainer.new()
 	body.name = "BodyContainer"
-	body.set_anchors_preset(Control.PRESET_CENTER)
-	body.position = Vector2(640 - (520 + 20 + 220) / 2.0, 130)
-	body.custom_minimum_size = Vector2(760, 420)
+	body.anchor_left   = 0.5
+	body.anchor_top    = 0.0
+	body.anchor_right  = 0.5
+	body.anchor_bottom = 0.0
+	body.layout_mode   = 1
+	# 宽 760px 居中，顶部 130px 留给标题
+	body.offset_left   = -380.0
+	body.offset_top    = 130.0
+	body.offset_right  = 380.0
+	body.offset_bottom = 560.0
 	body.add_theme_constant_override("separation", 20)
 	ui_layer.add_child(body)
 
@@ -275,10 +282,18 @@ func _generate_shop() -> void:
 	_shop_cards = CardDatabase.get_reward_cards(3)
 	_slot_infos.clear()
 
-	# 找左侧容器的 CardsRow
-	var cards_row: Node = get_node_or_null("UI/BodyContainer/LeftCardsPanel/CardsRow")
+	# 动态创建的 BodyContainer 挂在 CanvasLayer(UI) 下，需要用名字直接找子节点
+	var ui_layer: Node = get_node_or_null("UI")
+	var cards_row: Node = null
+	if ui_layer:
+		var body: Node = ui_layer.get_node_or_null("BodyContainer")
+		if body:
+			var left: Node = body.get_node_or_null("LeftCardsPanel")
+			if left:
+				cards_row = left.get_node_or_null("CardsRow")
+
+	# fallback：使用 tscn 里的 HBoxContainer
 	if cards_row == null:
-		# fallback：使用 tscn 里的 HBoxContainer
 		cards_row = get_node_or_null("UI/CardsForSale")
 		if cards_row:
 			cards_row.visible = true

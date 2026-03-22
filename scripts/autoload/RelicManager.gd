@@ -518,3 +518,25 @@ func _is_upgraded(relic_id: String) -> bool:
 		if r.get("id","") == relic_id:
 			return r.get("upgraded", false)
 	return false
+
+## 遗物奖励池查询
+func get_reward_relics(count: int = 3) -> Array[Dictionary]:
+	## 返回随机 count 个玩家尚未持有的遗物
+	var owned_ids: Array = active_relics.map(func(r): return r.get("id",""))
+	var pool: Array[Dictionary] = []
+	for relic in _all_relics_data.values():
+		var rid: String = relic.get("id","")
+		if rid not in owned_ids and relic.get("rarity","common") != "story":
+			pool.append(relic)
+	pool.shuffle()
+	var result: Array[Dictionary] = []
+	for i in mini(count, pool.size()):
+		result.append(pool[i])
+	return result
+
+func add_relic_by_id(relic_id: String) -> void:
+	var data: Dictionary = _all_relics_data.get(relic_id, {})
+	if data.is_empty(): return
+	if has_relic(relic_id): return
+	active_relics.append(data.duplicate())
+	relic_triggered.emit(relic_id)

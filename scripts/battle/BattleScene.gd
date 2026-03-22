@@ -380,6 +380,7 @@ func _on_battle_ended(result: String) -> void:
 		if _boss_ui: _boss_ui.on_boss_defeated()
 	# 成就追踪
 	var is_boss: bool = state_machine.enemy_data.get("type","") == "boss"
+	var is_elite: bool = bool(GameState.get_meta("is_elite_battle", false))
 	if is_boss:
 		AchievementManager.on_boss_battle_end(result, GameState.hp)
 	elif result == "du_hua":
@@ -399,6 +400,10 @@ func _on_battle_ended(result: String) -> void:
 			result_label.text = _result_panel_bbcode("你也困在这里了", "渡魂人，渡人先渡己。")
 			result_btn.text   = "重新开始"
 			SoundManager.play_sfx("battle_defeat")
+
+	# 精英战胜利 → 弹出遗物选择
+	if is_elite and result in ["victory", "du_hua"]:
+		call_deferred("_show_relic_reward_panel")
 
 ## ── 战斗场内迷你遗物栏 ──────────────────────────────
 ## 在 _ready() 末尾调用 _build_relic_bar()，渲染玩家持有的遗物图标
@@ -1634,3 +1639,152 @@ func _start_purification_dialogue(boss_id: String, char_id: String) -> void:
 			if effect == "purification_complete":
 				state_machine.confirm_du_hua()
 		)
+
+# ════════════════════════════════════════════════════════
+#  精英战遗物奖励面板
+# ════════════════════════════════════════════════════════
+
+func _show_relic_reward_panel() -> void:
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+
+	var relics: Array[Dictionary] = RelicManager.get_reward_relics(3)
+	if relics.is_empty(): return
+
+	# 背景遮罩
+	var overlay: ColorRect = ColorRect.new()
+	overlay.name = "RelicRewardOverlay"
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0, 0, 0, 0.72)
+	overlay.z_index = 150
+	ui.add_child(overlay)
+
+	# 主面板
+	var panel: Panel = Panel.new()
+	panel.name = "RelicRewardPanel"
+	panel.z_index = 151
+	panel.custom_minimum_size = Vector2(520, 260)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	panel.position = Vector2((vp.x - 520) * 0.5, (vp.y - 260) * 0.5)
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.06, 0.04, 0.02, 0.98)
+	ps.border_color = Color(0.85, 0.72, 0.20)
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(8)
+	panel.add_theme_stylebox_override("panel", ps)
+	ui.add_child(panel)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 16.0; vbox.offset_right = -16.0
+	vbox.offset_top = 14.0; vbox.offset_bottom = -14.0
+	vbox.add_theme_constant_override("separation", 12)
+	panel.add_child(vbox)
+
+	# 标题
+	var title: Label = Label.new()
+	title.text = "✦ 精英战奖励 · 选择一件遗物 ✦"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_color_override("font_color", Color(0.95, 0.82, 0.25))
+	vbox.add_child(title)
+
+	# 遗物选项横排
+	var hbox: HBoxContainer = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 16)
+	vbox.add_child(hbox)
+
+	for relic in relics:
+		var rcard: VBoxContainer = _make_relic_card(relic, overlay, panel)
+		hbox.add_child(rcard)
+
+	# 跳过按钮
+	var skip_btn: Button = Button.new()
+	skip_btn.text = "跳过（不选）"
+	skip_btn.custom_minimum_size = Vector2(140, 32)
+	skip_btn.add_theme_font_size_override("font_size", 12)
+	skip_btn.add_theme_color_override("font_color", UIConstants.color_of("ash"))
+	skip_btn.pressed.connect(func():
+		overlay.queue_free()
+		panel.queue_free()
+	)
+	var skip_hbox: HBoxContainer = HBoxContainer.new()
+	skip_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	skip_hbox.add_child(skip_btn)
+	vbox.add_child(skip_hbox)
+
+func _make_relic_card(relic: Dictionary, overlay: Node, panel: Node) -> VBoxContainer:
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.custom_minimum_size = Vector2(148, 160)
+	vbox.add_theme_constant_override("separation", 6)
+
+	# 遗物图标框
+	var frame: Panel = Panel.new()
+	frame.custom_minimum_size = Vector2(148, 100)
+	var fs: StyleBoxFlat = StyleBoxFlat.new()
+	fs.bg_color = Color(0.10, 0.08, 0.03, 0.95)
+	fs.border_color = Color(0.55, 0.42, 0.12, 0.85)
+	fs.set_border_width_all(1)
+	fs.set_corner_radius_all(5)
+	frame.add_theme_stylebox_override("panel", fs)
+	vbox.add_child(frame)
+
+	var inner: VBoxContainer = VBoxContainer.new()
+	inner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	inner.offset_left = 8.0; inner.offset_right = -8.0
+	inner.offset_top = 8.0; inner.offset_bottom = -8.0
+	inner.alignment = BoxContainer.ALIGNMENT_CENTER
+	frame.add_child(inner)
+
+	# 图标
+	var icon_lbl: Label = Label.new()
+	icon_lbl.text = _get_relic_icon(relic.get("id",""))
+	icon_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	icon_lbl.add_theme_font_size_override("font_size", 28)
+	inner.add_child(icon_lbl)
+
+	# 名字
+	var name_lbl: Label = Label.new()
+	name_lbl.text = relic.get("name","???")
+	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_lbl.add_theme_font_size_override("font_size", 12)
+	name_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	inner.add_child(name_lbl)
+
+	# 描述（截短）
+	var desc_raw: String = str(relic.get("description", relic.get("desc", "")))
+	var desc_lbl: Label = Label.new()
+	desc_lbl.text = desc_raw.substr(0, 40) + ("…" if len(desc_raw) > 40 else "")
+	desc_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
+	desc_lbl.add_theme_font_size_override("font_size", 10)
+	desc_lbl.add_theme_color_override("font_color", UIConstants.color_of("ash"))
+	inner.add_child(desc_lbl)
+
+	# 选择按钮
+	var pick_btn: Button = Button.new()
+	pick_btn.text = "选择"
+	pick_btn.custom_minimum_size = Vector2(148, 30)
+	pick_btn.add_theme_font_size_override("font_size", 12)
+	pick_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	pick_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	pick_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	var captured_id: String = relic.get("id","")
+	pick_btn.pressed.connect(func():
+		RelicManager.add_relic_by_id(captured_id)
+		overlay.queue_free()
+		panel.queue_free()
+		_show_float_text("获得遗物：" + relic.get("name",""), Color(0.95, 0.82, 0.25))
+	)
+	vbox.add_child(pick_btn)
+	return vbox
+
+func _get_relic_icon(relic_id: String) -> String:
+	var icons: Dictionary = {
+		"tong_jing_sui":"🪞","wenlu_xiang":"🕯","duhun_ce":"📖",
+		"shaogu_pian":"🦴","qingming_pai":"🪶","wuqing_jie":"🎀",
+		"nianhua_yan":"👁","yin_yang_bi":"✒","hun_bo_lu":"🔥","si_xiang_pian":"🌾",
+		"liuhun_suo":"⛓","biyue_fan":"🪭","kongming_jue":"🌀","wuming_pao":"🫧",
+	}
+	return icons.get(relic_id, "💎")
