@@ -72,20 +72,37 @@ func _build_ui() -> void:
 		row.add_child(panel)
 		_card_panels.append(panel)
 
+	# ── 底部按钮行（单人 + 双人）─────────────────────
+	var btn_row: HBoxContainer = HBoxContainer.new()
+	btn_row.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	btn_row.offset_top    = -108
+	btn_row.offset_bottom = -44
+	btn_row.offset_left   = -240
+	btn_row.offset_right  = 240
+	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_row.add_theme_constant_override("separation", 16)
+	add_child(btn_row)
+
 	var confirm_btn: Button = Button.new()
-	confirm_btn.text = "踏上渡魂之路"
-	confirm_btn.custom_minimum_size = Vector2(220, 52)
-	confirm_btn.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	confirm_btn.offset_top    = -100
-	confirm_btn.offset_bottom = -48
-	confirm_btn.offset_left   = -110
-	confirm_btn.offset_right  = 110
+	confirm_btn.text = "▶ 单人启程"
+	confirm_btn.custom_minimum_size = Vector2(200, 50)
 	var btn_style: StyleBox = UIC.make_button_style("ink", "gold")
 	confirm_btn.add_theme_stylebox_override("normal", btn_style)
+	confirm_btn.add_theme_stylebox_override("hover",  UIC.make_button_style("ink", "gold"))
 	confirm_btn.add_theme_color_override("font_color", UIC.color_of("gold"))
 	confirm_btn.add_theme_font_size_override("font_size", UIC.font_size_of("body"))
 	confirm_btn.pressed.connect(_on_confirm_pressed)
-	add_child(confirm_btn)
+	btn_row.add_child(confirm_btn)
+
+	var coop_btn: Button = Button.new()
+	coop_btn.text = "👥 双人渡魂"
+	coop_btn.custom_minimum_size = Vector2(200, 50)
+	coop_btn.add_theme_stylebox_override("normal", UIC.make_button_style("ink", "gold_dim"))
+	coop_btn.add_theme_stylebox_override("hover",  UIC.make_button_style("ink", "gold"))
+	coop_btn.add_theme_color_override("font_color", UIC.color_of("text_primary"))
+	coop_btn.add_theme_font_size_override("font_size", UIC.font_size_of("body"))
+	coop_btn.pressed.connect(_on_coop_pressed)
+	btn_row.add_child(coop_btn)
 
 	_select(0)
 
@@ -257,3 +274,81 @@ func _on_confirm_pressed() -> void:
 
 	DeckManager.init_starter_deck()
 	TransitionManager.change_scene("res://scenes/MapScene.tscn", "踏上渡魂之路")
+
+func _on_coop_pressed() -> void:
+	## 双人模式：强制选择阮如月（P1）+ 沈铁钧（P2）
+	_show_coop_confirm()
+
+func _show_coop_confirm() -> void:
+	# 临时确认弹窗
+	var popup: Panel = Panel.new()
+	popup.z_index = 200
+	popup.custom_minimum_size = Vector2(380, 220)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	popup.position = Vector2((vp.x - 380.0) * 0.5, (vp.y - 220.0) * 0.5)
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.05, 0.04, 0.02, 0.98)
+	ps.border_color = Color(0.78, 0.60, 0.10, 0.9)
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(8)
+	popup.add_theme_stylebox_override("panel", ps)
+	add_child(popup)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 20.0; vbox.offset_right = -20.0
+	vbox.offset_top = 18.0; vbox.offset_bottom = -18.0
+	vbox.add_theme_constant_override("separation", 12)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	popup.add_child(vbox)
+
+	var title: Label = Label.new()
+	title.text = "👥  双人渡魂"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", UIC.color_of("gold"))
+	vbox.add_child(title)
+
+	var desc: Label = Label.new()
+	desc.text = "P1 控制  阮如月（印记·渡化）\nP2 控制  沈铁钧（锁链·镇压）\n\n双人共享HP，协同技能特化。"
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	desc.add_theme_font_size_override("font_size", 12)
+	desc.add_theme_color_override("font_color", UIC.color_of("text_secondary"))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	vbox.add_child(desc)
+
+	var btn_row: HBoxContainer = HBoxContainer.new()
+	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_row.add_theme_constant_override("separation", 12)
+	vbox.add_child(btn_row)
+
+	var ok_btn: Button = Button.new()
+	ok_btn.text = "开始双人"
+	ok_btn.custom_minimum_size = Vector2(130, 36)
+	ok_btn.add_theme_stylebox_override("normal", UIC.make_button_style("parch", "gold"))
+	ok_btn.add_theme_color_override("font_color", UIC.color_of("gold"))
+	ok_btn.pressed.connect(func():
+		popup.queue_free()
+		_start_coop_mode()
+	)
+	btn_row.add_child(ok_btn)
+
+	var cancel_btn: Button = Button.new()
+	cancel_btn.text = "取消"
+	cancel_btn.custom_minimum_size = Vector2(100, 36)
+	cancel_btn.add_theme_stylebox_override("normal", UIC.make_button_style("parch", "gold_dim"))
+	cancel_btn.pressed.connect(func(): popup.queue_free())
+	btn_row.add_child(cancel_btn)
+
+func _start_coop_mode() -> void:
+	CoopManager.activate_coop_mode()
+	GameState.set_meta("selected_character", "ruan_ruyue")
+	GameState.set_meta("coop_p2_character",  "shen_tiejun")
+	# 双人HP取两角色平均
+	var hp_combined: int = 90  # (阮80 + 沈100) / 2 取整
+	GameState.max_hp = hp_combined
+	GameState.hp     = hp_combined
+	DeckManager.max_cost     = 3
+	DeckManager.current_cost = 3
+	DeckManager.init_starter_deck()
+	TransitionManager.change_scene("res://scenes/MapScene.tscn", "双魂共渡")

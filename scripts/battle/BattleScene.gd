@@ -59,10 +59,20 @@ var _deck_viewer: Control       = null
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
 
+## 双人模式状态机
+var _coop_sm: CoopBattleStateMachine = null
+
+const CoopBattleStateMachineClass = preload("res://scripts/battle/CoopBattleStateMachine.gd")
+
 func _ready() -> void:
 	TransitionManager.fade_in_only()
 	result_panel.visible = false
 	du_hua_btn.visible   = false
+
+	# 双人模式：使用 CoopBattleStateMachine 替代普通 state_machine
+	if CoopManager.is_coop_active:
+		_setup_coop_battle()
+		return
 
 	# ── 第一步：信号连接（纯逻辑，无 UI 依赖）──
 	state_machine.battle_started.connect(_on_battle_started)
@@ -1817,4 +1827,128 @@ func _on_achievement_unlocked(achievement_id: String) -> void:
 		Vector2(get_viewport().get_visible_rect().size.x * 0.5, 80.0),
 		Color(0.65, 0.90, 0.55),
 		16
+	)
+
+# ════════════════════════════════════════════════════════
+#  双人协作战斗模式
+# ════════════════════════════════════════════════════════
+
+func _setup_coop_battle() -> void:
+	_coop_sm = CoopBattleStateMachineClass.new()
+	_coop_sm.name = "CoopStateMachine"
+	add_child(_coop_sm)
+
+	# 连接 coop 信号
+	_coop_sm.coop_battle_started.connect(_on_coop_battle_started)
+	_coop_sm.turn_changed.connect(_on_coop_turn_changed)
+	_coop_sm.battle_ended.connect(_on_coop_battle_ended)
+	_coop_sm.coop_resonance_triggered.connect(_on_coop_resonance)
+
+	# 共用的 UI 初始化（遗物、碎片、卡组查看器等）
+	_setup_relic_bar()
+	_setup_shard_display()
+	_setup_buff_ui()
+	_setup_player_sprite()
+	_setup_energy_display()
+	_setup_card_preview()
+	_setup_altar_title_style()
+	WumianManager.activate()
+	_deck_viewer = DeckViewerPanelClass.new()
+	_deck_viewer.name = "DeckViewerPanel"
+	var ui_node: Node = get_node_or_null("UI")
+	if ui_node:
+		ui_node.add_child(_deck_viewer)
+		_deck_viewer.install_fixed_btn(ui_node, true)
+
+	# HUD 顶部加 coop 角色状态栏
+	_build_coop_hud()
+
+	var eid: String = str(GameState.get_meta("pending_enemy_id", "yuan_gui"))
+	_coop_sm.start_coop_battle(eid)
+
+func _build_coop_hud() -> void:
+	var hud: Node = get_node_or_null("UI/HUD")
+	if not hud: return
+
+	var bar: HBoxContainer = HBoxContainer.new()
+	bar.name = "CoopHUD"
+	bar.add_theme_constant_override("separation", 20)
+	bar.anchor_left = 0.0; bar.anchor_top = 0.0
+	bar.anchor_right = 1.0; bar.anchor_bottom = 0.0
+	bar.offset_top = 0.0; bar.offset_bottom = 44.0
+	bar.layout_mode = 1
+	hud.add_child(bar)
+
+	# P1 阮如月
+	var p1_lbl: Label = Label.new()
+	p1_lbl.name = "P1HP"
+	p1_lbl.text = "P1 阮如月  ❤ 80/80"
+	p1_lbl.add_theme_font_size_override("font_size", 13)
+	p1_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
+	p1_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(p1_lbl)
+
+	# 敌方 HP（中间）
+	var enemy_mid: Label = Label.new()
+	enemy_mid.name = "EnemyHPMid"
+	enemy_mid.text = "敌人 ❤ ?"
+	enemy_mid.add_theme_font_size_override("font_size", 13)
+	enemy_mid.add_theme_color_override("font_color", UIConstants.color_of("nu"))
+	enemy_mid.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	enemy_mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(enemy_mid)
+
+	# P2 沈铁钧
+	var p2_lbl: Label = Label.new()
+	p2_lbl.name = "P2HP"
+	p2_lbl.text = "P2 沈铁钧  ❤ 100/100"
+	p2_lbl.add_theme_font_size_override("font_size", 13)
+	p2_lbl.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
+	p2_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	p2_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	bar.add_child(p2_lbl)
+
+func _on_coop_battle_started() -> void:
+	turn_label.text = "⚔ 双魂协作 ·  第1回合"
+	SoundManager.play_battle_bgm(GameState.current_layer, false)
+	_update_coop_hud()
+
+func _on_coop_turn_changed(character: String) -> void:
+	match character:
+		"ruan": turn_label.text = "🌸 阮如月的回合"
+		"shen": turn_label.text = "⛓ 沈铁钧的回合"
+		"enemy": turn_label.text = "💀 敌人行动"
+	end_turn_btn.disabled = (character == "enemy")
+	_update_coop_hud()
+
+func _update_coop_hud() -> void:
+	if not _coop_sm: return
+	var p1: Label = get_node_or_null("UI/HUD/CoopHUD/P1HP")
+	if p1: p1.text = "P1 阮如月  ❤ %d/%d  🛡 %d" % [
+		_coop_sm.ruan_hp, _coop_sm.ruan_max_hp, _coop_sm.ruan_shield]
+	var p2: Label = get_node_or_null("UI/HUD/CoopHUD/P2HP")
+	if p2: p2.text = "P2 沈铁钧  ❤ %d/%d  🛡 %d" % [
+		_coop_sm.shen_hp, _coop_sm.shen_max_hp, _coop_sm.shen_shield]
+	var em: Label = get_node_or_null("UI/HUD/CoopHUD/EnemyHPMid")
+	if em: em.text = "敌人 ❤ %d/%d" % [_coop_sm.enemy_hp, _coop_sm.enemy_max_hp]
+
+func _on_coop_battle_ended(result: String) -> void:
+	if result == "victory":
+		_show_float_text("⚔ 双魂胜利！", get_viewport().get_visible_rect().size / 2.0,
+			UIConstants.color_of("gold"), 24)
+		await get_tree().create_timer(1.5).timeout
+		TransitionManager.change_scene("res://scenes/CardRewardScene.tscn")
+	else:
+		GameState.trigger_ending("defeat")
+
+func _on_coop_resonance(bonus_type: String) -> void:
+	var labels: Dictionary = {
+		"chain_boost":  "⛓ 锁链共鸣！",
+		"mark_boost":   "🌸 印记共鸣！",
+		"five_harmony": "☯ 五情大共鸣！",
+	}
+	_show_float_text(
+		labels.get(bonus_type, "✦ 协作共鸣！"),
+		Vector2(get_viewport().get_visible_rect().size.x * 0.5, 180.0),
+		Color(0.90, 0.75, 0.20), 20
 	)

@@ -889,6 +889,45 @@
           }
         }
       ]
+    },
+    {
+      "id": "lost_mirror",
+      "name": "迷镜",
+      "layer": 2,
+      "flavor": "水面上有一张脸——不是你的。",
+      "description": "在废弃的庙宇里，你发现了一面破碎的铜镜。镜中映出的，是另一个你——只是眼神已经空了。",
+      "choices": [
+        {
+          "text": "凝视镜中的自己",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "hp_loss",    "value": 20},
+              {"type": "emotion_gain","emotion": "grief","value": 2},
+              {"type": "narrative",  "text": "你从镜中看到了自己三年前的模样——那时候，你还不是渡魂人。"}
+            ],
+            "description": "-20HP，+悲2"
+          }
+        },
+        {
+          "text": "打碎镜子",
+          "result": {
+            "type": "multi",
+            "effects": [
+              {"type": "hp_loss",    "value": 5},
+              {"type": "gold",       "value": 30},
+              {"type": "narrative",  "text": "镜子碎成了七瓣。每一瓣都映着一张不同的脸。"}
+            ],
+            "description": "-5HP，+30金"
+          }
+        },
+        {
+          "text": "走进镜中",
+          "result": {
+            "type": "lost_ending"
+          }
+        }
+      ]
     }
   ]
 }

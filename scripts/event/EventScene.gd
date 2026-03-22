@@ -175,6 +175,12 @@ func _apply_result(result: Dictionary) -> void:
 				card_2["is_curse"] = true
 				DeckManager.add_card_to_deck(card_2)
 
+		"lost_ending":
+			## 隐藏结局：迷失轮回
+			AchievementManager.unlock("lost_ending")
+			await get_tree().create_timer(0.6).timeout
+			GameState.trigger_ending("lost")
+
 func _apply_single_effect(effect: Dictionary) -> void:
 	match effect.get("type", ""):
 		"card_reward":

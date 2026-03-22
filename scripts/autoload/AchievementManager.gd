@@ -212,3 +212,7 @@ func is_unlocked(id: String) -> bool:
 
 func get_achievement_info(achievement_id: String) -> Dictionary:
 	return ACHIEVEMENTS.get(achievement_id, {"name": achievement_id, "desc": "", "icon": "🏆"})
+
+## 外部直接解锁成就（事件/特殊路线用）
+func unlock(id: String) -> void:
+	_check_achievement(id, true)
