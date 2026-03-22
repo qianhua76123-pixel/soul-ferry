@@ -56,6 +56,9 @@ const BossDialogueUIClass   = preload("res://scripts/ui/BossDialogueUI.gd")
 var _energy_tray_label: Label  = null
 var _deck_viewer: Control       = null
 
+## 锁链 HUD 标签（动态创建，显示在敌人区域）
+var _chain_label: Label = null
+
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
 
@@ -96,6 +99,8 @@ func _ready() -> void:
 	RelicManager.relic_triggered.connect(_on_relic_triggered)
 	state_machine.du_hua_succeeded.connect(func(_eid): RelicManager.on_du_hua_success())
 	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
+	# 锁链 HUD：监听锁链层数变化
+	state_machine.chain_applied.connect(_on_chain_applied)
 
 	# ── 第二步：UI 主题 & 样式（不依赖布局尺寸）──
 	_setup_hud_theme()
@@ -796,6 +801,8 @@ func _update_hud() -> void:
 		_player_hbar.set_hp(GameState.hp, GameState.max_hp)
 	if _player_hbar and _player_hbar.has_method("set_shield"):
 		_player_hbar.set_shield(state_machine.player_shield)
+	# 锁链 HUD 同步
+	_refresh_chain_label(state_machine.enemy_chains)
 
 func _setup_hud_theme() -> void:
 	turn_label.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
@@ -830,8 +837,39 @@ func _setup_hud_theme() -> void:
 
 func _result_panel_bbcode(title: String, body: String) -> String:
 	var tc := UIConstants.color_of("gold").to_html(false)
-	var bc := UIConstants.color_of("ash").to_html(false)
-	return "[center][color=#%s]%s[/color]\n\n[color=#%s]%s[/color][/center]" % [tc, title, bc, body]
+
+## ── 锁链 HUD 辅助函数 ──────────────────────────────────
+func _refresh_chain_label(chains: int) -> void:
+	## 根据当前锁链层数更新或隐藏标签
+	if chains <= 0:
+		if _chain_label:
+			_chain_label.visible = false
+		return
+	# 如果标签还没创建，动态添加到敌人区域
+	if not _chain_label:
+		var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
+		if not enemy_area:
+			return
+		_chain_label = Label.new()
+		_chain_label.name = "ChainLabel"
+		_chain_label.add_theme_font_size_override("font_size", 14)
+		_chain_label.add_theme_color_override("font_color", Color(0.4, 0.7, 1.0))
+		_chain_label.z_index = 5
+		enemy_area.add_child(_chain_label)
+	_chain_label.visible = true
+	if chains >= 5:
+		# 5层以上：镇压色（蓝白），提示跳过行动
+		_chain_label.text = "⛓ %d  [镇压]" % chains
+		_chain_label.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
+	else:
+		_chain_label.text = "⛓ %d" % chains
+		_chain_label.add_theme_color_override("font_color", Color(0.4, 0.7, 1.0))
+
+func _on_chain_applied(total_chains: int) -> void:
+	## 接收锁链信号，刷新 HUD 并播放浮字提示
+	_refresh_chain_label(total_chains)
+	if total_chains > 0:
+		_show_float_text("⛓×%d" % total_chains, get_viewport().get_visible_rect().size * Vector2(0.65, 0.35), Color(0.5, 0.8, 1.0), 16)
 
 func _setup_result_panel_theme() -> void:
 	var ps: StyleBoxFlat = StyleBoxFlat.new()

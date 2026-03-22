@@ -10,6 +10,9 @@ signal battle_ended(result: String)
 signal du_hua_available(condition: String)
 signal du_hua_succeeded(enemy_id: String)
 signal intent_updated(intent: Dictionary)
+signal wu_wei_mark_applied(emotion: String, count: int, turns_left: int)
+signal wu_wei_ended_with_duhua()
+signal chain_applied(total_chains: int)  # 锁链施加后通知 HUD 刷新
 
 # 状态常量（替代 enum，避免外部引用问题）
 const STATE_IDLE         = 0
@@ -130,6 +133,8 @@ func _begin_player_turn() -> void:
 		DeckManager.discard_random()
 	player_turn_started.emit(current_turn)
 	intent_updated.emit(next_intent)
+	# 无为：持续施印倒计时
+	_process_wu_wei_tick()
 	# 回合开始时也检查渡化条件（emotion_threshold 型不依赖出牌）
 	_check_du_hua({})
 
@@ -163,6 +168,10 @@ func end_player_turn() -> void:
 	# Buff 系统：回合结束处理（灼烧/中毒伤害、层数衰减）
 	BuffManager.process_turn_end(BuffManager.TARGET_PLAYER)
 	BuffManager.process_turn_end(BuffManager.TARGET_ENEMY)
+	# 锁链自然衰减：每回合结束 -1 层（最低 0）
+	if enemy_chains > 0:
+		enemy_chains = maxi(0, enemy_chains - 1)
+		chain_applied.emit(enemy_chains)
 	_begin_enemy_turn()
 
 ## Boss 当前阶段（1=正常, 2=愤怒），由 BossUI.boss_phase_changed 信号更新
@@ -581,13 +590,16 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 				result.value = dmg4
 
 		"emotion_with_condition_bonus":
-			# 凝定：定+条件奖励
+			# 凝定：定+条件奖励（满足条件时实际施加锁链）
 			var emo_s7: Dictionary = card.get("emotion_shift", {})
 			for e: String in emo_s7:
 				EmotionManager.modify(e, int(emo_s7[e]))
 			if _check_condition(card):
 				result["bonus_energy_next_turn"] = card.get("condition_bonus_energy", 1)
-				result["bonus_chain"] = card.get("condition_bonus_chain", 1)
+				var chain_bonus: int = card.get("condition_bonus_chain", 1)
+				result["bonus_chain"] = chain_bonus
+				# 实际施加锁链（之前只写 result 但未执行效果）
+				_apply_chain(chain_bonus)
 			result.value = 0
 
 		"convert_damage_taken_to_armor":
@@ -934,10 +946,18 @@ func _choose_enemy_action() -> Dictionary:
 
 func _execute_enemy_action(action: Dictionary) -> void:
 	if action.is_empty(): return
+	# 锁链≥5层：跳过本次行动（镇压效果）
+	if next_intent.get("skip_next", false):
+		next_intent.erase("skip_next")
+		return
 	var mul: float = EmotionManager.get_enemy_damage_multiplier()
 	# 愤怒阶段：敌人伤害额外×1.3
 	if boss_phase == 2:
 		mul *= 1.3
+	# 锁链削弱：每层锁链降低10%攻击力，最高降低50%
+	if enemy_chains > 0:
+		var chain_penalty: float = minf(float(enemy_chains) * 0.1, 0.5)
+		mul *= (1.0 - chain_penalty)
 	var atype: String = action.get("type", "")
 	match atype:
 		"attack", "attack_all":
@@ -1065,6 +1085,22 @@ func _deal_damage_to_enemy(amount: int) -> void:
 
 # ── 印记系统辅助方法 ──────────────────────────────────
 
+func _process_wu_wei_tick() -> void:
+	## 无为·持续施印：每回合开始触发，倒计时归零时自动渡化判定
+	if _wu_wei_turns_remaining <= 0: return
+	# 施印
+	for emotion: String in _wu_wei_marks_per_turn:
+		var cnt: int = int(_wu_wei_marks_per_turn[emotion])
+		_apply_mark(emotion, cnt)
+		wu_wei_mark_applied.emit(emotion, cnt, _wu_wei_turns_remaining)
+	# 每回合回血3点
+	GameState.heal(3)
+	_wu_wei_turns_remaining -= 1
+	# 最后一回合结束：若渡化条件满足，自动触发渡化判定
+	if _wu_wei_turns_remaining <= 0:
+		_check_du_hua({})
+		wu_wei_ended_with_duhua.emit()
+
 func _apply_mark(emotion: String, count: int) -> void:
 	## 对敌人施加印记，并检查遗物触发
 	if count <= 0: return
@@ -1075,12 +1111,17 @@ func _apply_mark(emotion: String, count: int) -> void:
 	_check_resonances()
 
 func _apply_chain(count: int) -> void:
-	## 对敌人施加锁链
+	## 对敌人施加锁链，同时应用减攻/行动抑制效果
 	var cap: int = RelicManager.get_chain_stack_cap()
 	enemy_chains = mini(enemy_chains + count, cap)
 	_total_chains_this_battle += count
 	# 千斤锁：检查总锁链阈值
 	RelicManager.on_chain_total_changed_tiejun(enemy_chains)
+	# 锁链≥5层：下回合敌人跳过行动（镇压效果，类似 fear 共鸣）
+	if enemy_chains >= 5:
+		next_intent["skip_next"] = true
+	# 通知 BattleScene 刷新锁链 HUD
+	chain_applied.emit(enemy_chains)
 
 func _check_resonances() -> void:
 	## 检查所有印记是否满足共鸣条件
