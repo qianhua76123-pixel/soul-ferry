@@ -59,6 +59,9 @@ var _deck_viewer: Control       = null
 ## 锁链 HUD 标签（动态创建，显示在敌人区域）
 var _chain_label: Label = null
 
+## 印记显示面板（阮如月专属）
+var _mark_panel: Control = null
+
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
 
@@ -154,6 +157,8 @@ func _deferred_layout_setup() -> void:
 	var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
 	if char_id == "wumian":
 		_setup_wumian_ui()
+	# 印记 UI（阮如月专属，其他角色调用无害）
+	_setup_mark_ui()
 
 ## 情绪溢出状态图标栏（轮盘右侧/上方）
 func _setup_emotion_status_bar() -> void:
@@ -203,60 +208,219 @@ func _update_emotion_status_bar() -> void:
 			tw.tween_property(chip, "modulate", Color(1.4,1.3,1.1,1.0), 0.4)
 			tw.tween_property(chip, "modulate", Color.WHITE, 0.4)
 
+## 阮如月印记 UI：在敌人区域上方创建印记层数显示面板
+func _setup_mark_ui() -> void:
+	## 阮如月：在敌人区域上方创建印记层数显示面板
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if not enemy_area: return
+	# 避免重复创建
+	if enemy_area.get_node_or_null("MarkPanel"): return
+	var panel: Control = Control.new()
+	panel.name = "MarkPanel"
+	panel.custom_minimum_size = Vector2(240, 28)
+	enemy_area.add_child(panel)
+	_mark_panel = panel
+	# 五情图标+层数（横排）
+	var emotions: Array = ["joy", "calm", "grief", "fear", "rage"]
+	var icons: Dictionary = {"joy": "喜", "calm": "定", "grief": "悲", "fear": "惧", "rage": "怒"}
+	var colors: Dictionary = {
+		"joy":   Color(0.9, 0.75, 0.2),
+		"calm":  Color(0.3, 0.75, 0.55),
+		"grief": Color(0.45, 0.55, 0.8),
+		"fear":  Color(0.7, 0.45, 0.8),
+		"rage":  Color(0.9, 0.35, 0.2),
+	}
+	var x_offset: int = 0
+	for emo in emotions:
+		var lbl: Label = Label.new()
+		lbl.name = "Mark_%s" % emo
+		lbl.text = "%s×0" % icons[emo]
+		lbl.position = Vector2(x_offset, 0)
+		lbl.custom_minimum_size = Vector2(44, 28)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_color_override("font_color", colors[emo].darkened(0.3))  # 0层暗色
+		lbl.visible = false  # 0层时隐藏
+		panel.add_child(lbl)
+		x_offset += 46
+	# 连接信号（避免重复连接）
+	if not state_machine.marks_changed.is_connected(_on_marks_changed):
+		state_machine.marks_changed.connect(_on_marks_changed)
+
+func _on_marks_changed(marks: Dictionary) -> void:
+	## 印记层数变化时更新 UI 显示
+	if not _mark_panel: return
+	var emotions: Array = ["joy", "calm", "grief", "fear", "rage"]
+	var icons: Dictionary = {"joy": "喜", "calm": "定", "grief": "悲", "fear": "惧", "rage": "怒"}
+	var colors: Dictionary = {
+		"joy":   Color(0.9, 0.75, 0.2),
+		"calm":  Color(0.3, 0.75, 0.55),
+		"grief": Color(0.45, 0.55, 0.8),
+		"fear":  Color(0.7, 0.45, 0.8),
+		"rage":  Color(0.9, 0.35, 0.2),
+	}
+	var resonance_threshold: int = 3  # 默认共鸣阈值
+	for emo in emotions:
+		var lbl: Node = _mark_panel.get_node_or_null("Mark_%s" % emo)
+		if not lbl: continue
+		var count: int = marks.get(emo, 0)
+		if count <= 0:
+			lbl.visible = false
+		else:
+			lbl.visible = true
+			lbl.set("text", "%s×%d" % [icons[emo], count])
+			# 达到共鸣阈值时高亮，否则中等亮度
+			if count >= resonance_threshold:
+				lbl.add_theme_color_override("font_color", colors[emo])
+			else:
+				lbl.add_theme_color_override("font_color", colors[emo].darkened(0.2))
+
 ## 无名角色专属 UI
 func _setup_wumian_ui() -> void:
 	WumianManager.activate()
 	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 	if not ac: return
+
+	# ── 分段式像素空度进度条容器 ──────────────────────
+	# 总宽220px，高36px，分10格，格间1px间隔
 	var emp_bg: Panel = Panel.new()
 	emp_bg.name = "EmptinessBar"
 	emp_bg.custom_minimum_size = Vector2(220, 36)
 	var emp_style: StyleBoxFlat = StyleBoxFlat.new()
-	emp_style.bg_color = Color(0.10,0.10,0.12,0.9)
-	emp_style.border_width_top=1; emp_style.border_width_bottom=1
-	emp_style.border_width_left=1; emp_style.border_width_right=1
-	emp_style.border_color = Color(0.7,0.7,0.7,0.5)
+	emp_style.bg_color = Color(0.10, 0.10, 0.12, 0.9)
+	emp_style.border_width_top = 1; emp_style.border_width_bottom = 1
+	emp_style.border_width_left = 1; emp_style.border_width_right = 1
+	emp_style.border_color = Color(0.7, 0.7, 0.7, 0.5)
 	emp_style.set_corner_radius_all(4)
 	emp_bg.add_theme_stylebox_override("panel", emp_style)
+
+	# 生成10个 ColorRect 格子（Cell0~Cell9）
+	# 每格宽 = (220 - 11px间隔) / 10 = 20.9 → 近似取21px，最后一格自动填满
+	const CELL_COUNT: int = 10
+	const TOTAL_W: float = 220.0
+	const CELL_H: float = 36.0
+	const GAP: float = 1.0
+	var cell_w: float = (TOTAL_W - GAP * (CELL_COUNT - 1)) / float(CELL_COUNT)
+	for i: int in range(CELL_COUNT):
+		var cell: ColorRect = ColorRect.new()
+		cell.name = "Cell%d" % i
+		cell.color = Color(0.12, 0.12, 0.14, 0.8)  # 默认暗底
+		cell.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cell.position = Vector2(i * (cell_w + GAP), 0.0)
+		cell.size = Vector2(cell_w, CELL_H)
+		emp_bg.add_child(cell)
+
+	# 空度文字标签（覆盖在格子上方，居中）
 	var emp_lbl: Label = Label.new()
 	emp_lbl.name = "EmptinessLabel"
-	emp_lbl.text = "空 度  0 / 10"
+	emp_lbl.text = "空度 0/10"
 	emp_lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
 	emp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	emp_lbl.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
 	emp_lbl.add_theme_font_size_override("font_size", 13)
-	emp_lbl.add_theme_color_override("font_color", Color(0.85,0.85,0.85))
+	emp_lbl.add_theme_color_override("font_color", Color(0.92, 0.92, 0.88))
+	emp_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	emp_bg.add_child(emp_lbl)
+
 	ac.add_child(emp_bg)
+
+	# 分段名称标签
 	var tier_lbl: Label = Label.new()
 	tier_lbl.name = "EmptinessTier"
-	tier_lbl.text = "低空度 — 效果+10%"
+	tier_lbl.text = "虚 — 效果+10%"
 	tier_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	tier_lbl.add_theme_font_size_override("font_size", 11)
-	tier_lbl.add_theme_color_override("font_color", Color(0.7,0.7,0.65))
+	tier_lbl.add_theme_color_override("font_color", Color(0.6, 0.8, 0.6))
 	ac.add_child(tier_lbl)
+
+	# ── 镜·无我状态标签（默认隐藏）──────────────────
+	var kongming_lbl: Label = Label.new()
+	kongming_lbl.name = "KongmingLabel"
+	kongming_lbl.text = "✦ 镜·无我 ✦"
+	kongming_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	kongming_lbl.add_theme_font_size_override("font_size", 15)
+	kongming_lbl.add_theme_color_override("font_color", Color(0.5, 0.75, 1.0))
+	kongming_lbl.visible = false
+	ac.add_child(kongming_lbl)
+
+	# ── 连接信号 ──────────────────────────────────────
 	WumianManager.emptiness_changed.connect(_on_emptiness_changed)
 	WumianManager.kongming_triggered.connect(_on_kongming_triggered)
+	WumianManager.stage_changed.connect(_on_stage_changed)
 
 func _on_emptiness_changed(_old: int, new_val: int) -> void:
+	# ── 更新10个格子颜色（分段着色）──────────────────
 	var emp_bg: Node = get_node_or_null("UI/AltarLayout/AltarCenter/EmptinessBar")
 	if emp_bg:
+		for i: int in range(10):
+			var cell: Node = emp_bg.get_node_or_null("Cell%d" % i)
+			if not cell:
+				continue
+			if i < new_val:
+				# 已填充格：按分段上色
+				var fill_color: Color
+				if i <= 2:
+					fill_color = Color(0.35, 0.55, 0.45)   # 青绿（虚段 0-2）
+				elif i <= 5:
+					fill_color = Color(0.45, 0.45, 0.55)   # 灰蓝（平段 3-5）
+				elif i <= 8:
+					fill_color = Color(0.7, 0.55, 0.2)     # 琥珀（盈段 6-8）
+				else:
+					fill_color = Color(0.85, 0.25, 0.15)   # 血红（溢段 9-10）
+				# ColorRect 直接赋 color 属性
+				if cell is ColorRect:
+					(cell as ColorRect).color = fill_color
+			else:
+				# 未填充格：暗底
+				if cell is ColorRect:
+					(cell as ColorRect).color = Color(0.12, 0.12, 0.14, 0.8)
+		# 文字标签更新
 		var lbl: Node = emp_bg.get_node_or_null("EmptinessLabel")
-		if lbl: lbl.set("text", "空 度  %d / 10" % new_val)
+		if lbl:
+			lbl.set("text", "空度 %d/10" % new_val)
+
+	# ── 分段名称与颜色更新 ─────────────────────────────
 	var tier_lbl: Node = get_node_or_null("UI/AltarLayout/AltarCenter/EmptinessTier")
 	if tier_lbl:
-		var tier_texts: Array = ["低空度 — 效果+10%","中空度 — 平衡状态","高空度 — 费用-1","极高空度 — 费用0 · HP-5/回合"]
-		var tier_colors: Array = [Color(0.6,0.8,0.6),Color(0.7,0.7,0.65),Color(0.8,0.7,0.3),Color(0.9,0.3,0.2)]
+		var tier_texts: Array[String] = ["虚 — 效果+10%", "平 — 平衡状态", "盈 — 费用-1", "溢 — 费用0·HP-5/回合"]
+		var tier_colors: Array[Color] = [
+			Color(0.6, 0.8, 0.6),    # 青绿
+			Color(0.7, 0.7, 0.65),   # 灰白
+			Color(0.8, 0.7, 0.3),    # 琥珀
+			Color(0.9, 0.3, 0.2),    # 血红
+		]
 		var tier: int = clampi(WumianManager.current_tier, 0, 3)
 		tier_lbl.set("text", tier_texts[tier])
 		tier_lbl.add_theme_color_override("font_color", tier_colors[tier])
 
+## 分段切换浮字提示（空度：虚→平 等）
+func _on_stage_changed(old_stage: int, new_stage: int) -> void:
+	var stage_names: Array[String] = ["虚", "平", "盈", "溢"]
+	var old_name: String = stage_names[clampi(old_stage, 0, 3)]
+	var new_name: String = stage_names[clampi(new_stage, 0, 3)]
+	var msg: String = "空度：%s → %s" % [old_name, new_name]
+	var stage_colors: Array[Color] = [
+		Color(0.6, 0.8, 0.6),
+		Color(0.7, 0.7, 0.9),
+		Color(0.9, 0.75, 0.3),
+		Color(1.0, 0.35, 0.2),
+	]
+	var color: Color = stage_colors[clampi(new_stage, 0, 3)]
+	# 在祭坛中央偏上方浮现
+	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
+	var screen_pos: Vector2 = get_viewport().get_visible_rect().size * Vector2(0.5, 0.38)
+	if ac:
+		var rect: Rect2 = ac.get_global_rect()
+		screen_pos = Vector2(rect.position.x + rect.size.x * 0.5, rect.position.y + rect.size.y * 0.3)
+	_show_float_text(msg, screen_pos, color, 17)
+
 func _on_kongming_triggered(_pre: int) -> void:
 	var ui: Node = get_node_or_null("UI")
 	if not ui: return
+	# ── 全屏白色闪光 ──────────────────────────────────
 	var flash: ColorRect = ColorRect.new()
 	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-	flash.color = Color(1,1,1,0.0)
+	flash.color = Color(1, 1, 1, 0.0)
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	flash.z_index = 150
 	ui.add_child(flash)
@@ -264,7 +428,24 @@ func _on_kongming_triggered(_pre: int) -> void:
 	tw.tween_property(flash, "color:a", 0.6, 0.08)
 	tw.tween_property(flash, "color:a", 0.0, 0.45)
 	tw.tween_callback(flash.queue_free)
-	_show_float_text("空  鸣", get_viewport().get_visible_rect().size / 2.0, Color(0.9,0.9,0.85,1.0), 28)
+	_show_float_text("空  鸣", get_viewport().get_visible_rect().size / 2.0, Color(0.9, 0.9, 0.85, 1.0), 28)
+
+	# ── 镜·无我状态视觉反馈 ───────────────────────────
+	if WumianManager.is_kongming_mirror_active():
+		var kongming_lbl: Node = get_node_or_null("UI/AltarLayout/AltarCenter/KongmingLabel")
+		if kongming_lbl:
+			kongming_lbl.visible = true
+			kongming_lbl.modulate.a = 0.0
+			# pulse 淡入淡出循环3次后自动隐藏
+			var ptw: Tween = kongming_lbl.create_tween()
+			ptw.tween_property(kongming_lbl, "modulate:a", 1.0, 0.3)
+			ptw.tween_property(kongming_lbl, "modulate:a", 0.3, 0.3)
+			ptw.tween_property(kongming_lbl, "modulate:a", 1.0, 0.3)
+			ptw.tween_property(kongming_lbl, "modulate:a", 0.3, 0.3)
+			ptw.tween_property(kongming_lbl, "modulate:a", 1.0, 0.3)
+			ptw.tween_property(kongming_lbl, "modulate:a", 0.3, 0.3)
+			# 3次循环结束后保持半透明常显（表示镜·无我持续激活）
+			ptw.tween_property(kongming_lbl, "modulate:a", 0.85, 0.4)
 
 func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
@@ -1785,65 +1966,134 @@ func _on_wumian_free_card_bonus() -> void:
 # ════════════════════════════════════════════════════════
 
 func _on_kongming_choice_required() -> void:
-	## 空鸣触发后，玩家选择：渡化进度+25% or 所有敌人25点穿甲伤害
-	var ui: Node = get_node_or_null("UI")
-	if not ui: return
+	## 空鸣触发后，玩家选择空鸣效果
+	## 参考 PauseMenu/CardRewardScene 风格：深色背景+金色边框+大字标题
 
+	# 暂停敌人行动：将状态机切换到 STATE_RESOLVING（值=3）防止继续执行
+	const STATE_RESOLVING: int = 3
+	if state_machine.current_state != STATE_RESOLVING:
+		state_machine.current_state = STATE_RESOLVING
+
+	# 创建高层 CanvasLayer（layer=200，覆盖所有普通 UI）
+	var choice_layer: CanvasLayer = CanvasLayer.new()
+	choice_layer.name = "KongmingChoiceLayer"
+	choice_layer.layer = 200
+	add_child(choice_layer)
+
+	# 半透明遮罩
+	var overlay: ColorRect = ColorRect.new()
+	overlay.name = "Overlay"
+	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	overlay.color = Color(0.0, 0.0, 0.0, 0.68)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	choice_layer.add_child(overlay)
+
+	# 主面板（深色背景+金色边框）
 	var panel: Panel = Panel.new()
-	panel.name = "KongmingChoice"
-	panel.custom_minimum_size = Vector2(360, 140)
+	panel.name = "KongmingPanel"
+	panel.custom_minimum_size = Vector2(400, 200)
 	var vp: Vector2 = get_viewport().get_visible_rect().size
-	panel.position = Vector2((vp.x - 360) * 0.5, (vp.y - 140) * 0.5)
+	panel.position = Vector2((vp.x - 400.0) * 0.5, (vp.y - 200.0) * 0.5)
 	var ps: StyleBoxFlat = StyleBoxFlat.new()
-	ps.bg_color = Color(0.06, 0.04, 0.03, 0.97)
-	ps.border_width_top = 2; ps.border_width_bottom = 2
-	ps.border_width_left = 2; ps.border_width_right = 2
-	ps.border_color = Color(0.78, 0.78, 0.75, 0.9)
+	ps.bg_color = Color(0.05, 0.04, 0.03, 0.98)
+	ps.border_width_top    = 2; ps.border_width_bottom = 2
+	ps.border_width_left   = 2; ps.border_width_right  = 2
+	ps.border_color = Color(0.85, 0.70, 0.20, 1.0)   # 金色边框
 	ps.set_corner_radius_all(8)
+	ps.content_margin_left   = 20.0; ps.content_margin_right  = 20.0
+	ps.content_margin_top    = 18.0; ps.content_margin_bottom = 18.0
 	panel.add_theme_stylebox_override("panel", ps)
+	choice_layer.add_child(panel)
 
+	# 内部垂直布局
 	var vbox: VBoxContainer = VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.add_theme_constant_override("separation", 18)
 	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	vbox.add_theme_constant_override("separation", 12)
 	panel.add_child(vbox)
 
-	var title: Label = Label.new()
-	title.text = "✦ 空  鸣 ✦   选择空鸣效果"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 16)
-	title.add_theme_color_override("font_color", Color(0.9, 0.9, 0.85))
-	vbox.add_child(title)
+	# 大字标题"空 鸣"
+	var title_lbl: Label = Label.new()
+	title_lbl.text = "✦  空  鸣  ✦"
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_color_override("font_color", Color(0.95, 0.82, 0.25))
+	vbox.add_child(title_lbl)
 
+	# 副标题说明
+	var sub_lbl: Label = Label.new()
+	sub_lbl.text = "选择空鸣效果"
+	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub_lbl.add_theme_font_size_override("font_size", 13)
+	sub_lbl.add_theme_color_override("font_color", Color(0.75, 0.75, 0.70))
+	vbox.add_child(sub_lbl)
+
+	# 两个选项按钮横排
 	var hbox: HBoxContainer = HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	hbox.add_theme_constant_override("separation", 16)
+	hbox.add_theme_constant_override("separation", 20)
 	vbox.add_child(hbox)
 
+	# ── 关闭弹窗并恢复状态的通用 Callable ──
+	var close_choice: Callable = func() -> void:
+		const STATE_PLAYER_TURN: int = 2
+		choice_layer.queue_free()
+		if state_machine.current_state == STATE_RESOLVING:
+			state_machine.current_state = STATE_PLAYER_TURN
+
+	# 按钮样式工厂（深色底+金色边框）
+	var make_btn_style: Callable = func(highlight: bool) -> StyleBoxFlat:
+		var bs: StyleBoxFlat = StyleBoxFlat.new()
+		bs.bg_color = Color(0.10, 0.08, 0.04, 0.95) if not highlight else Color(0.15, 0.12, 0.04, 0.95)
+		bs.border_width_top    = 1; bs.border_width_bottom = 1
+		bs.border_width_left   = 1; bs.border_width_right  = 1
+		bs.border_color = Color(0.85, 0.70, 0.20, 0.85) if highlight else Color(0.60, 0.50, 0.15, 0.75)
+		bs.set_corner_radius_all(6)
+		return bs
+
+	# 选项 A：渡化之道 — 渡化进度+25%
 	var btn_purify: Button = Button.new()
-	btn_purify.text = "渡化进度 +25%"
-	btn_purify.custom_minimum_size = Vector2(150, 40)
+	btn_purify.text = "渡化之道\n渡化进度 +25%"
+	btn_purify.custom_minimum_size = Vector2(165, 60)
 	btn_purify.add_theme_font_size_override("font_size", 13)
-	btn_purify.pressed.connect(func():
-		# 渡化进度+25%（通过 BattleStateMachine 的 du_hua_progress 处理）
-		var prog_panel: Node = get_node_or_null("UI/PurificationPanel")
-		if prog_panel and prog_panel.has_method("add_progress"):
-			prog_panel.add_progress(0.25)
-		panel.queue_free()
+	btn_purify.add_theme_color_override("font_color", Color(0.92, 0.86, 0.74))
+	btn_purify.add_theme_stylebox_override("normal", make_btn_style.call(false))
+	btn_purify.add_theme_stylebox_override("hover",  make_btn_style.call(true))
+	btn_purify.pressed.connect(func() -> void:
+		# 通过 PurificationPanel 增加渡化进度
+		var purif: Node = get_node_or_null("UI/AltarLayout/AltarCenter/PurificationPanel")
+		if purif and purif.has_method("add_progress"):
+			purif.add_progress(0.25)
+		elif state_machine.has_method("_add_du_hua_progress"):
+			state_machine._add_du_hua_progress(0.25)
+		_show_float_text("渡化 +25%", get_viewport().get_visible_rect().size * Vector2(0.5, 0.45), Color(0.7, 0.9, 0.6), 16)
+		close_choice.call()
 	)
 	hbox.add_child(btn_purify)
 
-	var btn_dmg: Button = Button.new()
-	btn_dmg.text = "25点穿甲伤害（全体）"
-	btn_dmg.custom_minimum_size = Vector2(160, 40)
-	btn_dmg.add_theme_font_size_override("font_size", 13)
-	btn_dmg.pressed.connect(func():
+	# 选项 B：空鸣穿甲 — 对敌人造成25点穿甲伤害
+	var btn_pierce: Button = Button.new()
+	btn_pierce.text = "空鸣穿甲\n对敌人25点穿甲伤害"
+	btn_pierce.custom_minimum_size = Vector2(165, 60)
+	btn_pierce.add_theme_font_size_override("font_size", 13)
+	btn_pierce.add_theme_color_override("font_color", Color(0.92, 0.86, 0.74))
+	btn_pierce.add_theme_stylebox_override("normal", make_btn_style.call(false))
+	btn_pierce.add_theme_stylebox_override("hover",  make_btn_style.call(true))
+	btn_pierce.pressed.connect(func() -> void:
+		# 穿甲伤害（忽略护盾，直接扣敌人HP）
 		state_machine._deal_damage_to_enemy(25)
-		panel.queue_free()
+		_show_float_text("空鸣穿甲 -25", get_viewport().get_visible_rect().size * Vector2(0.5, 0.45), Color(1.0, 0.4, 0.2), 16)
+		close_choice.call()
 	)
-	hbox.add_child(btn_dmg)
+	hbox.add_child(btn_pierce)
 
-	ui.add_child(panel)
+	# 面板入场动画（缩放弹入）
+	panel.modulate.a = 0.0
+	panel.scale = Vector2(0.88, 0.88)
+	var anim_tw: Tween = panel.create_tween()
+	anim_tw.tween_property(panel, "modulate:a", 1.0, 0.22)
+	anim_tw.parallel().tween_property(panel, "scale", Vector2(1.0, 1.0), 0.20)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 # ════════════════════════════════════════════════════════
 #  Boss 渡化条件检测（每回合结束时调用）

@@ -13,6 +13,7 @@ signal intent_updated(intent: Dictionary)
 signal wu_wei_mark_applied(emotion: String, count: int, turns_left: int)
 signal wu_wei_ended_with_duhua()
 signal chain_applied(total_chains: int)  # 锁链施加后通知 HUD 刷新
+signal marks_changed(marks: Dictionary)  # 印记层数变化通知 UI
 
 # 状态常量（替代 enum，避免外部引用问题）
 const STATE_IDLE         = 0
@@ -76,6 +77,7 @@ func start_battle(enemy_id: String) -> void:
 	_reflect_ratio   = 0.0
 	_persistent_shield_turns = 0
 	_enemy_marks = {}
+	marks_changed.emit({})
 	_wu_wei_turns_remaining = 0
 	current_turn = 0
 	joy_cards_played_this_turn = 0
@@ -1108,6 +1110,7 @@ func _apply_mark(emotion: String, count: int) -> void:
 	# 通知遗物（旧铜铃：施印牌触发亲和效果）
 	RelicManager.on_seal_card_played_ruyue(emotion)
 	# 县志一卷：施加锁链时揭示意图（印记不触发，但复用接口）
+	marks_changed.emit(_enemy_marks.duplicate())
 	_check_resonances()
 
 func _apply_chain(count: int) -> void:
