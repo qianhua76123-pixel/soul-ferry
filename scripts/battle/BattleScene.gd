@@ -230,7 +230,7 @@ func _on_emptiness_changed(_old: int, new_val: int) -> void:
 	if tier_lbl:
 		var tier_texts: Array = ["低空度 — 效果+10%","中空度 — 平衡状态","高空度 — 费用-1","极高空度 — 费用0 · HP-5/回合"]
 		var tier_colors: Array = [Color(0.6,0.8,0.6),Color(0.7,0.7,0.65),Color(0.8,0.7,0.3),Color(0.9,0.3,0.2)]
-		var tier: int = clamp(WumianManager.current_tier, 0, 3)
+		var tier: int = clampi(WumianManager.current_tier, 0, 3)
 		tier_lbl.set("text", tier_texts[tier])
 		tier_lbl.add_theme_color_override("font_color", tier_colors[tier])
 
@@ -460,8 +460,8 @@ func _show_relic_tooltip(relic_id: String, btn: Button) -> void:
 	var mp: Vector2 = get_viewport().get_mouse_position()
 	var panel_w: float = 240.0
 	var panel_h: float = 80.0
-	var px: float = clamp(mp.x - panel_w * 0.5, 4, vp_size.x - panel_w - 4)
-	var py: float = clamp(mp.y - panel_h - 12, 4, vp_size.y - panel_h - 4)
+	var px: float = clampf(mp.x - panel_w * 0.5, 4.0, vp_size.x - panel_w - 4.0)
+	var py: float = clampf(mp.y - panel_h - 12.0, 4.0, vp_size.y - panel_h - 4.0)
 	_relic_tooltip_panel.position = Vector2(px, py)
 	_relic_tooltip_panel.visible = true
 
@@ -587,7 +587,7 @@ func _on_hand_updated(hand: Array) -> void:
 		if not card_ui: continue
 		if card_ui.has_method("setup"):
 			card_ui.setup(cd2)
-		var can_afford: bool = DeckManager.current_cost >= max(0, cd2.get("cost", 0) - EmotionManager.get_cost_reduction())
+		var can_afford: bool = DeckManager.current_cost >= maxi(0, cd2.get("cost", 0) - EmotionManager.get_cost_reduction())
 		if card_ui.has_method("set_playable"):
 			card_ui.set_playable(can_afford and EmotionManager.can_play_card(cd2))
 		card_ui.card_clicked.connect(_on_card_clicked)
@@ -599,7 +599,7 @@ func _on_hand_updated(hand: Array) -> void:
 	var card_count: int = hand_container.get_child_count()
 	var sep: int = 12
 	if card_count > 5:
-		sep = max(4, 12 - (card_count - 5) * 3)
+		sep = maxi(4, 12 - (card_count - 5) * 3)
 	hand_container.add_theme_constant_override("separation", sep)
 
 	# ⑤ 等两帧确保布局稳定（HBoxContainer 需要两帧完成尺寸分配）
@@ -781,7 +781,7 @@ func _refresh_hand() -> void:
 		if card_ui.has_method("set_playable") and card_ui.has_method("get") :
 			var cd: Variant = card_ui.get("card_data")
 			if cd:
-				var can_afford: bool = DeckManager.current_cost >= max(0, cd.get("cost", 0) - EmotionManager.get_cost_reduction())
+				var can_afford: bool = DeckManager.current_cost >= maxi(0, cd.get("cost", 0) - EmotionManager.get_cost_reduction())
 				card_ui.set_playable(can_afford and EmotionManager.can_play_card(cd))
 
 func _show_popup(result: Dictionary) -> void:
@@ -827,7 +827,7 @@ func _on_wenlu_pressed() -> void:
 	var acts: Array = state_machine.enemy_data.get("actions", [])
 	if acts.is_empty(): return
 	var preview: Array[String] = []
-	for a in acts.slice(0, min(2, len(acts))):
+	for a in acts.slice(0, mini(2, len(acts))):
 		preview.append("%s %s" % [a.get("type", "?"), str(a.get("value", ""))])
 	var line := "感知：" + " / ".join(preview)
 	if _intent_display and _intent_display.has_method("show_intent_custom"):
@@ -974,7 +974,7 @@ func _show_tooltip(buff: Dictionary, anchor: Control) -> void:
 	_tooltip_label.text    = "%s ×%d\n%s" % [title, int(stacks), tip]
 	_tooltip_panel.visible = true
 	var pos: Vector2 = anchor.get_global_rect().position
-	_tooltip_panel.position = Vector2(clamp(pos.x - 60, 4, 1080), max(pos.y - 72, 4))
+	_tooltip_panel.position = Vector2(clampf(pos.x - 60.0, 4.0, 1080.0), maxf(pos.y - 72.0, 4.0))
 
 func _hide_tooltip() -> void:
 	if _tooltip_panel: _tooltip_panel.visible = false

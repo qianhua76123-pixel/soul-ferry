@@ -102,7 +102,7 @@ func on_turn_start() -> void:
 	reset_discard_limit()
 	var draw_n: int = BASE_DRAW + EmotionManager.get_draw_bonus()
 	if EmotionManager.is_disorder("fear"): draw_n -= 1
-	draw_cards(max(1, draw_n))
+	draw_cards(maxi(1, draw_n))
 
 func on_turn_end() -> void:
 	for c in hand.duplicate():
@@ -114,7 +114,7 @@ func play_card(card: Dictionary) -> bool:
 		if hand[i].get("id","") == card.get("id",""):
 			idx = i; break
 	if idx < 0: return false
-	var cost: int = max(0, card.get("cost", 0) - EmotionManager.get_cost_reduction())
+	var cost: int = maxi(0, card.get("cost", 0) - EmotionManager.get_cost_reduction())
 	if current_cost < cost: return false
 	if not EmotionManager.can_play_card(card): return false
 	hand.remove_at(idx)
