@@ -148,15 +148,15 @@ func _build_popup() -> void:
 func _build_mini_bar() -> void:
 	_mini_bar = Control.new()
 	_mini_bar.name = "MiniDeckBar"
-	# 锚定右下角
-	_mini_bar.anchor_left   = 1.0
+	# 锚定左下角（手牌区上方左侧，避免与右下角其他 UI 重叠）
+	_mini_bar.anchor_left   = 0.0
 	_mini_bar.anchor_top    = 1.0
-	_mini_bar.anchor_right  = 1.0
+	_mini_bar.anchor_right  = 0.0
 	_mini_bar.anchor_bottom = 1.0
-	_mini_bar.offset_left   = -170.0
-	_mini_bar.offset_top    = -42.0
-	_mini_bar.offset_right  = -4.0
-	_mini_bar.offset_bottom = -4.0
+	_mini_bar.offset_left   = 8.0
+	_mini_bar.offset_top    = -212.0   # 手牌区（约 170px）再往上 42px
+	_mini_bar.offset_right  = 174.0
+	_mini_bar.offset_bottom = -170.0
 	_mini_bar.layout_mode   = 1
 	_mini_bar.mouse_filter  = Control.MOUSE_FILTER_IGNORE
 	add_child(_mini_bar)
@@ -226,32 +226,46 @@ func _refresh_mini_bar() -> void:
 #  公共 API
 # ════════════════════════════════════════════════════════
 
-## 安装固定「📖 牌组」按钮到指定父节点，用 anchor 定位
-## battle_mode=true 时按钮放左上角 HUD 区，false 放右下角地图区
+## 安装固定「📖 牌组」按钮到指定父节点
+## battle_mode=true 时直接插入 HUD HBoxContainer；false 放右上角地图区
 func install_fixed_btn(parent: Node, battle_mode: bool = false) -> Button:
 	var btn: Button = Button.new()
 	btn.name = "FixedDeckBtn"
-	btn.text = "📖 牌组 [D]"
-	btn.custom_minimum_size = Vector2(100, 30)
-	btn.add_theme_font_size_override("font_size", 12)
+	btn.text = "📖 [D]"  # 缩短文字，节省 HUD 空间
+	btn.custom_minimum_size = Vector2(52, 30)
+	btn.add_theme_font_size_override("font_size", 11)
 	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
 	btn.add_theme_stylebox_override("hover",  UIConstants.make_button_style("parch", "gold"))
 	btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
-	btn.layout_mode = 1
-	if battle_mode:
-		# 战斗模式：右上角 HUD，不遮挡卡牌
-		btn.anchor_left   = 1.0; btn.anchor_top    = 0.0
-		btn.anchor_right  = 1.0; btn.anchor_bottom = 0.0
-		btn.offset_left   = -108.0; btn.offset_right  = -4.0
-		btn.offset_top    = 4.0;   btn.offset_bottom = 34.0
-	else:
-		# 地图模式：右上角固定
-		btn.anchor_left   = 1.0; btn.anchor_top    = 0.0
-		btn.anchor_right  = 1.0; btn.anchor_bottom = 0.0
-		btn.offset_left   = -108.0; btn.offset_right  = -4.0
-		btn.offset_top    = 4.0;   btn.offset_bottom = 34.0
 	btn.pressed.connect(toggle_popup)
-	parent.add_child(btn)
+	if battle_mode:
+		# 战斗模式：直接插入到 HUD HBoxContainer（EndTurnBtn 之前）
+		# parent 是 UI CanvasLayer，向下找 HUD 节点
+		var hud: Node = parent.get_node_or_null("HUD")
+		if hud:
+			btn.layout_mode = 2  # 跟随容器布局
+			btn.size_flags_horizontal = Control.SIZE_SHRINK_END
+			hud.add_child(btn)
+			# 把按钮移到 EndTurnBtn 之前，避免遮挡
+			var end_btn: Node = hud.get_node_or_null("EndTurnBtn")
+			if end_btn:
+				hud.move_child(btn, end_btn.get_index())
+		else:
+			# 回退：右上角 anchor 定位，y 偏移避开 HUD 高度 44px
+			btn.layout_mode = 1
+			btn.anchor_left   = 1.0; btn.anchor_top    = 0.0
+			btn.anchor_right  = 1.0; btn.anchor_bottom = 0.0
+			btn.offset_left   = -56.0; btn.offset_right  = 0.0
+			btn.offset_top    = 8.0;  btn.offset_bottom = 38.0
+			parent.add_child(btn)
+	else:
+		# 地图/商店模式：右上角固定，y=50 避开顶部导航
+		btn.layout_mode = 1
+		btn.anchor_left   = 1.0; btn.anchor_top    = 0.0
+		btn.anchor_right  = 1.0; btn.anchor_bottom = 0.0
+		btn.offset_left   = -108.0; btn.offset_right  = -4.0
+		btn.offset_top    = 50.0;  btn.offset_bottom = 80.0
+		parent.add_child(btn)
 	return btn
 
 func toggle_popup() -> void:

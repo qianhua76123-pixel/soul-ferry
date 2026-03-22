@@ -738,8 +738,9 @@ func _open_forge_overlay() -> void:
 	left_panel.add_child(scroll)
 
 	var card_flow: HFlowContainer = HFlowContainer.new()
-	card_flow.add_theme_constant_override("h_separation", 8)
-	card_flow.add_theme_constant_override("v_separation", 8)
+	# 增大间距，左侧卡牌区更紧凑易读
+	card_flow.add_theme_constant_override("h_separation", 10)
+	card_flow.add_theme_constant_override("v_separation", 10)
 	scroll.add_child(card_flow)
 
 	var card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
@@ -748,7 +749,8 @@ func _open_forge_overlay() -> void:
 		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
 		card_ui.set_playable(can_forge)
-		card_ui.custom_minimum_size = Vector2(95, 148)
+		# 更大的卡牌尺寸，更易点击
+		card_ui.custom_minimum_size = Vector2(110, 165)
 		card_ui.modulate.a = 1.0 if can_forge else 0.35
 		if can_forge:
 			var captured: Dictionary = card
@@ -861,21 +863,23 @@ func _on_forge_card_selected(card: Dictionary) -> void:
 
 	var forge_options: Array[Dictionary] = ForgeSystem.get_available_forges(card)
 	for opt: Dictionary in forge_options:
-		var opt_btn: Button = Button.new()
 		var is_locked: bool = opt.get("locked", false)
 		var is_eligible: bool = opt.get("eligible", true)
-		var label_text: String = "%s\n%s" % [opt.get("label","?"), opt.get("cost_display","")]
+		# 不满足条件且未锁定（即资源不足）的选项直接跳过，减少干扰
+		if not is_eligible and not is_locked:
+			continue
+		var opt_btn: Button = Button.new()
+		var label_text: String = "%s\n%s" % [opt.get("label", "?"), opt.get("cost_display", "")]
 		if is_locked:
 			label_text += "  【需图纸】"
-		elif not is_eligible:
-			label_text += "  【碎片不足】"
 		opt_btn.text = label_text
-		opt_btn.custom_minimum_size = Vector2(0, 52)
+		# 更大的按钮高度和字体，锻造方案更醒目
+		opt_btn.custom_minimum_size = Vector2(0, 64)
 		opt_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		opt_btn.disabled = is_locked or not is_eligible
-		opt_btn.add_theme_font_size_override("font_size", 12)
-		var captured_type: String = opt.get("type","")
-		var captured_label: String = opt.get("label","?")
+		opt_btn.disabled = is_locked
+		opt_btn.add_theme_font_size_override("font_size", 14)
+		var captured_type: String = opt.get("type", "")
+		var captured_label: String = opt.get("label", "?")
 		opt_btn.pressed.connect(func():
 			_forge_selected_type = captured_type
 			if _forge_exec_btn:
