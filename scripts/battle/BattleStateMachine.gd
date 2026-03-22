@@ -449,7 +449,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 				total_marks += _enemy_marks.get(e, 0)
 			var min_heal: int = card.get("effect_value", 4)
 			var max_heal: int = card.get("heal_cap", 15)
-			var hv5: int = int(PLACEHOLDER_CLAMPF * EmotionManager.get_heal_multiplier())
+			var hv5: int = int(clampi(total_marks, min_heal, max_heal) * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv5)
 			DeckManager.draw_cards(card.get("draw", 1))
 			result.value = hv5
@@ -780,7 +780,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			# 空盾：空度-2，护盾=6-当前空度（最低2，最高6）
 			var reduce2: int = mini(2, WumianManager.emptiness)
 			WumianManager.modify_emptiness(-reduce2)
-			var sv2: int = PLACEHOLDER_CLAMPF
+			var sv2: int = clampi(6 - WumianManager.emptiness, 2, 6)
 			player_shield += sv2
 			result.value = sv2
 

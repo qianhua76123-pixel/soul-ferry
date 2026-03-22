@@ -170,7 +170,7 @@ func _on_emotion_changed(emotion: String, _old: int, new_val: int) -> void:
 func _update_edge_vignette(emotion: String, val: int) -> void:
 	if _edge_rects.is_empty(): return
 	var ec    = EMOTION_COLORS.get(emotion, Color.RED)
-	var alpha: float = PLACEHOLDER_CLAMPF
+	var alpha: float = clampf(float(val - 1) / 3.0, 0.0, 0.22)
 	for r in _edge_rects:
 		r.color = Color(ec.r, ec.g, ec.b, alpha)
 
