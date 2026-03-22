@@ -193,6 +193,15 @@ func add_card_to_deck(card: Dictionary) -> void:
 	deck.append(card.duplicate(true))
 	shuffle_deck()
 
+func remove_card(card: Dictionary) -> void:
+	## 从完整牌组中永久移除一张牌（按 id 匹配，跨 deck/hand/discard_pile）
+	var card_id: String = card.get("id", "")
+	for arr: Array in [deck, hand, discard_pile, exhaust_pile]:
+		for i: int in range(arr.size()):
+			if arr[i].get("id", "") == card_id:
+				arr.remove_at(i)
+				return
+
 func remove_card_from_deck(card_id: String) -> bool:
 	for i in len(deck):
 		if deck[i].get("id","") == card_id:

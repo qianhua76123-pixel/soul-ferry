@@ -1,27 +1,31 @@
 extends Node2D
 
 ## RestScene.gd - 休息节点场景
-## 提供两种选择：回复HP / 升级一张牌
+## 提供三种选择：回复HP / 升级一张牌 / 移除一张牌
 ## 背景氛围：烛火、古庙
 
-@onready var heal_btn:      Button = $UI/Options/HealBtn
-@onready var upgrade_btn:   Button = $UI/Options/UpgradeBtn
-@onready var leave_btn:     Button = $UI/LeaveBtn
-@onready var status_label:  Label  = $UI/StatusLabel
+@onready var heal_btn:       Button        = $UI/Options/HealBtn
+@onready var upgrade_btn:    Button        = $UI/Options/UpgradeBtn
+@onready var remove_btn:     Button        = $UI/Options/RemoveBtn
+@onready var leave_btn:      Button        = $UI/LeaveBtn
+@onready var status_label:   Label         = $UI/StatusLabel
 @onready var deck_container: GridContainer = $UI/DeckPanel/DeckGrid
-@onready var deck_panel:    Panel  = $UI/DeckPanel
+@onready var deck_panel:     Panel         = $UI/DeckPanel
 
 const HEAL_AMOUNT_PERCENT = 0.30
 
-var _upgrade_mode: bool  = false
-var _healed:       bool  = false
-var _upgraded:     bool  = false
+var _upgrade_mode: bool = false
+var _remove_mode:  bool = false
+var _healed:       bool = false
+var _upgraded:     bool = false
+var _removed:      bool = false
 
 func _ready() -> void:
 	TransitionManager.fade_in_only()
 	deck_panel.visible = false
 	heal_btn.pressed.connect(_on_heal)
 	upgrade_btn.pressed.connect(_on_upgrade_mode)
+	remove_btn.pressed.connect(_on_remove_mode)
 	leave_btn.pressed.connect(_on_leave)
 	_update_status()
 	_build_bg_candles()
@@ -32,23 +36,26 @@ func _on_heal() -> void:
 	_healed = true
 	var amount: int = int(GameState.max_hp * HEAL_AMOUNT_PERCENT)
 	GameState.heal(amount)
-	heal_btn.disabled  = true
-	status_label.text  = "休息后回复了 %d HP。" % int(amount)
+	heal_btn.disabled = true
+	status_label.text = "休息后回复了 %d HP。" % int(amount)
 	_update_status()
 	SoundManager.play_sfx("heal")
 
 func _on_upgrade_mode() -> void:
 	if _upgraded: return
-	_upgrade_mode      = true
-	deck_panel.visible = true
+	_upgrade_mode        = true
+	deck_panel.visible   = true
 	upgrade_btn.disabled = true
-	status_label.text  = "选择一张牌进行升级 ✨"
+	status_label.text    = "选择一张牌进行升级 ✨"
 
 	for child in deck_container.get_children():
 		child.queue_free()
 
+	# 每行5张，布局更美观
+	deck_container.columns = 5
+
 	var card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
-	for card in DeckManager.get_full_deck():
+	for card: Dictionary in DeckManager.get_full_deck():
 		var can_up: bool = CardDatabase.can_upgrade(card)
 		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
@@ -57,17 +64,65 @@ func _on_upgrade_mode() -> void:
 		# 升级预览 tooltip
 		if can_up:
 			card_ui.tooltip_text = _get_upgrade_preview(card)
-			card_ui.card_clicked.connect(func(c): _on_card_upgrade_selected(c))
+			card_ui.card_clicked.connect(func(c: Dictionary) -> void: _on_card_upgrade_selected(c))
 		deck_container.add_child(card_ui)
+
+func _on_remove_mode() -> void:
+	if _removed: return
+	_remove_mode         = true
+	deck_panel.visible   = true
+	remove_btn.disabled  = true
+	status_label.text    = "选择一张牌将其移除（此操作不可撤销）"
+
+	for child in deck_container.get_children():
+		child.queue_free()
+
+	# 每行5张，布局更美观
+	deck_container.columns = 5
+
+	var card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
+	for card: Dictionary in DeckManager.get_full_deck():
+		# 起始牌（rarity=starter）不允许移除
+		var can_remove: bool = card.get("rarity", "") != "starter"
+		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
+		card_ui.setup(card)
+		card_ui.set_playable(can_remove)
+		card_ui.modulate.a = 1.0 if can_remove else 0.35
+		if can_remove:
+			card_ui.card_clicked.connect(func(c: Dictionary) -> void: _on_card_remove_selected(c))
+		deck_container.add_child(card_ui)
+
+func _on_card_remove_selected(card: Dictionary) -> void:
+	if not _remove_mode: return
+	_removed      = true
+	_remove_mode  = false
+	DeckManager.remove_card(card)
+	deck_panel.visible = false
+	status_label.text  = "「%s」已移除。\n牌组 -1 张。" % card.get("name", "???")
+	_update_status()
+
+	# 移除浮字特效（红色）
+	var lbl: Label = Label.new()
+	lbl.text = "🗑 已移除"
+	lbl.add_theme_color_override("font_color", Color(0.85, 0.35, 0.25))
+	lbl.add_theme_font_size_override("font_size", 20)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var root: Node = get_node_or_null("UI") if get_node_or_null("UI") else self
+	root.add_child(lbl)
+	lbl.position = Vector2(400, 300)
+	var tw: Tween = lbl.create_tween()
+	tw.tween_property(lbl, "position:y", 240.0, 1.0).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(lbl, "modulate:a", 0.0, 1.0)
+	tw.tween_callback(lbl.queue_free)
 
 ## 升级预览文字（展示升级后效果）
 func _get_upgrade_preview(card: Dictionary) -> String:
 	var lines: Array[String] = []
 	lines.append("✨ 升级效果预览：")
-	var cost: int = card.get("cost", 1)
+	var cost: int    = card.get("cost", 1)
 	var etype: String = card.get("effect_type", "")
-	var eval_: int = card.get("effect_value", 0)
-	var bonus: int = card.get("condition_bonus", 0)
+	var eval_: int   = card.get("effect_value", 0)
+	var bonus: int   = card.get("condition_bonus", 0)
 
 	# 费用降低（除0费外）
 	if cost >= 1:
@@ -87,7 +142,7 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 		lines.append("• 条件加成 +%d → +%d" % [int(bonus), int(bonus) + int(int(bonus) * 0.5) + 1])
 
 	# 传说牌额外说明
-	if card.get("rarity","") == "legendary":
+	if card.get("rarity", "") == "legendary":
 		lines.append("• 传说牌：解锁隐藏强化效果")
 
 	lines.append("")
@@ -97,30 +152,31 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 ## 执行升级 — 统一走 CardDatabase.upgrade_card()
 func _on_card_upgrade_selected(card: Dictionary) -> void:
 	if not _upgrade_mode: return
-	_upgraded = true
+	_upgraded     = true
 	_upgrade_mode = false
 
 	var upgraded: Dictionary = CardDatabase.upgrade_card(card)
 	deck_panel.visible = false
 	var utype: String = str(upgraded.get("upgrade_type", "power"))
 	var type_label: Dictionary = {
-		"power":"【强化】数值提升",
-		"cost":"【省能】费用-1",
-		"extend":"【扩展】追加效果",
-		"unlock":"【解锁】移除限制",
-		"transform":"【转化】彻底重铸",
+		"power":     "【强化】数值提升",
+		"cost":      "【省能】费用-1",
+		"extend":    "【扩展】追加效果",
+		"unlock":    "【解锁】移除限制",
+		"transform": "【转化】彻底重铸",
 	}
 	status_label.text = "「%s」已升级！\n%s" % [
-		upgraded.get("name","???"),
+		upgraded.get("name", "???"),
 		type_label.get(utype, "强化完成")]
 
 	# 升级浮字特效
 	_show_upgrade_effect()
 	SoundManager.play_sfx("card_upgrade")
+	_update_status()
 
 ## 升级光效（全屏金色粒子模拟）
 func _show_upgrade_effect() -> void:
-	var overlay = ColorRect.new()
+	var overlay: ColorRect = ColorRect.new()
 	overlay.color = Color(0.98, 0.85, 0.10, 0.0)
 	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var ui: Node = get_node_or_null("UI")
@@ -149,17 +205,34 @@ func _on_leave() -> void:
 	TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 func _update_status() -> void:
+	## 实时刷新 HP 显示 + 操作状态提示
 	var hp_lbl: Node = get_node_or_null("UI/HPStatus")
 	if hp_lbl:
-		hp_lbl.text = "HP: %d / %d" % [int(GameState.hp), int(GameState.max_hp)]
-	status_label.text = "• 回复HP：恢复最大HP的30%%\n• 升级牌卡：费用-1 + 效果值+25%%\n\n当前HP：%d / %d" % [
-		GameState.hp, GameState.max_hp]
+		hp_lbl.set("text", "HP: %d / %d" % [int(GameState.hp), int(GameState.max_hp)])
+
+	# 根据已选行动更新状态文字
+	var opts: Array[String] = []
+	if not _healed:
+		opts.append("• 回复HP：恢复最大HP的30%%（%d点）" % int(GameState.max_hp * 0.3))
+	else:
+		opts.append("✓ 已回复HP")
+	if not _upgraded:
+		opts.append("• 升级牌卡：选一张牌升级")
+	else:
+		opts.append("✓ 已升级牌卡")
+	if not _removed:
+		opts.append("• 移除牌卡：删除一张牌")
+	else:
+		opts.append("✓ 已移除牌卡")
+	opts.append("")
+	opts.append("当前HP：%d / %d" % [int(GameState.hp), int(GameState.max_hp)])
+	status_label.text = "\n".join(opts)
 
 ## 程序化烛火背景装饰
 func _build_bg_candles() -> void:
 	var bg: Node = get_node_or_null("BgCanvas")
 	if not bg: return
-	for i in range(5):
+	for i: int in range(5):
 		var candle: Label = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 28)
@@ -177,7 +250,7 @@ func _setup_rest_visual() -> void:
 	## 休息场景氛围：古庙烛台 + 温暖色调背景
 
 	# 背景（深青灰）
-	var bg = ColorRect.new()
+	var bg: ColorRect = ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.color = Color(0.04, 0.06, 0.08, 1.0)
 	bg.z_index = -10
@@ -199,8 +272,8 @@ func _setup_rest_visual() -> void:
 	if ui_root:
 		var frame: InkedPanel = InkedPanel.new()
 		frame.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		frame.fill_color = Color(UIConstants.color_of("parch").r, UIConstants.color_of("parch").g, UIConstants.color_of("parch").b, 0.10)
-		frame.border_color = Color(UIConstants.color_of("gold_dim").r, UIConstants.color_of("gold_dim").g, UIConstants.color_of("gold_dim").b, 0.45)
+		frame.fill_color   = Color(UIConstants.color_of("parch").r,     UIConstants.color_of("parch").g,     UIConstants.color_of("parch").b,     0.10)
+		frame.border_color = Color(UIConstants.color_of("gold_dim").r,  UIConstants.color_of("gold_dim").g,  UIConstants.color_of("gold_dim").b,  0.45)
 		frame.top_line_color = UIConstants.color_of("gold")
 		ui_root.add_child(frame)
 		ui_root.move_child(frame, 0)
@@ -208,23 +281,23 @@ func _setup_rest_visual() -> void:
 	var divider: WaterInkDivider = WaterInkDivider.new()
 	divider.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	divider.position.y = 56
-	divider.ink_color = UIConstants.color_of("gold_dim")
+	divider.ink_color  = UIConstants.color_of("gold_dim")
 	add_child(divider)
 
 	# 3支烛台
-	for i in range(3):
+	for i: int in range(3):
 		var candle: Label = Label.new()
 		candle.text = "🕯"
 		candle.add_theme_font_size_override("font_size", 24)
 		candle.position = Vector2(460 + i * 148, 520 + (i % 2) * 20)
 		add_child(candle)
 		var tw: Tween = candle.create_tween().set_loops()
-		var period = 1.1 + i * 0.18
+		var period: float = 1.1 + i * 0.18
 		tw.tween_property(candle, "modulate:a", 0.55, period)
 		tw.tween_property(candle, "modulate:a", 1.0,  period)
 
-	# 强化按钮样式（heal/upgrade）
-	for btn in [heal_btn, upgrade_btn]:
+	# 强化按钮样式（heal / upgrade / remove 统一风格）
+	for btn: Button in [heal_btn, upgrade_btn, remove_btn]:
 		var sty: StyleBox = UIConstants.make_button_style("parch", "gold_dim")
 		btn.add_theme_stylebox_override("normal", sty)
 		btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
