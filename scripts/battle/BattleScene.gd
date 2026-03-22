@@ -1316,27 +1316,29 @@ func _setup_altar_title_style() -> void:
 	if pa:
 		var pt: Node = pa.get_node_or_null("PlayerTitle")
 		if pt:
-			pt.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
-			pt.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+			pt.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
+			pt.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
 			_insert_ink_divider_below(pa, pt, 168)
 	var ac: Node = get_node_or_null("UI/AltarLayout/AltarCenter")
 	if ac:
+		# 移除祭坛中央区域的硬边框面板（如果有 Panel 节点）
+		var bg_panel: Node = ac.get_node_or_null("BgPanel")
+		if bg_panel: bg_panel.modulate = Color(0,0,0,0)
 		var at: Node = ac.get_node_or_null("AltarTitle")
 		if at:
-			at.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
+			at.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 			at.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 			_insert_ink_divider_below(ac, at, 200)
 	var ea: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
 	if ea:
 		var en: Node = ea.get_node_or_null("EnemyName")
 		if en:
-			en.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
-			en.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+			en.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
+			en.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
 			_insert_ink_divider_below(ea, en, 168)
 	var dw: Node = get_node_or_null("UI/AltarLayout/AltarCenter/DisorderWarning")
 	if dw:
 		dw.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
-		# 节点自带红色 modulate，正文用浅色保证可读
 		dw.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 	for path in [
 		"UI/AltarLayout/PlayerArea/ShieldLabel",
