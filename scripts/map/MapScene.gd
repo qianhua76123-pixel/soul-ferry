@@ -80,24 +80,13 @@ func _ready() -> void:
 	if not GameState.check_victory_condition():
 		_check_layer_done()
 
-	# 初始化卡组查看器
+	# 初始化卡组查看器 + 安装固定按钮
 	_deck_viewer = DeckViewerPanelClass.new()
 	_deck_viewer.name = "DeckViewer"
 	var ui_layer: Node = get_node_or_null("UI")
 	if ui_layer:
 		ui_layer.add_child(_deck_viewer)
-		# 在 RelicBar 左侧加「查看牌组」按钮
-		var deck_btn: Button = Button.new()
-		deck_btn.name = "ViewDeckBtn"
-		deck_btn.text = "📖 牌组 [D]"
-		deck_btn.custom_minimum_size = Vector2(100, 28)
-		deck_btn.add_theme_font_size_override("font_size", 12)
-		deck_btn.pressed.connect(func(): _deck_viewer.open_panel())
-		# 插入到 RelicBar 前面
-		var rbar: Node = ui_layer.get_node_or_null("RelicBar")
-		if rbar:
-			ui_layer.add_child(deck_btn)
-			deck_btn.position = Vector2(rbar.position.x - 110, rbar.position.y + 4)
+		_deck_viewer.install_fixed_btn(ui_layer, false)
 
 # ══════════════════════════════════════════════════════
 #  地图生成
@@ -821,3 +810,10 @@ func _get_scene_title(ntype: String) -> String:
 		"shop":   return "幽冥集市"
 		"rest":   return "古庙休息"
 		_:        return ""
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_D:
+			if _deck_viewer:
+				_deck_viewer.toggle_popup()
+			get_viewport().set_input_as_handled()

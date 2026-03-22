@@ -752,25 +752,13 @@ func _setup_hud_theme() -> void:
 	du_hua_btn.add_theme_stylebox_override("hover", du_hover)
 	du_hua_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 
-	# 卡组查看按钮（HUD 右侧，DeckCount 按钮旁）
-	var view_deck_btn: Button = Button.new()
-	view_deck_btn.name = "ViewDeckBtn"
-	view_deck_btn.text = "📖 [D]"
-	view_deck_btn.custom_minimum_size = Vector2(60, 28)
-	view_deck_btn.add_theme_font_size_override("font_size", 12)
-	view_deck_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
-	view_deck_btn.add_theme_stylebox_override("hover",  UIConstants.make_button_style("parch", "gold"))
-	view_deck_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
-	view_deck_btn.pressed.connect(func():
-		if _deck_viewer: _deck_viewer.open_panel())
-	var hud_node: Node = get_node_or_null("UI/HUD")
-	if hud_node: hud_node.add_child(view_deck_btn)
-
-	# 初始化卡组查看器面板
+	# 卡组查看器：安装固定按钮 + 快捷键
 	_deck_viewer = DeckViewerPanelClass.new()
 	_deck_viewer.name = "DeckViewerPanel"
 	var ui_node: Node = get_node_or_null("UI")
-	if ui_node: ui_node.add_child(_deck_viewer)
+	if ui_node:
+		ui_node.add_child(_deck_viewer)
+		_deck_viewer.install_fixed_btn(ui_node, true)
 
 func _result_panel_bbcode(title: String, body: String) -> String:
 	var tc := UIConstants.color_of("gold").to_html(false)
@@ -1795,3 +1783,21 @@ func _get_relic_icon(relic_id: String) -> String:
 		"liuhun_suo":"⛓","biyue_fan":"🪭","kongming_jue":"🌀","wuming_pao":"🫧",
 	}
 	return icons.get(relic_id, "💎")
+
+# ════════════════════════════════════════════════════════
+#  键盘快捷键
+# ════════════════════════════════════════════════════════
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not event is InputEventKey or not event.pressed: return
+	match event.keycode:
+		KEY_E:
+			## [E] 结束回合
+			if not end_turn_btn.disabled:
+				_on_end_turn_pressed()
+				get_viewport().set_input_as_handled()
+		KEY_D:
+			## [D] 切换牌组查看
+			if _deck_viewer:
+				_deck_viewer.toggle_popup()
+				get_viewport().set_input_as_handled()
