@@ -269,27 +269,32 @@ data/
 #### 场景
 - [x] 主菜单（水墨背景动态绘制）
 - [x] 战斗场景（BattleScene + BattleStateMachine）
-- [x] 地图导航（MapScene）
+- [x] 地图导航（MapScene，三层结构，节点顺序解锁）
 - [x] 随机事件（EventScene）
 - [x] 商店（ShopScene）
 - [x] 休息（RestScene）
 - [x] 结局（EndingScene，多结局分支）
+- [x] 选牌奖励（CardRewardScene）
 
 #### UI 系统
 - [x] 全局设计系统（UIConstants，色板+字号+组件工厂）
 - [x] 五情雷达图（EmotionRadar）
-- [x] 血量条动画（PlayerHealthBar / EnemyHealthBar）
+- [x] 双层残影血条（PlayerHealthBar / EnemyHealthBar）
 - [x] 意图显示（IntentDisplay）
 - [x] 渡化进度面板（PurificationPanel）
 - [x] 水墨分隔线（WaterInkDivider）
 - [x] Boss 对话UI（BossDialogueUI，逐行播放+多阶段触发）
+- [x] 卡牌悬停预览（CardPreview）
+- [x] 牌组查看器（DeckViewerPanel）
+- [x] 遗物 Tooltip（自定义悬浮面板）
+- [x] 新手引导（TutorialOverlay，6页分步引导，CanvasLayer 实现）
 
 #### 内容（卷一）
 - [x] 共享卡牌 50张
 - [x] 共享遗物 10件
-- [x] 普通亡魂 8个
+- [x] 普通亡魂 8个（含渡化条件）
 
-#### 内容（卷二·深度扩展设计）
+#### 内容（卷二·深度扩展）
 - [x] **阮如月专属遗物** 12件（含传说遗物「观尘之镜」）
 - [x] **沈铁钧专属遗物** 12件（含传说遗物「天网令」）
 - [x] **阮如月·光愈流变体牌组** 15张
@@ -297,22 +302,29 @@ data/
 - [x] **铁甲系统**（固定减伤 + 以盾/甲换攻击）
 - [x] **印记系统完整实现**（施印/共鸣/五情共鸣链路）
 - [x] **Boss 战斗数据** 3个（江盼鱼/宋兰秀/沈素锦）
-- [x] **Boss 对话文本** 12组完整对话（原文全部落地）
-- [x] **双角色协作模式框架**（CoopBattleStateMachine + CoopManager + 协同专属遗物）
+- [x] **Boss 对话文本** 12组完整对话
+- [x] **双角色协作模式框架**（CoopBattleStateMachine + CoopManager）
 - [x] **无面人第三角色**（WumianManager + 空度系统 + 28张牌组 + 情绪转移机制）
-- [x] **三角色数据**（characters.json）
+- [x] **三角色完整数据**（characters.json，含像素色板）
+
+### 🐛 已修复（2026-03-22）
+
+- [x] 新手引导面板偏移到左上角 → 改用 CanvasLayer + 绝对坐标居中
+- [x] 角色选择界面属性文字与背景融合不可见 → 修正颜色键 `parch`→`text_primary`
+- [x] 进入战斗后 `_show_float_text()` 方法缺失报错 → 补全实现
+- [x] 渡化条件触发时 `desc` 类型错误（String→Dictionary）→ 修正变量声明
+- [x] `InkedPanel.gd` / `PlayerHealthBar.gd` Variant 类型推断警告→错误 → 改用 `minf()` / 显式类型
 
 ### 🔲 待开发
 
-- [ ] 无面人起始牌组和过牌动画适配
+- [ ] 无名牌组节奏梳理（当前机制过多，需精简至核心循环）
 - [ ] 协作模式 UI（双人血量/手牌分屏）
 - [ ] Boss 对话与战斗流程集成（BossDialogueUI 接入 BattleScene）
 - [ ] 第4–6章敌人设计
 - [ ] 无面人专属结局文本
 - [ ] 音效/BGM 资产
-- [ ] 3D 像素美术资产（参见 ART_ASSETS_3D_PIXEL.md）
-- [ ] 存档系统完善
-- [ ] 新手引导
+- [ ] 美术资产替换（当前为程序化像素占位符）
+- [ ] 存档系统完善（含版本兼容）
 
 ---
 
@@ -334,6 +346,11 @@ data/
 
 | Commit | 内容 |
 |--------|------|
+| `63f101e` | fix: Variant 类型推断警告修复（InkedPanel / PlayerHealthBar） |
+| `50ce3da` | fix: TutorialOverlay 改用 CanvasLayer，面板绝对坐标居中 |
+| `f9ff358` | fix: _trigger_du_hua desc 类型错误 String→Dictionary |
+| `f38a7ca` | fix: 补全 _show_float_text 方法 + 修正教程面板居中 |
+| `0e5e7eb` | fix: 教程居中 + 角色属性文字可见性修复 |
 | `49eef4f` | feat: 无面人第三角色·空系统（优先级7） |
 | `9ded471` | feat: 双角色协作模式框架（优先级6） |
 | `ac51bfe` | feat: Boss战斗数据+渡化镇压对话文本+BossDialogueUI（优先级5） |
@@ -343,4 +360,4 @@ data/
 
 ---
 
-*README 最后更新：2026-03-21*
+*README 最后更新：2026-03-22*
