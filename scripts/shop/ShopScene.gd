@@ -177,55 +177,85 @@ func _build_left_panel() -> Control:
 	return container
 
 func _build_right_panel() -> Control:
-	## 右侧区域（宽220px）：移除牌区
-
 	var container: VBoxContainer = VBoxContainer.new()
 	container.name = "RightPanel"
 	container.custom_minimum_size = Vector2(220, 400)
-	container.add_theme_constant_override("separation", 12)
+	container.add_theme_constant_override("separation", 10)
 
-	# 移除区面板（InkedPanel 风格 StyleBoxFlat）
+	# ── 移除牌区 ──────────────────────────────────────
 	var remove_frame: Panel = Panel.new()
 	remove_frame.name = "RemoveFrame"
-	remove_frame.custom_minimum_size = Vector2(220, 130)
+	remove_frame.custom_minimum_size = Vector2(220, 110)
 	_apply_inked_stylebox(remove_frame)
-
 	var remove_inner: VBoxContainer = VBoxContainer.new()
 	remove_inner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	remove_inner.offset_left  = 10.0
-	remove_inner.offset_top   = 10.0
-	remove_inner.offset_right  = -10.0
-	remove_inner.offset_bottom = -10.0
+	remove_inner.offset_left = 10.0; remove_inner.offset_top = 8.0
+	remove_inner.offset_right = -10.0; remove_inner.offset_bottom = -8.0
 	remove_inner.add_theme_constant_override("separation", 6)
 	remove_frame.add_child(remove_inner)
-
-	# 移除区标题
 	var remove_title: Label = Label.new()
 	remove_title.text = "✦ 移除一张牌  ·  75金"
 	remove_title.add_theme_font_size_override("font_size", UIC.FONT_SIZES["body"])
 	remove_title.add_theme_color_override("font_color", UIC.COLORS["gold"])
 	remove_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	remove_inner.add_child(remove_title)
-
-	# 移除区描述
 	var remove_desc: Label = Label.new()
 	remove_desc.text = "从牌组中永久抹去一张牌"
 	remove_desc.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
 	remove_desc.add_theme_color_override("font_color", UIC.COLORS["ash"])
 	remove_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	remove_desc.autowrap_mode = TextServer.AUTOWRAP_WORD
 	remove_inner.add_child(remove_desc)
-
-	# 移除按钮
 	var remove_btn_new: Button = Button.new()
 	remove_btn_new.name = "RemoveBtnNew"
 	remove_btn_new.text = "🗑 选择要移除的牌"
-	remove_btn_new.custom_minimum_size = Vector2(200, 36)
+	remove_btn_new.custom_minimum_size = Vector2(200, 32)
 	_apply_buy_button_style(remove_btn_new)
 	remove_btn_new.pressed.connect(_on_remove_pressed)
 	remove_inner.add_child(remove_btn_new)
-
 	container.add_child(remove_frame)
+
+	# ── 锻造入口 ──────────────────────────────────────
+	var forge_frame: Panel = Panel.new()
+	forge_frame.name = "ForgeFrame"
+	forge_frame.custom_minimum_size = Vector2(220, 110)
+	_apply_inked_stylebox(forge_frame)
+	var forge_inner: VBoxContainer = VBoxContainer.new()
+	forge_inner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	forge_inner.offset_left = 10.0; forge_inner.offset_top = 8.0
+	forge_inner.offset_right = -10.0; forge_inner.offset_bottom = -8.0
+	forge_inner.add_theme_constant_override("separation", 6)
+	forge_frame.add_child(forge_inner)
+	var forge_title: Label = Label.new()
+	forge_title.text = "⚒ 锻造改造"
+	forge_title.add_theme_font_size_override("font_size", UIC.FONT_SIZES["body"])
+	forge_title.add_theme_color_override("font_color", UIC.COLORS["gold"])
+	forge_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	forge_inner.add_child(forge_title)
+	var forge_desc: Label = Label.new()
+	forge_desc.text = "消耗碎片强化一张牌\n（需先在战斗中积累碎片）"
+	forge_desc.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
+	forge_desc.add_theme_color_override("font_color", UIC.COLORS["ash"])
+	forge_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	forge_desc.autowrap_mode = TextServer.AUTOWRAP_WORD
+	forge_inner.add_child(forge_desc)
+	var forge_btn: Button = Button.new()
+	forge_btn.name = "ForgeBtnNew"
+	forge_btn.text = "⚒ 进入锻造"
+	forge_btn.custom_minimum_size = Vector2(200, 32)
+	_apply_buy_button_style(forge_btn)
+	forge_btn.pressed.connect(_on_forge_pressed)
+	forge_inner.add_child(forge_btn)
+	container.add_child(forge_frame)
+
+	# ── 已解锁图纸提示 ────────────────────────────────
+	var recipe_lbl: Label = Label.new()
+	recipe_lbl.name = "RecipeLbl"
+	var locked_count: int = ForgeSystem.unlocked_recipes.size()
+	recipe_lbl.text = "已解锁图纸：%d 种" % locked_count if locked_count > 0 else "尚未解锁锻造图纸"
+	recipe_lbl.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
+	recipe_lbl.add_theme_color_override("font_color", UIC.COLORS["ash"] if locked_count == 0 else UIC.COLORS["gold_dim"])
+	recipe_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	container.add_child(recipe_lbl)
 
 	return container
 
@@ -596,3 +626,179 @@ func _apply_buy_button_style(btn: Button) -> void:
 	btn.add_theme_color_override("font_hover_color",    UIC.COLORS["gold"])
 	btn.add_theme_color_override("font_disabled_color", UIC.COLORS["ash"])
 	btn.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
+
+# ── 锻造面板 ──────────────────────────────────────────
+
+var _forge_panel: Panel = null
+
+func _on_forge_pressed() -> void:
+	if _forge_panel and is_instance_valid(_forge_panel):
+		_forge_panel.queue_free()
+		_forge_panel = null
+		return
+	var ui_layer: Node = get_node_or_null("UI")
+	if not ui_layer: return
+
+	_forge_panel = Panel.new()
+	_forge_panel.name = "ForgeSelectPanel"
+	_forge_panel.custom_minimum_size = Vector2(680, 480)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_forge_panel.position = Vector2((vp.x - 680) * 0.5, (vp.y - 480) * 0.5)
+	_forge_panel.z_index = 100
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.06, 0.04, 0.02, 0.98)
+	ps.border_color = Color(0.65, 0.48, 0.12, 0.9)
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(8)
+	_forge_panel.add_theme_stylebox_override("panel", ps)
+	ui_layer.add_child(_forge_panel)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 16.0; vbox.offset_right = -16.0
+	vbox.offset_top = 14.0; vbox.offset_bottom = -14.0
+	vbox.add_theme_constant_override("separation", 10)
+	_forge_panel.add_child(vbox)
+
+	# 标题
+	var title: Label = Label.new()
+	title.text = "⚒  锻造工坊  — 选择一张牌"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", UIC.COLORS["gold"])
+	vbox.add_child(title)
+
+	# 碎片状态
+	var shard_row: HBoxContainer = HBoxContainer.new()
+	shard_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	shard_row.add_theme_constant_override("separation", 12)
+	vbox.add_child(shard_row)
+	var shard_types: Array[String] = ["bei","ju","nu","xi","ding","seal","chain","void","spirit","echo"]
+	var shard_icons: Dictionary = {"bei":"悲","ju":"惧","nu":"怒","xi":"喜","ding":"定",
+		"seal":"印","chain":"锁","void":"空","spirit":"灵","echo":"响"}
+	for st: String in shard_types:
+		var count: int = DiscardSystem.get_shard(st)
+		if count == 0: continue
+		var sl: Label = Label.new()
+		sl.text = "%s×%d" % [shard_icons.get(st,"?"), count]
+		sl.add_theme_font_size_override("font_size", 11)
+		sl.add_theme_color_override("font_color", UIC.COLORS["gold_dim"])
+		shard_row.add_child(sl)
+
+	# 牌组列表（可滚动）
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 200)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var card_flow: HFlowContainer = HFlowContainer.new()
+	card_flow.add_theme_constant_override("h_separation", 8)
+	card_flow.add_theme_constant_override("v_separation", 8)
+	scroll.add_child(card_flow)
+
+	var card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
+	for card: Dictionary in DeckManager.get_full_deck():
+		var can_forge: bool = not card.get("forged", false)
+		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
+		card_ui.setup(card)
+		card_ui.set_playable(can_forge)
+		card_ui.custom_minimum_size = Vector2(100, 155)
+		card_ui.modulate.a = 1.0 if can_forge else 0.4
+		if can_forge:
+			var captured: Dictionary = card
+			card_ui.card_clicked.connect(func(_c): _show_forge_type_selector(captured))
+		card_flow.add_child(card_ui)
+
+	# 关闭
+	var close_btn: Button = Button.new()
+	close_btn.text = "关闭"
+	close_btn.add_theme_font_size_override("font_size", 12)
+	close_btn.pressed.connect(func():
+		if _forge_panel and is_instance_valid(_forge_panel):
+			_forge_panel.queue_free()
+			_forge_panel = null
+	)
+	var close_row: HBoxContainer = HBoxContainer.new()
+	close_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	close_row.add_child(close_btn)
+	vbox.add_child(close_row)
+
+func _show_forge_type_selector(card: Dictionary) -> void:
+	if not _forge_panel or not is_instance_valid(_forge_panel): return
+	# 清空面板内容，换成锻造类型选择
+	for c in _forge_panel.get_children():
+		c.queue_free()
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 16.0; vbox.offset_right = -16.0
+	vbox.offset_top = 14.0; vbox.offset_bottom = -14.0
+	vbox.add_theme_constant_override("separation", 8)
+	_forge_panel.add_child(vbox)
+
+	var title: Label = Label.new()
+	title.text = "⚒  选择锻造类型  ·  「%s」" % card.get("name","???")
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_color_override("font_color", UIC.COLORS["gold"])
+	vbox.add_child(title)
+
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 340)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var list: VBoxContainer = VBoxContainer.new()
+	list.add_theme_constant_override("separation", 6)
+	scroll.add_child(list)
+
+	var forge_options: Array[Dictionary] = ForgeSystem.get_available_forges(card)
+	for opt: Dictionary in forge_options:
+		var row: HBoxContainer = HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		list.add_child(row)
+
+		var info: VBoxContainer = VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(info)
+
+		var name_lbl: Label = Label.new()
+		name_lbl.text = opt.get("label","?")
+		var is_locked: bool = opt.get("locked", false)
+		var is_eligible: bool = opt.get("eligible", true)
+		name_lbl.add_theme_font_size_override("font_size", 13)
+		name_lbl.add_theme_color_override("font_color",
+			UIC.COLORS["ash"] if is_locked else UIC.COLORS["gold"])
+		info.add_child(name_lbl)
+
+		var cost_lbl: Label = Label.new()
+		cost_lbl.text = "消耗：%s%s" % [
+			opt.get("cost_display","???"),
+			"  【需要图纸】" if is_locked else ("  【不适用】" if not is_eligible else "")]
+		cost_lbl.add_theme_font_size_override("font_size", 10)
+		cost_lbl.add_theme_color_override("font_color", UIC.COLORS["ash"])
+		info.add_child(cost_lbl)
+
+		var forge_btn: Button = Button.new()
+		forge_btn.text = "锻造"
+		forge_btn.custom_minimum_size = Vector2(64, 28)
+		forge_btn.add_theme_font_size_override("font_size", 12)
+		forge_btn.disabled = is_locked or not is_eligible
+		var captured_type: String = opt.get("type","")
+		var captured_card: Dictionary = card
+		forge_btn.pressed.connect(func():
+			var result: Dictionary = ForgeSystem.execute_forge(captured_card, captured_type)
+			if result.get("forged", false):
+				_forge_panel.queue_free()
+				_forge_panel = null
+		)
+		row.add_child(forge_btn)
+
+	var back_btn: Button = Button.new()
+	back_btn.text = "← 返回选牌"
+	back_btn.add_theme_font_size_override("font_size", 11)
+	back_btn.pressed.connect(func(): _on_forge_pressed(); _on_forge_pressed())
+	var back_row: HBoxContainer = HBoxContainer.new()
+	back_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	back_row.add_child(back_btn)
+	vbox.add_child(back_row)

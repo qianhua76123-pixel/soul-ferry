@@ -65,6 +65,7 @@ func _ready() -> void:
 	GameState.hp_changed.connect(func(_o: int, _n: int): _update_status())
 	GameState.gold_changed.connect(func(_o: int, _n: int): _update_status())
 	GameState.relic_added.connect(func(_id: String): _render_relics())
+	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 
 	if GameState.has_meta("map_data"):
 		_map_data = GameState.get_meta("map_data")
@@ -817,3 +818,35 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			if _deck_viewer:
 				_deck_viewer.toggle_popup()
 			get_viewport().set_input_as_handled()
+
+func _on_achievement_unlocked(achievement_id: String) -> void:
+	_show_achievement_toast(achievement_id)
+
+func _show_achievement_toast(achievement_id: String) -> void:
+	var info: Dictionary = AchievementManager.get_achievement_info(achievement_id)
+	var name_str: String = info.get("name", achievement_id)
+	var root: Node = get_tree().root
+	var toast: Panel = Panel.new()
+	toast.z_index = 300
+	toast.custom_minimum_size = Vector2(280, 60)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	toast.position = Vector2((vp.x - 280) * 0.5, vp.y - 80.0)
+	var ts: StyleBoxFlat = StyleBoxFlat.new()
+	ts.bg_color = Color(0.06, 0.10, 0.06, 0.95)
+	ts.border_color = Color(0.35, 0.70, 0.30, 0.9)
+	ts.set_border_width_all(2)
+	ts.set_corner_radius_all(6)
+	toast.add_theme_stylebox_override("panel", ts)
+	root.add_child(toast)
+	var lbl: Label = Label.new()
+	lbl.text = "🏆 成就解锁：%s" % name_str
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lbl.offset_left = 12.0; lbl.offset_right = -12.0
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.add_theme_color_override("font_color", Color(0.65, 0.90, 0.55))
+	toast.add_child(lbl)
+	var tw: Tween = toast.create_tween()
+	tw.tween_property(toast, "modulate:a", 0.0, 0.6).set_delay(2.8)
+	tw.tween_callback(toast.queue_free)

@@ -209,3 +209,6 @@ func get_achievement_count() -> int:
 
 func is_unlocked(id: String) -> bool:
 	return stats["achievements"].has(id)
+
+func get_achievement_info(achievement_id: String) -> Dictionary:
+	return ACHIEVEMENTS.get(achievement_id, {"name": achievement_id, "desc": "", "icon": "🏆"})

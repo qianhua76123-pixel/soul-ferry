@@ -47,11 +47,10 @@ var _bg_node:        Node2D  = null
 var _energy_display: Control = null
 const BattleBackgroundClass = preload("res://scripts/battle/BattleBackground.gd")
 const EnergyDisplayClass    = preload("res://scripts/ui/EnergyDisplay.gd")
-
-## 显式 preload 保证 Godot 4.6 编译期能找到静态类定义
 const EnemyPixelArtClass    = preload("res://scripts/ui/EnemyPixelArt.gd")
 const PlayerPixelArtClass   = preload("res://scripts/ui/PlayerPixelArt.gd")
 const DeckViewerPanelClass  = preload("res://scripts/ui/DeckViewerPanel.gd")
+const BossDialogueUIClass   = preload("res://scripts/ui/BossDialogueUI.gd")
 
 ## 卡盘能量标签（右上角）
 var _energy_tray_label: Label  = null
@@ -86,6 +85,7 @@ func _ready() -> void:
 
 	RelicManager.relic_triggered.connect(_on_relic_triggered)
 	state_machine.du_hua_succeeded.connect(func(_eid): RelicManager.on_du_hua_success())
+	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 
 	# ── 第二步：UI 主题 & 样式（不依赖布局尺寸）──
 	_setup_hud_theme()
@@ -1062,6 +1062,13 @@ func _setup_boss_ui(enemy_data: Dictionary) -> void:
 	_boss_ui.boss_phase_changed.connect(_on_boss_phase_changed)
 	_boss_ui.activate(self, enemy_data)
 
+	# Boss 渡化对话 UI（动态创建并挂到 UI 层）
+	var ui_node: Node = get_node_or_null("UI")
+	if ui_node and not ui_node.has_node("BossDialogueUI"):
+		var dlg: Node = BossDialogueUIClass.new()
+		dlg.name = "BossDialogueUI"
+		ui_node.add_child(dlg)
+
 func _on_boss_phase_changed(new_phase: int) -> void:
 	# 同步到状态机：愤怒阶段行动权重倍增
 	state_machine.boss_phase = new_phase
@@ -1801,3 +1808,13 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			if _deck_viewer:
 				_deck_viewer.toggle_popup()
 				get_viewport().set_input_as_handled()
+
+# ── 成就 Toast ─────────────────────────────────────────
+func _on_achievement_unlocked(achievement_id: String) -> void:
+	var info: Dictionary = AchievementManager.get_achievement_info(achievement_id)
+	_show_float_text(
+		"%s 成就：%s" % [info.get("icon","🏆"), info.get("name", achievement_id)],
+		Vector2(get_viewport().get_visible_rect().size.x * 0.5, 80.0),
+		Color(0.65, 0.90, 0.55),
+		16
+	)

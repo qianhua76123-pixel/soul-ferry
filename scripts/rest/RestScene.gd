@@ -47,14 +47,17 @@ func _on_upgrade_mode() -> void:
 	for child in deck_container.get_children():
 		child.queue_free()
 
-	var card_scene: GDScript = preload("res://scenes/CardUI.tscn")
+	var card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
 	for card in DeckManager.get_full_deck():
+		var can_up: bool = CardDatabase.can_upgrade(card)
 		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
 		card_ui.setup(card)
-		card_ui.set_playable(true)
-		# 悬停时显示升级预览 tooltip
-		card_ui.tooltip_text = _get_upgrade_preview(card)
-		card_ui.card_clicked.connect(func(c): _on_card_upgrade_selected(c))
+		card_ui.set_playable(can_up)
+		card_ui.modulate.a = 1.0 if can_up else 0.45
+		# 升级预览 tooltip
+		if can_up:
+			card_ui.tooltip_text = _get_upgrade_preview(card)
+			card_ui.card_clicked.connect(func(c): _on_card_upgrade_selected(c))
 		deck_container.add_child(card_ui)
 
 ## 升级预览文字（展示升级后效果）
@@ -91,53 +94,25 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 	lines.append(card.get("description", ""))
 	return "\n".join(lines)
 
-## 执行升级
+## 执行升级 — 统一走 CardDatabase.upgrade_card()
 func _on_card_upgrade_selected(card: Dictionary) -> void:
 	if not _upgrade_mode: return
 	_upgraded = true
 	_upgrade_mode = false
 
-	var upgrades: Array[String] = []
-
-	# 费用-1
-	var old_cost: int = card.get("cost", 1)
-	if old_cost >= 1:
-		card["cost"] = old_cost - 1
-		upgrades.append("费用 %d→%d" % [int(old_cost), int(card["cost"])])
-
-	# 效果值+25%
-	var etype: String = card.get("effect_type", "")
-	var eval_: int = card.get("effect_value", 0)
-	if eval_ > 0 and etype in [
-		"attack","attack_all","attack_lifesteal","shield","heal",
-		"heal_all_buffs","attack_dot","attack_scaling_rage","shield_attack",
-		"mass_heal_shield","attack_all_triple","weaken","weaken_fear"
-	]:
-		var new_val: int = int(eval_ * 1.25)
-		card["effect_value"] = new_val
-		upgrades.append("效果 %d→%d" % [int(eval_), int(new_val)])
-
-	# 条件加成+50%+1
-	var bonus: int = card.get("condition_bonus", 0)
-	if bonus > 0:
-		var new_bonus: int = bonus + int(bonus * 0.5) + 1
-		card["condition_bonus"] = new_bonus
-		upgrades.append("加成 +%d→+%d" % [int(bonus), int(new_bonus)])
-
-	# 传说牌额外：情绪偏移翻倍
-	if card.get("rarity","") == "legendary":
-		var shift: Dictionary = card.get("emotion_shift", {})
-		for k in shift:
-			shift[k] = shift[k] * 2
-		card["emotion_shift"] = shift
-		upgrades.append("情绪偏移翻倍")
-
-	# 标记已升级（供 CardDatabase 识别）
-	card["level"] = card.get("level", 0) + 1
-
+	var upgraded: Dictionary = CardDatabase.upgrade_card(card)
 	deck_panel.visible = false
-	var upgrade_text = "、".join(upgrades) if upgrades.size() > 0 else "强化完成"
-	status_label.text = "「%s」已升级！\n%s" % [card.get("name","???"), upgrade_text]
+	var utype: String = str(upgraded.get("upgrade_type", "power"))
+	var type_label: Dictionary = {
+		"power":"【强化】数值提升",
+		"cost":"【省能】费用-1",
+		"extend":"【扩展】追加效果",
+		"unlock":"【解锁】移除限制",
+		"transform":"【转化】彻底重铸",
+	}
+	status_label.text = "「%s」已升级！\n%s" % [
+		upgraded.get("name","???"),
+		type_label.get(utype, "强化完成")]
 
 	# 升级浮字特效
 	_show_upgrade_effect()
