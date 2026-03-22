@@ -59,8 +59,8 @@ var _deck_viewer: Control       = null
 ## Boss UI 控制器（仅 Boss 战时激活）
 var _boss_ui: BossUI = null
 
-## 双人模式状态机
-var _coop_sm: CoopBattleStateMachine = null
+## 双人模式状态机（动态类型，避免依赖已移除的 class_name）
+var _coop_sm: Node = null
 
 const CoopBattleStateMachineClass = preload("res://scripts/battle/CoopBattleStateMachine.gd")
 
@@ -1844,14 +1844,19 @@ func _setup_coop_battle() -> void:
 	_coop_sm.battle_ended.connect(_on_coop_battle_ended)
 	_coop_sm.coop_resonance_triggered.connect(_on_coop_resonance)
 
-	# 共用的 UI 初始化（遗物、碎片、卡组查看器等）
-	_setup_relic_bar()
+	# 共用的 UI 初始化（用实际存在的函数名）
+	_build_relic_bar()
 	_setup_shard_display()
 	_setup_buff_ui()
 	_setup_player_sprite()
 	_setup_energy_display()
-	_setup_card_preview()
 	_setup_altar_title_style()
+	# 卡牌预览内联初始化
+	var ui_node2: Node = get_node_or_null("UI")
+	if ui_node2 and not _card_preview:
+		_card_preview = CardPreviewClass.new()
+		ui_node2.add_child(_card_preview)
+
 	WumianManager.activate()
 	_deck_viewer = DeckViewerPanelClass.new()
 	_deck_viewer.name = "DeckViewerPanel"
