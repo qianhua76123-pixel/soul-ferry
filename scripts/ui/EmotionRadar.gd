@@ -59,6 +59,9 @@ func _build_edge_vignettes() -> void:
 	var root_ui: Node = get_tree().root.find_child("UI", true, false)
 	if not root_ui:
 		root_ui = get_parent()
+	if not root_ui:
+		push_warning("EmotionRadar: 无法找到有效的UI根节点，跳过边缘晕染初始化")
+		return
 	for i in range(4):
 		var r = ColorRect.new()
 		r.name = "EdgeVignette%d" % i

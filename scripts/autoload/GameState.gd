@@ -254,4 +254,4 @@ func trigger_ending(ending_type: String) -> void:
 	delete_save()
 	# 成就：结局记录
 	AchievementManager.on_ending(ending_type)
-	TransitionManager.change_scene.call_deferred("res://scenes/EndingScene.tscn")
+	TransitionManager.call_deferred("change_scene", "res://scenes/EndingScene.tscn")

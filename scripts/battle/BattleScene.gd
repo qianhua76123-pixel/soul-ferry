@@ -1048,6 +1048,8 @@ func _setup_hud_theme() -> void:
 
 func _result_panel_bbcode(title: String, body: String) -> String:
 	var tc: String = UIConstants.color_of("gold").to_html(false)
+	var bc: String = UIConstants.color_of("ash").to_html(false)
+	return "[center][color=#%s]%s[/color]\n\n[color=#%s]%s[/color][/center]" % [tc, title, bc, body]
 
 ## ── 锁链 HUD 辅助函数 ──────────────────────────────────
 func _refresh_chain_label(chains: int) -> void:
