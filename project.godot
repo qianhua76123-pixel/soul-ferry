@@ -38,11 +38,10 @@ CoopManager="*res://scripts/autoload/CoopManager.gd"
 [display]
 
 window/size/viewport_width=1280
+window/size/viewport_height=720
 window/size/window_width_override=1920
 window/size/window_height_override=1080
-window/size/viewport_height=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 
 [input]
 
@@ -55,5 +54,4 @@ end_turn={
 [rendering]
 
 environment/defaults/default_clear_color=Color(0.047, 0.031, 0.027, 1)
-
 rendering/2d/snap/snap_2d_vertices_to_pixel=true
