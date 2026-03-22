@@ -45,6 +45,8 @@ func _ready() -> void:
 	)
 
 	GameState.gold_changed.connect(_on_gold_changed)
+	# 遗物获取时显示 Toast
+	GameState.relic_added.connect(_show_relic_toast)
 	_update_gold_label()
 	_setup_shop_visual()
 	_rebuild_layout()
@@ -232,7 +234,7 @@ func _build_right_panel() -> Control:
 	forge_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	forge_inner.add_child(forge_title)
 	var forge_desc: Label = Label.new()
-	forge_desc.text = "消耗碎片强化一张牌\n（需先在战斗中积累碎片）"
+	forge_desc.text = "消耗金币强化一张牌\n（强化/减费/扩展三种方案）"
 	forge_desc.add_theme_font_size_override("font_size", UIC.FONT_SIZES["caption"])
 	forge_desc.add_theme_color_override("font_color", UIC.COLORS["ash"])
 	forge_desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -685,21 +687,8 @@ func _open_forge_overlay() -> void:
 	title_lbl.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	title_bar.add_child(title_lbl)
 
-	# 碎片状态（横排小标签）
-	var shard_row: HBoxContainer = HBoxContainer.new()
-	shard_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shard_row.add_theme_constant_override("separation", 10)
-	title_bar.add_child(shard_row)
-	var shard_types: Array[String] = ["bei","ju","nu","xi","ding","seal","chain","void","spirit","echo"]
-	var shard_icons: Dictionary = {"bei":"悲","ju":"惧","nu":"怒","xi":"喜","ding":"定","seal":"印","chain":"锁","void":"空","spirit":"灵","echo":"响"}
-	for st: String in shard_types:
-		var cnt: int = DiscardSystem.get_shard(st)
-		if cnt == 0: continue
-		var sl: Label = Label.new()
-		sl.text = "%s×%d" % [shard_icons.get(st,"?"), cnt]
-		sl.add_theme_font_size_override("font_size", 12)
-		sl.add_theme_color_override("font_color", Color(0.75, 0.62, 0.28))
-		shard_row.add_child(sl)
+	# 碎片状态行已删除（碎片系统下线）
+	# var shard_row: HBoxContainer = ...
 
 	var close_btn: Button = Button.new()
 	close_btn.text = "✕"
@@ -895,3 +884,43 @@ func _on_forge_execute() -> void:
 	var result: Dictionary = ForgeSystem.execute_forge(_forge_selected_card, _forge_selected_type)
 	if result.get("forged", false):
 		_close_forge_overlay()
+
+# ══════════════════════════════════════════════════════
+#  遗物获取 Toast 通知
+# ══════════════════════════════════════════════════════
+
+func _show_relic_toast(relic_id: String) -> void:
+	## 获得遗物时底部弹出金色 Toast，3秒后自动消失
+	var data: Dictionary = RelicManager._all_relics_data.get(relic_id, {})
+	var relic_name: String = data.get("name", relic_id)
+	var relic_desc: String = data.get("effect", "")
+	# 创建 Toast（底部弹出，3秒后消失）
+	var canvas: CanvasLayer = CanvasLayer.new()
+	canvas.layer = 200
+	add_child(canvas)
+	var panel: Panel = Panel.new()
+	panel.custom_minimum_size = Vector2(320, 72)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	panel.position = Vector2((vp.x - 320) * 0.5, vp.y - 100)
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.08, 0.06, 0.02, 0.96)
+	ps.border_color = Color(0.75, 0.58, 0.15, 0.9)
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(6)
+	panel.add_theme_stylebox_override("panel", ps)
+	canvas.add_child(panel)
+	var lbl: Label = Label.new()
+	lbl.text = "✦ 获得遗物：%s\n%s" % [relic_name, relic_desc]
+	lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_color_override("font_color", Color(0.95, 0.82, 0.25))
+	panel.add_child(lbl)
+	# 入场动画 + 3秒后消失
+	panel.modulate.a = 0.0
+	var tw: Tween = panel.create_tween()
+	tw.tween_property(panel, "modulate:a", 1.0, 0.2)
+	tw.tween_interval(2.8)
+	tw.tween_property(panel, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(canvas.queue_free)

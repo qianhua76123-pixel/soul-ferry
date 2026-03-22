@@ -91,8 +91,8 @@ func start_battle(enemy_id: String) -> void:
 	DeckManager.on_battle_start()
 	# 清空所有 Buff
 	BuffManager.clear_all()
-	# 碎片清零
-	DiscardSystem.clear_run_shards()
+	# 碎片清零已删除（碎片系统下线）
+	# DiscardSystem.clear_run_shards()
 	# 无名激活状态
 	var char_id: String = str(GameState.get_meta("selected_character", ""))
 	if char_id == "wumian":

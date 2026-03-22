@@ -16,11 +16,10 @@ func _ready() -> void:
 
 # ── 公共 API ───────────────────────────────────────────
 
-## 返回该牌所有可用锻造方案（金币基础 + 碎片进阶 + 图纸暂注释）
+## 返回该牌所有可用锻造方案（仅金币基础锻造；碎片进阶锻造已删除）
 func get_available_forges(card: Dictionary) -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	var gold: int = GameState.gold
-	var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
 
 	# ── 基础锻造（金币，无需碎片）────────────────────
 	result.append({
@@ -48,40 +47,8 @@ func get_available_forges(card: Dictionary) -> Array[Dictionary]:
 		"cost_gold":    100,
 	})
 
-	# ── 进阶锻造（碎片，有碎片才显示，无需解锁）────
-	var spirit: int = DiscardSystem.get_shard("spirit")
-	if spirit >= 3:
-		result.append({
-			"type":         "adv_emotion",
-			"label":        "🌀 注入情绪  —  打出时+最优情绪",
-			"cost_display": "灵气碎片×3",
-			"eligible":     true,
-			"locked":       false,
-			"cost_shards":  {"spirit": 3},
-		})
-
-	var void_shard: int = DiscardSystem.get_shard("void")
-	if void_shard >= 5 and char_id == "wumian":
-		result.append({
-			"type":         "adv_void",
-			"label":        "◎ 空度注入  —  效果值×1.5（无名专属）",
-			"cost_display": "空度碎片×5",
-			"eligible":     true,
-			"locked":       false,
-			"cost_shards":  {"void": 5},
-		})
-
-	var seal_shard: int = DiscardSystem.get_shard("seal")
-	var etype: String = str(card.get("effect_type", ""))
-	if seal_shard >= 4 and ("mark" in etype or "resonance" in etype or "seal" in etype):
-		result.append({
-			"type":         "adv_resonance",
-			"label":        "印 共鸣强化  —  共鸣效果×1.5（阮如月）",
-			"cost_display": "印记碎片×4",
-			"eligible":     char_id == "ruan_ruyue",
-			"locked":       char_id != "ruan_ruyue",
-			"cost_shards":  {"seal": 4},
-		})
+	# ── 进阶锻造（碎片）已删除 ────────────────────────
+	# adv_emotion / adv_void / adv_resonance 均已移除
 
 	# ── 图纸锻造（暂时注释，后续扩展）──────────────
 	# TODO: 解锁后在此追加 recipe-based forges
@@ -118,36 +85,10 @@ func execute_forge(card: Dictionary, forge_type: String, _params: Dictionary = {
 			var extra: String = str(result.get("upgrade_extra_effect", "强化完成"))
 			result["description"] = str(result.get("description", "")) + "\n[锻造] " + extra
 
-		"adv_emotion":
-			# 注入情绪：消耗 spirit×3，给牌打上当前最高情绪标签
-			if not DiscardSystem.spend_shards({"spirit": 3}):
-				return card
-			var top_emo: String = "joy"
-			var top_val: int = 0
-			for e: String in EmotionManager.EMOTIONS:
-				var v: int = EmotionManager.values.get(e, 0)
-				if v > top_val:
-					top_val = v
-					top_emo = e
-			result["emotion_tag"] = top_emo
-			result["description"] = str(result.get("description", "")) + \
-				"\n[锻造] 打出时%s+1" % EmotionManager.get_emotion_name(top_emo)
-
-		"adv_void":
-			# 空度注入（无名专属）：消耗 void×5，效果值×1.5
-			if not DiscardSystem.spend_shards({"void": 5}):
-				return card
-			var ev2: int = int(result.get("effect_value", 0))
-			if ev2 > 0:
-				result["effect_value"] = int(ev2 * 1.5)
-			result["description"] = str(result.get("description", "")) + "\n[锻造] 空度效果×1.5"
-
-		"adv_resonance":
-			# 共鸣强化（阮如月）：消耗 seal×4，共鸣触发时效果×1.5
-			if not DiscardSystem.spend_shards({"seal": 4}):
-				return card
-			result["resonance_amp"] = true
-			result["description"] = str(result.get("description", "")) + "\n[锻造] 共鸣效果×1.5"
+		# ── 进阶锻造（碎片）已删除 ────────────────────
+		# "adv_emotion": ...   # 已删除
+		# "adv_void": ...      # 已删除
+		# "adv_resonance": ... # 已删除
 
 		_:
 			# 未知锻造类型，直接返回原卡不修改

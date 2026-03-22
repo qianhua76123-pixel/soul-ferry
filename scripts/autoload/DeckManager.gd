@@ -28,6 +28,7 @@ func _ready() -> void:
 
 func init_deck(card_ids: Array) -> void:
 	deck = []; hand = []; discard_pile = []; exhaust_pile = []
+	_is_first_turn = true  # 重置第一回合标记（每次初始化牌组时确保正确）
 	for cid in card_ids:
 		var c: Dictionary = CardDatabase.get_card(cid)
 		if not c.is_empty(): deck.append(c)
@@ -112,19 +113,24 @@ func on_battle_start() -> void:
 	current_cost  = BASE_COST
 	max_cost      = BASE_COST
 	_is_first_turn = true
-	active_discard_used  = 0
-	active_discard_limit = 1
+	# active_discard_used/limit 已随主动弃牌功能一同删除
 	cost_changed.emit(current_cost)
 
 func on_turn_start() -> void:
 	max_cost = BASE_COST - EmotionManager.get_cost_reduction()
 	current_cost = max_cost
 	cost_changed.emit(current_cost)
-	reset_discard_limit()
-	# 第一回合抽4张，后续3张
+	# reset_discard_limit() 已随主动弃牌功能删除
+	# ── 抽卡数量计算（来源说明）──────────────────────────────────
+	# 第一回合基础：BASE_DRAW_FIRST（4张）；后续每回合：BASE_DRAW（3张）
+	# + EmotionManager.get_draw_bonus()：情绪奖励（如惧主导时返回+2，合计5张）
+	# - 1：若惧失调则再减1
+	# 最终保证至少抽1张（maxi 保底）
 	var base_draw: int = BASE_DRAW_FIRST if _is_first_turn else BASE_DRAW
-	var draw_n: int = base_draw + EmotionManager.get_draw_bonus()
-	if EmotionManager.is_disorder("fear"): draw_n -= 1
+	var draw_bonus: int = EmotionManager.get_draw_bonus()  # 情绪加成（惧主导+2等）
+	var draw_n: int = base_draw + draw_bonus
+	if EmotionManager.is_disorder("fear"):
+		draw_n -= 1  # 惧失调：减1张（但不低于最终保底）
 	draw_cards(maxi(1, draw_n))
 	_is_first_turn = false
 
@@ -156,21 +162,8 @@ func play_card(card: Dictionary) -> bool:
 	hand_updated.emit(hand)
 	return true
 
-## 每回合可主动弃牌次数（遗物/牌效可修改）
-var active_discard_limit: int = 1
-var active_discard_used:  int = 0
-
-func reset_discard_limit() -> void:
-	active_discard_used = 0
-
-func can_active_discard() -> bool:
-	return active_discard_used < active_discard_limit
-
-func active_discard(card: Dictionary) -> void:
-	## 主动弃牌（玩家手动点击「弃牌」按钮），每回合有次数限制
-	if not can_active_discard(): return
-	active_discard_used += 1
-	discard_from_hand(card, false)  # is_forced=false
+## 主动弃牌功能已删除（保留被动弃牌：discard_from_hand / discard_random / card_discarded 信号）
+## DiscardSystem 依赖 card_discarded 信号，不可删除
 
 func discard_from_hand(card: Dictionary, is_forced: bool = true) -> void:
 	var idx: int = hand.find(card)

@@ -115,8 +115,7 @@ func _ready() -> void:
 
 	# ── 第三步：动态 UI 组件（添加子节点，不依赖 size）──
 	_setup_battle_background()   # 最底层背景，先挂上
-	if RelicManager.has_relic("wenlu_xiang"):
-		_add_wenlu_btn()
+	# 问路香按钮已删除（功能下线）
 	_build_relic_bar()
 	_setup_buff_ui()
 	_setup_player_sprite()
@@ -127,11 +126,11 @@ func _ready() -> void:
 	# ── 第四步：布局微调（需要节点树已完整，延迟一帧）──
 	call_deferred("_deferred_layout_setup")
 
-	# ── 弃牌按钮 ──
-	_setup_discard_button()
+	# ── 弃牌按钮已删除（主动弃牌功能下线）──
+	# _setup_discard_button()
 
-	# ── 碎片显示 ──
-	_setup_shard_display()
+	# ── 碎片显示已删除（碎片系统下线）──
+	# _setup_shard_display()
 
 	# ── 弃牌系统信号 ──
 	DiscardSystem.ruyue_seal_bonus_requested.connect(_on_ruyue_seal_bonus)
@@ -490,11 +489,7 @@ func _on_player_turn_started(turn: int) -> void:
 	# 遗物：回合开始触发
 	RelicManager.on_turn_start()
 	_update_hud()
-	# 弃牌按钮重置
-	if _discard_btn:
-		_discard_btn.visible  = true
-		_discard_btn.disabled = false
-		_discard_btn.text     = "弃牌 (%d)" % DeckManager.active_discard_limit
+	# 主动弃牌按钮已删除（功能下线）
 	_discard_mode = false
 	SoundManager.play_sfx("card_draw")
 	if _boss_ui:
@@ -1132,39 +1127,9 @@ func _show_popup(result: Dictionary) -> void:
 	tween.parallel().tween_property(lbl, "modulate:a", 0.0, 0.7)
 	tween.tween_callback(lbl.queue_free)
 
-## 问路香按钮（动态添加到 HUD）
-func _add_wenlu_btn() -> void:
-	var hud: Node = get_node_or_null("UI/HUD")
-	if not hud: return
-	var btn: Button = Button.new()
-	btn.name = "WenluBtn"
-	btn.text = "🕯问路香"
-	btn.custom_minimum_size = Vector2(100, 30)
-	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
-	btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
-	var dis: StyleBoxFlat = UIConstants.make_button_style("parch", "ash")
-	dis.bg_color = Color(dis.bg_color.r, dis.bg_color.g, dis.bg_color.b, 0.5)
-	btn.add_theme_stylebox_override("disabled", dis)
-	btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
-	btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
-	btn.pressed.connect(_on_wenlu_pressed)
-	hud.add_child(btn)
-
-func _on_wenlu_pressed() -> void:
-	if not RelicManager.use_wenlu_xiang(): return
-	# 展示敌人下两回合意图（从 state_machine 读取）
-	var acts: Array = state_machine.enemy_data.get("actions", [])
-	if acts.is_empty(): return
-	var preview: Array[String] = []
-	for a in acts.slice(0, mini(2, len(acts))):
-		preview.append("%s %s" % [a.get("type", "?"), str(a.get("value", ""))])
-	var line: String = "感知：" + " / ".join(preview)
-	if _intent_display and _intent_display.has_method("show_intent_custom"):
-		var rage: bool = int(state_machine.boss_phase) == 2
-		_intent_display.show_intent_custom("🕯", line, rage)
-	# 禁用按钮
-	var btn: Node = get_node_or_null("UI/HUD/WenluBtn")
-	if btn: btn.disabled = true
+## 问路香按钮已删除（问路香功能下线）
+# func _add_wenlu_btn() -> void: ...
+# func _on_wenlu_pressed() -> void: ...
 
 ## ══════════════════════════════════════════════════════
 ## Buff 图标栏系统
@@ -1909,60 +1874,25 @@ func _spawn_impact_particles(parent: Node, color: Color) -> void:
 	gtw.tween_callback(glow.queue_free)
 
 # ════════════════════════════════════════════════════════
-#  弃牌按钮 & 碎片显示
+#  主动弃牌按钮已删除（碎片系统 + 主动弃牌功能下线）
 # ════════════════════════════════════════════════════════
 
-var _discard_btn: Button = null
-var _shard_display: ShardDisplay = null
+# var _discard_btn: Button = null        # 已删除
+# var _shard_display: ShardDisplay = null  # 已删除
 var _free_next_card: bool = false    # 无名空流进入段奖励：下一张牌免费
 
-func _setup_discard_button() -> void:
-	var ui: Node = get_node_or_null("UI")
-	if not ui: return
-	_discard_btn = Button.new()
-	_discard_btn.name = "DiscardBtn"
-	_discard_btn.text = "弃牌"
-	_discard_btn.custom_minimum_size = Vector2(64, 28)
-	_discard_btn.add_theme_font_size_override("font_size", 12)
-	_discard_btn.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
-	_discard_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
-	_discard_btn.visible = false  # 玩家回合才显示
-	_discard_btn.pressed.connect(_on_discard_btn_pressed)
-	ui.add_child(_discard_btn)
-	# 定位到 HUD 右侧
-	var hud: Node = get_node_or_null("UI/HUD")
-	if hud:
-		_discard_btn.position = Vector2(1100.0, 8.0)
-
-func _setup_shard_display() -> void:
-	var ui: Node = get_node_or_null("UI")
-	if not ui: return
-	_shard_display = ShardDisplay.new()
-	_shard_display.name = "ShardDisplay"
-	_shard_display.position = Vector2(8.0, 50.0)
-	ui.add_child(_shard_display)
-
-func _on_discard_btn_pressed() -> void:
-	# 弃牌模式：下一次点击手牌触发主动弃牌
-	if not DeckManager.can_active_discard():
-		return
-	_discard_mode = true
-	_discard_btn.text = "选择要弃掉的牌..."
-	_discard_btn.disabled = true
+# func _setup_discard_button() -> void: ...  # 已删除
+# func _setup_shard_display() -> void: ...   # 已删除
+# func _on_discard_btn_pressed() -> void: ... # 已删除
+# func _update_discard_btn() -> void: ...    # 已删除
 
 var _discard_mode: bool = false
 
 func _handle_card_click_discard(card_data: Dictionary) -> void:
+	## 主动弃牌模式（已停用，函数保留避免调用报错）
 	if not _discard_mode: return
 	_discard_mode = false
-	DeckManager.active_discard(card_data)
-	_update_discard_btn()
-
-func _update_discard_btn() -> void:
-	if not _discard_btn: return
-	var can: bool = DeckManager.can_active_discard()
-	_discard_btn.disabled = not can
-	_discard_btn.text = "弃牌 (%d)" % (DeckManager.active_discard_limit - DeckManager.active_discard_used) if can else "弃牌（已用尽）"
+	# DeckManager.active_discard(card_data)  # 主动弃牌已删除
 
 # ════════════════════════════════════════════════════════
 #  弃牌系统角色专属回调
@@ -2371,7 +2301,7 @@ func _setup_coop_battle() -> void:
 
 	# 共用的 UI 初始化（用实际存在的函数名）
 	_build_relic_bar()
-	_setup_shard_display()
+	# _setup_shard_display()  # 碎片系统已删除
 	_setup_buff_ui()
 	_setup_player_sprite()
 	_setup_energy_display()

@@ -176,7 +176,7 @@ func new_run() -> void:
 	if Engine.has_singleton("BuffManager"):
 		BuffManager.clear_all()
 	add_relic("tong_jing_sui")
-	add_relic("wenlu_xiang")
+	# add_relic("wenlu_xiang")  # 问路香已删除（功能下线）
 	add_relic("duhun_ce")
 
 func take_damage(amount: int) -> void:

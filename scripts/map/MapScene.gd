@@ -64,7 +64,7 @@ func _ready() -> void:
 
 	GameState.hp_changed.connect(func(_o: int, _n: int): _update_status())
 	GameState.gold_changed.connect(func(_o: int, _n: int): _update_status())
-	GameState.relic_added.connect(func(_id: String): _render_relics())
+	GameState.relic_added.connect(func(rid: String): _render_relics(); _show_relic_toast(rid))
 	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 
 	if GameState.has_meta("map_data"):
@@ -826,7 +826,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _on_achievement_unlocked(achievement_id: String) -> void:
 	_show_achievement_toast(achievement_id)
-
 func _show_achievement_toast(achievement_id: String) -> void:
 	var info: Dictionary = AchievementManager.get_achievement_info(achievement_id)
 	var name_str: String = info.get("name", achievement_id)
@@ -979,3 +978,43 @@ func _start_node_idle_animation(btn: Button, ntype: String) -> void:
 				.set_ease(Tween.EASE_IN_OUT)
 			rtw3.tween_property(btn, "modulate", Color.WHITE, 2.5)\
 				.set_ease(Tween.EASE_IN_OUT)
+
+# ══════════════════════════════════════════════════════
+#  遗物获取 Toast 通知
+# ══════════════════════════════════════════════════════
+
+func _show_relic_toast(relic_id: String) -> void:
+	## 获得遗物时底部弹出金色 Toast，3秒后自动消失
+	var data: Dictionary = RelicManager._all_relics_data.get(relic_id, {})
+	var relic_name: String = data.get("name", relic_id)
+	var relic_desc: String = data.get("effect", "")
+	# 创建 Toast（底部弹出，3秒后消失）
+	var canvas: CanvasLayer = CanvasLayer.new()
+	canvas.layer = 200
+	add_child(canvas)
+	var panel: Panel = Panel.new()
+	panel.custom_minimum_size = Vector2(320, 72)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	panel.position = Vector2((vp.x - 320) * 0.5, vp.y - 100)
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.08, 0.06, 0.02, 0.96)
+	ps.border_color = Color(0.75, 0.58, 0.15, 0.9)
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(6)
+	panel.add_theme_stylebox_override("panel", ps)
+	canvas.add_child(panel)
+	var lbl: Label = Label.new()
+	lbl.text = "✦ 获得遗物：%s\n%s" % [relic_name, relic_desc]
+	lbl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.add_theme_color_override("font_color", Color(0.95, 0.82, 0.25))
+	panel.add_child(lbl)
+	# 入场动画 + 3秒后消失
+	panel.modulate.a = 0.0
+	var tw: Tween = panel.create_tween()
+	tw.tween_property(panel, "modulate:a", 1.0, 0.2)
+	tw.tween_interval(2.8)
+	tw.tween_property(panel, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(canvas.queue_free)

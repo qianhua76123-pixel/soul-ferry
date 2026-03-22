@@ -9,7 +9,7 @@ signal relic_triggered(relic_id: String, effect_desc: String)
 var active_relics: Array = []
 
 # ── 各遗物的内部状态
-var _wenlu_used_this_battle: bool  = false   # 问路香：每战一次
+# var _wenlu_used_this_battle: bool = false   # 问路香已删除
 var _sixiang_triggered_this_turn: bool = false  # 思乡片：每回合一次
 var _wuqing_bonus_active: bool    = false   # 五情结：附加费用状态
 
@@ -66,7 +66,7 @@ func get_relic_names() -> Array:
 
 # 战斗开始时由 BattleScene 调用
 func on_battle_start(enemy_data: Dictionary) -> void:
-	_wenlu_used_this_battle = false
+	# _wenlu_used_this_battle 已删除（问路香功能下线）
 	_effect_tong_jing_sui_on_battle_start(enemy_data)
 
 # 回合开始时由 BattleScene 调用
@@ -190,13 +190,8 @@ func _effect_sixiang_pian_on_grief() -> void:
 	GameState.heal(5)
 	relic_triggered.emit("si_xiang_pian", "思乡片：回复 5 HP")
 
-## 问路香 — 每战一次，预览敌人意图（在 BattleScene 调用 use_wenlu_xiang()）
-func use_wenlu_xiang() -> bool:
-	if not has_relic("wenlu_xiang"): return false
-	if _wenlu_used_this_battle: return false
-	_wenlu_used_this_battle = true
-	relic_triggered.emit("wenlu_xiang", "问路香：感知敌人意图")
-	return true
+## 问路香已删除（功能下线，data/relics.json 中的数据保留）
+# func use_wenlu_xiang() -> bool: ...
 
 ## 年画眼 — 事件预览（一局一次），由 EventScene 查询
 var nianhua_used_this_run: bool = false
