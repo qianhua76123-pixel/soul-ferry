@@ -16,7 +16,7 @@ const DeckViewerPanelClass = preload("res://scripts/ui/DeckViewerPanel.gd")
 var _deck_viewer: Control = null
 
 # ── 每层普通节点数量（不含 Boss）
-const LAYER_NODE_COUNTS: Array = [5, 5, 4]
+const LAYER_NODE_COUNTS: Array = [6, 6, 5]   # 每层普通节点数（不含 Boss 和 Boss前休整）
 
 const LAYER_BOSSES: Dictionary = {
 	1: "shuigui_wanggui",
@@ -37,11 +37,11 @@ const SCENE_PATHS: Dictionary = {
 }
 const NODE_ICONS: Dictionary = {
 	"battle": "⚔", "event": "📜", "shop": "🏮",
-	"rest": "🕯", "boss": "☠", "elite": "💀",
+	"rest": "🕯", "boss": "☠", "elite": "💀", "pre_boss_rest": "⛩",
 }
 const NODE_CN: Dictionary = {
 	"battle": "战斗", "event": "事件", "shop": "商店",
-	"rest": "休息", "boss": "Boss", "elite": "精英",
+	"rest": "休息", "boss": "Boss", "elite": "精英", "pre_boss_rest": "休整",
 }
 const LAYER_BG_COLORS: Dictionary = {
 	1: Color("#0a1008"),
@@ -114,53 +114,66 @@ func _generate_layer_nodes(layer_num: int) -> Array:
 	var count: int = LAYER_NODE_COUNTS[layer_num - 1]
 	var nodes: Array = []
 
-	# ── 规则分配：保证合理性 ──
-	# 槽位 0 固定战斗
-	# 至少 1 个事件（随机插入剩余位置）
-	# 至少 1 个商店（随机插入剩余位置）
-	# 第2层起保证有1个精英战斗
-	# 剩余槽位随机填充
-	var fixed_types: Array = ["battle"]           # 位置0固定
-	var must_have: Array   = ["event", "shop"]    # 保证出现
-	if layer_num >= 2:
-		must_have.append("elite")   # 第2层起保证精英节点
-	var remaining_count: int = count - fixed_types.size() - must_have.size()
+	# ── 规则分配 ──────────────────────────────────────────
+	# 结构：[battle(固定)] + [随机中段] + [pre_boss_rest(固定)] + [boss(固定)]
+	# 保证出现：event × 1，shop × 1，elite × 1-2
+	# 剩余槽位随机填充（battle/event）
+	var fixed_start: Array = ["battle"]              # 位置0固定战斗
+	var must_have: Array   = ["event", "shop", "elite"]  # 每层保证出现
 
-	# 剩余槽位用权重随机填充
+	# 50% 概率第二个精英
+	if randi() % 2 == 0:
+		must_have.append("elite")
+
+	var remaining_count: int = count - fixed_start.size() - must_have.size()
+	remaining_count = maxi(0, remaining_count)
+
+	# 剩余槽位随机填充
 	var fill_pool: Array = []
 	for _i: int in remaining_count:
 		fill_pool.append(_roll_type())
 
-	# 合并 must_have + fill_pool，然后随机打乱（保证must_have不扎堆）
+	# 中段 = must_have + fill_pool 随机打乱
 	var middle: Array = must_have + fill_pool
 	middle.shuffle()
 
-	# 最终节点类型序列：[battle, ...shuffle..., boss]
-	var type_seq: Array = fixed_types + middle
+	# 最终普通节点序列（不含 pre_boss_rest 和 boss）
+	var type_seq: Array = fixed_start + middle
 
-	for i: int in count:
+	for i: int in type_seq.size():
 		var enemy_id: String = ""
 		var is_elite: bool = type_seq[i] == "elite"
 		if type_seq[i] in ["battle", "elite"]:
 			enemy_id = _random_enemy_for_layer(layer_num)
 		nodes.append({
-			"id":        "n_%d_%d" % [layer_num, i],
-			"type":      type_seq[i],
-			"layer":     layer_num,
-			"visited":   false,
-			"enemy_id":  enemy_id,
-			"index":     i,
-			"is_elite":  is_elite,
+			"id":       "n_%d_%d" % [layer_num, i],
+			"type":     type_seq[i],
+			"layer":    layer_num,
+			"visited":  false,
+			"enemy_id": enemy_id,
+			"index":    i,
+			"is_elite": is_elite,
 		})
 
-	# Boss 节点最后
+	# ── Boss 前休整节点（固定倒数第二）──
+	nodes.append({
+		"id":       "pre_boss_%d" % layer_num,
+		"type":     "pre_boss_rest",
+		"layer":    layer_num,
+		"visited":  false,
+		"enemy_id": "",
+		"index":    type_seq.size(),
+		"is_elite": false,
+	})
+
+	# ── Boss 节点（固定最后）──
 	nodes.append({
 		"id":       "boss_%d" % layer_num,
 		"type":     "boss",
 		"layer":    layer_num,
 		"visited":  false,
 		"enemy_id": LAYER_BOSSES[layer_num],
-		"index":    count,
+		"index":    type_seq.size() + 1,
 		"is_elite": false,
 	})
 	return nodes
@@ -299,7 +312,8 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 		"elite":  [Color(0.22, 0.05, 0.22, 0.95), Color(0.85, 0.20, 0.85)],
 		"event":  [Color(0.08, 0.14, 0.08, 0.92), Color(0.35, 0.70, 0.25)],
 		"shop":   [Color(0.14, 0.11, 0.03, 0.92), Color(0.90, 0.72, 0.10)],
-		"rest":   [Color(0.05, 0.11, 0.18, 0.92), Color(0.20, 0.55, 0.80)],
+		"rest":         [Color(0.05, 0.11, 0.18, 0.92), Color(0.20, 0.55, 0.80)],
+		"pre_boss_rest":[Color(0.05, 0.14, 0.10, 0.95), Color(0.30, 0.80, 0.55)],
 	}
 	var nc: Array = COLOR_MAP.get(ntype, [Color(0.12, 0.12, 0.12), Color(0.5, 0.5, 0.5)])
 
@@ -389,7 +403,7 @@ func _on_node_pressed(nd: Dictionary) -> void:
 
 	var ntype: String = nd.get("type", "battle")
 
-	# 休息节点：直接在地图内结算，不跳场景
+	# 普通休息节点：直接在地图内结算，不跳场景
 	if ntype == "rest":
 		var healed: int = int(GameState.max_hp * 0.30)
 		GameState.heal(healed)
@@ -397,6 +411,11 @@ func _on_node_pressed(nd: Dictionary) -> void:
 		_check_layer_done()
 		_render_map()
 		_update_status()
+		return
+
+	# Boss 前休整节点：弹出面板，可选择升级牌 or 回复 HP
+	if ntype == "pre_boss_rest":
+		_show_pre_boss_rest_panel()
 		return
 
 	# 战斗 / Boss / 精英：设置 pending enemy
@@ -430,6 +449,233 @@ func _show_rest_popup(healed: int) -> void:
 	var tw: Tween = lbl.create_tween()
 	tw.tween_property(lbl, "modulate:a", 0.0, 1.8).set_delay(1.0)
 	tw.tween_callback(lbl.queue_free)
+
+# ── Boss 前休整面板 ───────────────────────────────────
+
+var _pre_boss_overlay: ColorRect = null
+var _pre_boss_panel: Panel = null
+var _pre_boss_upgrade_mode: bool = false
+var _pre_boss_used: bool = false   # 每次只能选一项
+
+func _show_pre_boss_rest_panel() -> void:
+	var root: Node = get_tree().root
+	if _pre_boss_overlay and is_instance_valid(_pre_boss_overlay):
+		return
+
+	# 遮罩
+	_pre_boss_overlay = ColorRect.new()
+	_pre_boss_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_pre_boss_overlay.color = Color(0, 0, 0, 0.72)
+	_pre_boss_overlay.z_index = 200
+	root.add_child(_pre_boss_overlay)
+
+	# 主面板
+	_pre_boss_panel = Panel.new()
+	_pre_boss_panel.z_index = 201
+	_pre_boss_panel.custom_minimum_size = Vector2(540, 380)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_pre_boss_panel.position = Vector2((vp.x - 540) * 0.5, (vp.y - 380) * 0.5)
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.05, 0.08, 0.06, 0.98)
+	ps.border_color = Color(0.30, 0.75, 0.50, 0.9)
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(8)
+	_pre_boss_panel.add_theme_stylebox_override("panel", ps)
+	root.add_child(_pre_boss_panel)
+
+	_pre_boss_used = false
+	_build_pre_boss_main_view()
+
+func _build_pre_boss_main_view() -> void:
+	# 清空面板旧内容
+	for c in _pre_boss_panel.get_children():
+		c.queue_free()
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 20.0; vbox.offset_right = -20.0
+	vbox.offset_top = 18.0; vbox.offset_bottom = -18.0
+	vbox.add_theme_constant_override("separation", 14)
+	_pre_boss_panel.add_child(vbox)
+
+	# 标题
+	var title: Label = Label.new()
+	title.text = "⛩  Boss 前休整"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(0.30, 0.88, 0.58))
+	vbox.add_child(title)
+
+	# 副标题
+	var sub: Label = Label.new()
+	sub.text = "选择一项：升级一张牌卡  或  回复 HP"
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.add_theme_font_size_override("font_size", 12)
+	sub.add_theme_color_override("font_color", Color(0.70, 0.85, 0.75))
+	vbox.add_child(sub)
+
+	# 当前 HP 信息
+	var hp_lbl: Label = Label.new()
+	hp_lbl.text = "当前 HP：%d / %d" % [int(GameState.hp), int(GameState.max_hp)]
+	hp_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hp_lbl.add_theme_font_size_override("font_size", 12)
+	hp_lbl.add_theme_color_override("font_color", Color(0.9, 0.7, 0.7))
+	vbox.add_child(hp_lbl)
+
+	# 两个选项按钮
+	var btn_row: HBoxContainer = HBoxContainer.new()
+	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	btn_row.add_theme_constant_override("separation", 20)
+	vbox.add_child(btn_row)
+
+	# 选项1：升级牌
+	var upgrade_btn: Button = Button.new()
+	upgrade_btn.text = "✦ 升级一张牌"
+	upgrade_btn.custom_minimum_size = Vector2(200, 48)
+	upgrade_btn.add_theme_font_size_override("font_size", 14)
+	_style_pre_boss_btn(upgrade_btn, Color(0.85, 0.72, 0.20))
+	upgrade_btn.pressed.connect(_show_pre_boss_upgrade_view)
+	btn_row.add_child(upgrade_btn)
+
+	# 选项2：回血（全满）
+	var heal_amount: int = int(GameState.max_hp * 0.50)
+	var heal_btn: Button = Button.new()
+	heal_btn.text = "♥ 回复 %d HP\n（50%% 最大HP）" % heal_amount
+	heal_btn.custom_minimum_size = Vector2(200, 48)
+	heal_btn.add_theme_font_size_override("font_size", 14)
+	_style_pre_boss_btn(heal_btn, Color(0.85, 0.35, 0.35))
+	heal_btn.disabled = GameState.hp >= GameState.max_hp
+	heal_btn.pressed.connect(func():
+		GameState.heal(heal_amount)
+		_pre_boss_used = true
+		heal_btn.text = "♥ 已回复 %d HP" % heal_amount
+		heal_btn.disabled = true
+		upgrade_btn.disabled = true
+		# 更新 HP 显示
+		hp_lbl.text = "当前 HP：%d / %d" % [int(GameState.hp), int(GameState.max_hp)]
+	)
+	btn_row.add_child(heal_btn)
+
+	# 分隔线
+	var sep: HSeparator = HSeparator.new()
+	vbox.add_child(sep)
+
+	# 牌组预览（小尺寸，只显示名字）
+	var deck_title: Label = Label.new()
+	deck_title.text = "当前牌组（%d张）" % DeckManager.get_total_card_count()
+	deck_title.add_theme_font_size_override("font_size", 11)
+	deck_title.add_theme_color_override("font_color", Color(0.6, 0.8, 0.65))
+	vbox.add_child(deck_title)
+
+	var deck_scroll: ScrollContainer = ScrollContainer.new()
+	deck_scroll.custom_minimum_size = Vector2(0, 80)
+	deck_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(deck_scroll)
+
+	var deck_flow: HFlowContainer = HFlowContainer.new()
+	deck_flow.add_theme_constant_override("separation", 4)
+	deck_scroll.add_child(deck_flow)
+
+	for card in DeckManager.get_full_deck():
+		var pill: Label = Label.new()
+		pill.text = card.get("name", "???")
+		pill.add_theme_font_size_override("font_size", 10)
+		var upgraded: bool = card.get("upgraded", false)
+		pill.add_theme_color_override("font_color",
+			Color(0.95, 0.82, 0.25) if upgraded else Color(0.72, 0.78, 0.72))
+		deck_flow.add_child(pill)
+
+	# 关闭按钮
+	var close_btn: Button = Button.new()
+	close_btn.text = "离开（不选）"
+	close_btn.add_theme_font_size_override("font_size", 11)
+	close_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+	close_btn.pressed.connect(_close_pre_boss_panel)
+	var close_row: HBoxContainer = HBoxContainer.new()
+	close_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	close_row.add_child(close_btn)
+	vbox.add_child(close_row)
+
+func _show_pre_boss_upgrade_view() -> void:
+	## 展示牌组，点击升级
+	for c in _pre_boss_panel.get_children():
+		c.queue_free()
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	vbox.offset_left = 16.0; vbox.offset_right = -16.0
+	vbox.offset_top = 14.0; vbox.offset_bottom = -14.0
+	vbox.add_theme_constant_override("separation", 10)
+	_pre_boss_panel.add_child(vbox)
+
+	var title: Label = Label.new()
+	title.text = "✦ 选择一张牌升级"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_color_override("font_color", Color(0.95, 0.82, 0.25))
+	vbox.add_child(title)
+
+	# 牌组滚动列表
+	var scroll: ScrollContainer = ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0, 260)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(scroll)
+
+	var grid: GridContainer = GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	scroll.add_child(grid)
+
+	var card_scene: PackedScene = preload("res://scenes/CardUI.tscn")
+	for card in DeckManager.get_full_deck():
+		var can_up: bool = CardDatabase.can_upgrade(card)
+		var card_ui: CardUINode = card_scene.instantiate() as CardUINode
+		card_ui.setup(card)
+		card_ui.set_playable(can_up)
+		card_ui.custom_minimum_size = Vector2(110, 160)
+		card_ui.modulate.a = 1.0 if can_up else 0.4
+		if can_up:
+			var captured: Dictionary = card
+			card_ui.card_clicked.connect(func(_c):
+				CardDatabase.upgrade_card(captured)
+				_pre_boss_used = true
+				_close_pre_boss_panel()
+			)
+		grid.add_child(card_ui)
+
+	# 返回按钮
+	var back_btn: Button = Button.new()
+	back_btn.text = "← 返回"
+	back_btn.add_theme_font_size_override("font_size", 11)
+	back_btn.pressed.connect(_build_pre_boss_main_view)
+	var back_row: HBoxContainer = HBoxContainer.new()
+	back_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	back_row.add_child(back_btn)
+	vbox.add_child(back_row)
+
+func _close_pre_boss_panel() -> void:
+	if _pre_boss_overlay and is_instance_valid(_pre_boss_overlay):
+		_pre_boss_overlay.queue_free()
+		_pre_boss_overlay = null
+	if _pre_boss_panel and is_instance_valid(_pre_boss_panel):
+		_pre_boss_panel.queue_free()
+		_pre_boss_panel = null
+	_check_layer_done()
+	_render_map()
+	_update_status()
+
+func _style_pre_boss_btn(btn: Button, accent: Color) -> void:
+	var sty: StyleBoxFlat = StyleBoxFlat.new()
+	sty.bg_color = Color(accent.r * 0.18, accent.g * 0.18, accent.b * 0.18, 0.95)
+	sty.border_color = accent
+	sty.set_border_width_all(2)
+	sty.set_corner_radius_all(5)
+	var hover_sty: StyleBoxFlat = sty.duplicate()
+	hover_sty.bg_color = Color(accent.r * 0.30, accent.g * 0.30, accent.b * 0.30, 0.95)
+	btn.add_theme_stylebox_override("normal", sty)
+	btn.add_theme_stylebox_override("hover", hover_sty)
+	btn.add_theme_color_override("font_color", accent)
 
 # ══════════════════════════════════════════════════════
 #  层进度检测
