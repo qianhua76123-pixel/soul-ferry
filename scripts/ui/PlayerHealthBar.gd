@@ -31,7 +31,7 @@ func _ready() -> void:
 	add_theme_constant_override("separation", 3)
 
 	# 血条绘制区（自定义绘制节点）
-	var bar_area := Control.new()
+	var bar_area: Control = Control.new()
 	bar_area.name = "BarArea"
 	bar_area.custom_minimum_size = Vector2(220, int(BAR_H) + 4)
 	bar_area.draw.connect(_draw_bar.bind(bar_area))
