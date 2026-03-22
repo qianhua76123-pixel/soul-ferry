@@ -307,9 +307,10 @@ func _on_player_turn_started(turn: int) -> void:
 		_boss_ui.on_turn_start(state_machine.enemy_hp, turn)
 
 func _on_enemy_turn_started() -> void:
-	# 敌人行动时锁定结束回合按钮
 	end_turn_btn.disabled = true
-	# 特殊行动UI反馈：摸牌陷阱提示
+	# 敌人出击动画
+	_play_enemy_attack_animation()
+	# 特殊行动UI反馈
 	var last_action: String = state_machine.enemy_data.get("_last_action_type", "")
 	match last_action:
 		"draw_player":
@@ -374,6 +375,10 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 		if rtype in dmg_types:
 			_spawn_enemy_damage(rval, "damage")
 			SoundManager.play_sfx("attack_hit")
+			# 敌人受击动画
+			var enemy_sprite: Node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
+			if enemy_sprite:
+				_play_hit_animation(enemy_sprite, "enemy")
 		elif rtype in heal_types:
 			_spawn_player_number(rval, "heal")
 			SoundManager.play_sfx("heal")
@@ -388,7 +393,11 @@ func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 func _on_battle_ended(result: String) -> void:
 	_last_battle_result = result
 	end_turn_btn.disabled = true
-	result_panel.visible  = true
+	# 胜利时先播死亡动画，再显示结果面板
+	if result in ["victory", "du_hua"]:
+		_play_enemy_death_animation()
+		await get_tree().create_timer(0.55).timeout
+	result_panel.visible = true
 	# 遗物：镇压胜利触发烧骨片等
 	if result == "victory":
 		RelicManager.on_victory_zhenya()
@@ -699,8 +708,10 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 		"shield_attack","remove_enemy_shield","dodge_attack"]
 	await get_tree().create_timer(0.12).timeout
 	if is_attack:
+		_play_player_attack_animation()
+		await get_tree().create_timer(0.10).timeout
 		_play_attack_flash()
-		await get_tree().create_timer(0.08).timeout
+		await get_tree().create_timer(0.06).timeout
 	state_machine.play_card(card_data)
 
 func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
@@ -742,9 +753,14 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	if diff < 0:
 		_spawn_player_number(-diff, "damage")
 		_set_player_sprite_state("hurt")
+		# 玩家受击动画
+		var player_sprite: Node = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
+		if player_sprite:
+			_play_hit_animation(player_sprite, "player")
+		# 屏幕左侧红边闪烁（受伤感）
+		_flash_screen_edge(Color(0.85, 0.08, 0.08, 0.45))
 		get_tree().create_timer(0.4).timeout.connect(
 			func(): _set_player_sprite_state("idle"), CONNECT_ONE_SHOT)
-		# 成就：Boss战伤害追踪
 		var is_boss: bool = state_machine.enemy_data.get("type","") == "boss"
 		if is_boss:
 			AchievementManager.on_player_damaged(-diff)
@@ -795,12 +811,17 @@ func _setup_hud_theme() -> void:
 	du_hua_btn.add_theme_stylebox_override("hover", du_hover)
 	du_hua_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 
-	# 卡组查看器：安装固定按钮 + 快捷键
+	# 卡组查看器：挂到专用高层 CanvasLayer（layer=90），始终在最前
 	_deck_viewer = DeckViewerPanelClass.new()
 	_deck_viewer.name = "DeckViewerPanel"
+	var deck_layer: CanvasLayer = CanvasLayer.new()
+	deck_layer.name  = "DeckViewerLayer"
+	deck_layer.layer = 90   # 高于普通 UI（一般 layer=1）但低于 PauseMenu（layer=64）
+	add_child(deck_layer)
+	deck_layer.add_child(_deck_viewer)
+	# 固定按钮仍挂到 UI 层（可见位置），但面板弹出时在 DeckViewerLayer 最前渲染
 	var ui_node: Node = get_node_or_null("UI")
 	if ui_node:
-		ui_node.add_child(_deck_viewer)
 		_deck_viewer.install_fixed_btn(ui_node, true)
 
 func _result_panel_bbcode(title: String, body: String) -> String:
@@ -1476,19 +1497,154 @@ func _setup_purification_panel() -> void:
 	)
 
 func _play_attack_flash() -> void:
-	## 攻击牌命中闪光：在敌人区域叠加白色闪光
+	## 玩家攻击：敌人精灵冲击动画
+	var sprite: Node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
+	if sprite:
+		_play_hit_animation(sprite, "enemy")
+	## 同时在敌人区域叠加冲击光
 	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
-	if not enemy_area: return
-	var flash = ColorRect.new()
-	flash.color = Color(1, 1, 1, 0.0)
-	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	flash.z_index = 20
-	enemy_area.add_child(flash)
-	var tw: Tween = flash.create_tween()
-	tw.tween_property(flash, "color:a", 0.55, 0.06)
-	tw.tween_property(flash, "color:a", 0.0,  0.18)
-	tw.tween_callback(flash.queue_free)
+	if enemy_area:
+		_spawn_impact_particles(enemy_area, Color(1.0, 0.85, 0.30))
+
+## ══════════════════════════════════════════════════════
+## 攻击/受击/死亡 动画系统（程序化，无需外部素材）
+## ══════════════════════════════════════════════════════
+
+## 受击抖动 + 红色闪烁（enemy/player 通用）
+func _play_hit_animation(sprite_node: Node, target: String) -> void:
+	if not sprite_node: return
+	# 停止 idle 浮动（临时）
+	var base_pos: Vector2 = sprite_node.position
+	# 受击颜色（红色闪烁）
+	var htw: Tween = sprite_node.create_tween()
+	htw.tween_property(sprite_node, "modulate", Color(1.8, 0.3, 0.3, 1.0), 0.05)
+	htw.tween_property(sprite_node, "modulate", Color.WHITE, 0.18)
+	# 受击位移（向击打方向偏移）
+	var offset_x: float = -12.0 if target == "enemy" else 12.0
+	var ptw: Tween = sprite_node.create_tween()
+	ptw.tween_property(sprite_node, "position:x", base_pos.x + offset_x, 0.05)\
+		.set_ease(Tween.EASE_OUT)
+	ptw.tween_property(sprite_node, "position:x", base_pos.x - offset_x * 0.4, 0.06)
+	ptw.tween_property(sprite_node, "position:x", base_pos.x, 0.12)\
+		.set_trans(Tween.TRANS_SPRING)
+	# 竖向微震
+	var vtw: Tween = sprite_node.create_tween()
+	vtw.tween_property(sprite_node, "position:y", base_pos.y - 4.0, 0.04)
+	vtw.tween_property(sprite_node, "position:y", base_pos.y + 3.0, 0.06)
+	vtw.tween_property(sprite_node, "position:y", base_pos.y, 0.10)\
+		.set_trans(Tween.TRANS_SPRING)
+
+## 玩家出牌冲向敌人动画（攻击型卡牌）
+func _play_player_attack_animation() -> void:
+	var sprite: Node = get_node_or_null("UI/AltarLayout/PlayerArea/PlayerSprite")
+	if not sprite: return
+	var base_pos: Vector2 = sprite.position
+	# 向右冲刺后弹回
+	var atw: Tween = sprite.create_tween()
+	atw.tween_property(sprite, "position:x", base_pos.x + 18.0, 0.08)\
+		.set_ease(Tween.EASE_OUT)
+	atw.tween_property(sprite, "position:x", base_pos.x - 6.0, 0.06)
+	atw.tween_property(sprite, "position:x", base_pos.x, 0.14)\
+		.set_trans(Tween.TRANS_SPRING)
+	# 出击时轻微缩放拉伸
+	var stw: Tween = sprite.create_tween()
+	stw.tween_property(sprite, "scale", Vector2(1.12, 0.90), 0.08)
+	stw.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.18)\
+		.set_trans(Tween.TRANS_BACK)
+
+## 敌人攻击动画（向玩家方向猛扑）
+func _play_enemy_attack_animation() -> void:
+	var sprite: Node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
+	if not sprite: return
+	var base_pos: Vector2 = sprite.position
+	# 向左冲向玩家
+	var atw: Tween = sprite.create_tween()
+	atw.tween_property(sprite, "position:x", base_pos.x - 22.0, 0.10)\
+		.set_ease(Tween.EASE_OUT)
+	atw.tween_property(sprite, "position:x", base_pos.x + 5.0, 0.08)
+	atw.tween_property(sprite, "position:x", base_pos.x, 0.16)\
+		.set_trans(Tween.TRANS_SPRING)
+	# 拉伸
+	var stw: Tween = sprite.create_tween()
+	stw.tween_property(sprite, "scale", Vector2(0.85, 1.18), 0.10)
+	stw.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.20)\
+		.set_trans(Tween.TRANS_BACK)
+
+## 死亡动画（敌人消散）
+func _play_enemy_death_animation() -> void:
+	var sprite: Node = get_node_or_null("UI/AltarLayout/EnemyArea/EnemySprite")
+	if not sprite: return
+	# 先剧烈抖动
+	var base_pos: Vector2 = sprite.position
+	var dtw: Tween = sprite.create_tween()
+	for _i in 4:
+		dtw.tween_property(sprite, "position:x", base_pos.x + 6.0, 0.04)
+		dtw.tween_property(sprite, "position:x", base_pos.x - 6.0, 0.04)
+	dtw.tween_property(sprite, "position:x", base_pos.x, 0.04)
+	# 然后上升淡出消散
+	dtw.tween_property(sprite, "position:y", base_pos.y - 30.0, 0.45)\
+		.set_ease(Tween.EASE_IN)
+	dtw.parallel().tween_property(sprite, "modulate:a", 0.0, 0.45)
+	# 消散粒子
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if enemy_area:
+		_spawn_death_particles(enemy_area)
+
+## 死亡粒子：8个小方块向外扩散
+func _spawn_death_particles(parent: Node) -> void:
+	var center: Vector2 = Vector2(parent.size.x * 0.5, parent.size.y * 0.4)
+	var colors: Array[Color] = [
+		Color(0.85, 0.72, 0.28), Color(0.60, 0.20, 0.20),
+		Color(0.90, 0.90, 0.85), Color(0.50, 0.55, 0.65),
+	]
+	for i in 10:
+		var dot: ColorRect = ColorRect.new()
+		dot.size = Vector2(randf_range(3.0, 6.0), randf_range(3.0, 6.0))
+		dot.color = colors[i % colors.size()]
+		dot.color.a = 0.9
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dot.position = center + Vector2(randf_range(-8.0, 8.0), randf_range(-8.0, 8.0))
+		parent.add_child(dot)
+		var angle: float = TAU * i / 10.0 + randf_range(-0.3, 0.3)
+		var dist: float  = randf_range(30.0, 65.0)
+		var tw: Tween    = dot.create_tween()
+		tw.tween_property(dot, "position",
+			dot.position + Vector2(cos(angle), sin(angle)) * dist, 0.55)\
+			.set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(dot, "modulate:a", 0.0, 0.55)\
+			.set_delay(0.15)
+		tw.tween_callback(dot.queue_free)
+
+## 冲击波粒子（攻击命中时）
+func _spawn_impact_particles(parent: Node, color: Color) -> void:
+	var center: Vector2 = Vector2(parent.size.x * 0.5, parent.size.y * 0.38)
+	for i in 8:
+		var line: ColorRect = ColorRect.new()
+		line.size = Vector2(randf_range(2.0, 4.0), randf_range(10.0, 20.0))
+		line.color = color
+		line.color.a = 0.85
+		line.rotation = TAU * i / 8.0 + randf_range(-0.2, 0.2)
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		line.position = center
+		parent.add_child(line)
+		var dist: float = randf_range(20.0, 45.0)
+		var tw: Tween = line.create_tween()
+		tw.tween_property(line, "position",
+			center + Vector2(cos(line.rotation), sin(line.rotation)) * dist, 0.25)\
+			.set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(line, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(line.queue_free)
+	# 中心亮点
+	var glow: ColorRect = ColorRect.new()
+	glow.size = Vector2(18, 18)
+	glow.color = Color(color.r, color.g, color.b, 0.0)
+	glow.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	glow.position = center - Vector2(9, 9)
+	parent.add_child(glow)
+	var gtw: Tween = glow.create_tween()
+	gtw.tween_property(glow, "color:a", 0.9, 0.05)
+	gtw.tween_property(glow, "color:a", 0.0, 0.22)
+	gtw.tween_callback(glow.queue_free)
 
 # ════════════════════════════════════════════════════════
 #  弃牌按钮 & 碎片显示
@@ -1995,3 +2151,26 @@ func _on_coop_resonance(bonus_type: String) -> void:
 		Vector2(get_viewport().get_visible_rect().size.x * 0.5, 180.0),
 		Color(0.90, 0.75, 0.20), 20
 	)
+
+## 屏幕边缘闪烁（受伤感/危机感）
+func _flash_screen_edge(color: Color) -> void:
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	# 四条边框
+	for side in 4:
+		var bar: ColorRect = ColorRect.new()
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.z_index = 180
+		match side:
+			0: bar.size = Vector2(vp.x, 10); bar.position = Vector2(0, 0)
+			1: bar.size = Vector2(vp.x, 10); bar.position = Vector2(0, vp.y - 10)
+			2: bar.size = Vector2(10, vp.y); bar.position = Vector2(0, 0)
+			3: bar.size = Vector2(10, vp.y); bar.position = Vector2(vp.x - 10, 0)
+		bar.color = color
+		bar.modulate.a = 0.0
+		ui.add_child(bar)
+		var tw: Tween = bar.create_tween()
+		tw.tween_property(bar, "modulate:a", 1.0, 0.07)
+		tw.tween_property(bar, "modulate:a", 0.0, 0.38)
+		tw.tween_callback(bar.queue_free)

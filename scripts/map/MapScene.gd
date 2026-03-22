@@ -81,12 +81,16 @@ func _ready() -> void:
 	if not GameState.check_victory_condition():
 		_check_layer_done()
 
-	# 初始化卡组查看器 + 安装固定按钮
+	# 初始化卡组查看器：挂到高层 CanvasLayer，始终最前
 	_deck_viewer = DeckViewerPanelClass.new()
 	_deck_viewer.name = "DeckViewer"
+	var deck_layer: CanvasLayer = CanvasLayer.new()
+	deck_layer.name  = "DeckViewerLayer"
+	deck_layer.layer = 90
+	add_child(deck_layer)
+	deck_layer.add_child(_deck_viewer)
 	var ui_layer: Node = get_node_or_null("UI")
 	if ui_layer:
-		ui_layer.add_child(_deck_viewer)
 		_deck_viewer.install_fixed_btn(ui_layer, false)
 
 # ══════════════════════════════════════════════════════
