@@ -1775,7 +1775,7 @@ func _make_relic_card(relic: Dictionary, overlay: Node, panel: Node) -> VBoxCont
 		RelicManager.add_relic_by_id(captured_id)
 		overlay.queue_free()
 		panel.queue_free()
-		_show_float_text("获得遗物：" + relic.get("name",""), Color(0.95, 0.82, 0.25))
+		_show_float_text("获得遗物：" + relic.get("name",""), get_viewport().get_visible_rect().size / 2.0, Color(0.95, 0.82, 0.25))
 	)
 	vbox.add_child(pick_btn)
 	return vbox
