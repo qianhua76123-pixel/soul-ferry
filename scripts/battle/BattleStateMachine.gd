@@ -880,7 +880,7 @@ func _check_du_hua(played_card: Dictionary) -> void:
 
 func _trigger_du_hua() -> void:
 	du_hua_triggered = true
-	var desc: Dictionary = enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足")
+	var desc: String = str(enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足"))
 	du_hua_available.emit(desc)
 
 func confirm_du_hua() -> void:
