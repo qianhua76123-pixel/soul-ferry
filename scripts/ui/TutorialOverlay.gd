@@ -68,10 +68,15 @@ func _build_ui() -> void:
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(overlay)
 
-	# 主面板
+	# 主面板 —— 相对于整个视口居中
 	_panel = Panel.new()
-	_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_panel.custom_minimum_size = Vector2(700, 430)
+	# 使用 PRESET_CENTER 锚点后，需要同时把锚点参考从"父容器"改为视口尺寸
+	# 这里直接用绝对居中：锚点全置 0.5，offset 再偏移半宽高
+	_panel.anchor_left   = 0.5
+	_panel.anchor_right  = 0.5
+	_panel.anchor_top    = 0.5
+	_panel.anchor_bottom = 0.5
 	_panel.offset_left   = -350
 	_panel.offset_right  =  350
 	_panel.offset_top    = -215

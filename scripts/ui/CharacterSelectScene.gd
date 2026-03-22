@@ -164,8 +164,9 @@ func _build_character_card(index: int) -> Control:
 	stats_rich.custom_minimum_size = Vector2(260, 0)
 	stats_rich.add_theme_font_size_override("normal_font_size", 12)
 	var gold_hex: String = UIC.color_of("gold").to_html(false)
-	var parch_hex: String = UIC.color_of("parch").to_html(false)
-	var dim_hex: String = UIC.color_of("gold_dim").to_html(false)
+	# parch (#1a1508) 是极暗背景色，不适合做文字。改用 text_primary 保证可读性
+	var parch_hex: String = UIC.color_of("text_primary").to_html(false)
+	var dim_hex: String = UIC.color_of("text_secondary").to_html(false)
 	stats_rich.text = (
 		"[color=#%s]❤ 生命[/color]  [color=#%s]%d[/color]   " % [dim_hex, parch_hex, hp_val] +
 		"[color=#%s]⚡ 能量[/color]  [color=#%s]%d[/color]\n" % [dim_hex, parch_hex, energy_val] +
