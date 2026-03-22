@@ -16,6 +16,7 @@ signal closed
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	# 必须用 FULL_RECT 以便遮罩覆盖全屏
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build_ui()
 	hide()
@@ -28,14 +29,9 @@ func _build_ui() -> void:
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(overlay)
 
-	# 主面板
+	# 主面板：延迟到第一次显示时用视口尺寸居中
 	_visible_panel = Panel.new()
-	_visible_panel.set_anchors_preset(Control.PRESET_CENTER)
 	_visible_panel.custom_minimum_size = Vector2(860, 520)
-	_visible_panel.offset_left  = -430
-	_visible_panel.offset_right =  430
-	_visible_panel.offset_top   = -260
-	_visible_panel.offset_bottom = 260
 	var ps: StyleBoxFlat = StyleBoxFlat.new()
 	ps.bg_color = Color(0.07, 0.05, 0.04, 0.97)
 	ps.border_width_top    = 2; ps.border_width_bottom = 2
@@ -109,9 +105,17 @@ func _build_ui() -> void:
 
 ## 打开面板
 func open_panel() -> void:
+	# 用视口实际尺寸计算居中位置（兼容 CanvasLayer）
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var panel_w: float = 860.0
+	var panel_h: float = 520.0
+	_visible_panel.size = Vector2(panel_w, panel_h)
+	_visible_panel.position = Vector2(
+		(vp.x - panel_w) * 0.5,
+		(vp.y - panel_h) * 0.5
+	)
 	show()
 	_switch_tab("deck")
-	# ESC 关闭
 	set_process_unhandled_key_input(true)
 
 ## 关闭面板

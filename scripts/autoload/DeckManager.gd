@@ -11,7 +11,8 @@ signal hand_full()
 signal cost_changed(new_cost: int)   # 费用变化（供 EnergyDisplay 使用）
 
 const MAX_HAND_SIZE  = 10
-const BASE_DRAW      = 5
+const BASE_DRAW_FIRST = 4   # 第一回合抽4张
+const BASE_DRAW       = 3   # 后续每回合抽3张
 const BASE_COST      = 3
 
 var deck:         Array = []
@@ -20,6 +21,7 @@ var discard_pile: Array = []
 var exhaust_pile: Array = []
 var current_cost: int  = 0
 var max_cost:     int  = BASE_COST
+var _is_first_turn: bool = true   # 标记是否第一回合
 
 func _ready() -> void:
 	pass
@@ -95,14 +97,36 @@ func draw_card() -> void:
 func draw_cards(count: int) -> void:
 	for _i in count: draw_card()
 
+func on_battle_start() -> void:
+	## 每场战斗开始时重置牌堆状态
+	## 注意：不重置 deck 本身（保留玩家构建的牌组）
+	## 而是把所有牌（手牌+弃牌堆+消耗堆）归回抽牌堆
+	for c in hand:
+		deck.append(c)
+	for c in discard_pile:
+		deck.append(c)
+	# exhaust_pile 不归还（已消耗的牌永久离场）
+	hand.clear()
+	discard_pile.clear()
+	shuffle_deck()
+	current_cost  = BASE_COST
+	max_cost      = BASE_COST
+	_is_first_turn = true
+	active_discard_used  = 0
+	active_discard_limit = 1
+	cost_changed.emit(current_cost)
+
 func on_turn_start() -> void:
 	max_cost = BASE_COST - EmotionManager.get_cost_reduction()
 	current_cost = max_cost
 	cost_changed.emit(current_cost)
 	reset_discard_limit()
-	var draw_n: int = BASE_DRAW + EmotionManager.get_draw_bonus()
+	# 第一回合抽4张，后续3张
+	var base_draw: int = BASE_DRAW_FIRST if _is_first_turn else BASE_DRAW
+	var draw_n: int = base_draw + EmotionManager.get_draw_bonus()
 	if EmotionManager.is_disorder("fear"): draw_n -= 1
 	draw_cards(maxi(1, draw_n))
+	_is_first_turn = false
 
 func on_turn_end() -> void:
 	for c in hand.duplicate():

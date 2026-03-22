@@ -283,11 +283,16 @@ func _on_player_turn_started(turn: int) -> void:
 	end_turn_btn.disabled = false
 	du_hua_btn.visible    = false
 	disorder_warning.text = ""
-	# 遗物：回合开始触发（DeckManager.on_turn_start 之后，手牌已摸完）
+	# 遗物：回合开始触发
 	RelicManager.on_turn_start()
 	_update_hud()
+	# 弃牌按钮重置
+	if _discard_btn:
+		_discard_btn.visible  = true
+		_discard_btn.disabled = false
+		_discard_btn.text     = "弃牌 (%d)" % DeckManager.active_discard_limit
+	_discard_mode = false
 	SoundManager.play_sfx("card_draw")
-	# Boss UI：回合开始刷新意图预告
 	if _boss_ui:
 		_boss_ui.on_turn_start(state_machine.enemy_hp, turn)
 

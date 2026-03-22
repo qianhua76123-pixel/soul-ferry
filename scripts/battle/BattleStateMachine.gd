@@ -77,8 +77,23 @@ func start_battle(enemy_id: String) -> void:
 	current_turn = 0
 	joy_cards_played_this_turn = 0
 	du_hua_triggered = false
-	# 清空上一场战斗遗留 Buff
+
+	# ── 重置所有 Autoload 系统 ──────────────────────────
+	# 情绪全部归零
+	EmotionManager.reset_all()
+	# 牌堆归位（手牌/弃牌堆→抽牌堆，重新洗牌）
+	DeckManager.on_battle_start()
+	# 清空所有 Buff
 	BuffManager.clear_all()
+	# 碎片清零
+	DiscardSystem.clear_run_shards()
+	# 无名激活状态
+	var char_id: String = str(GameState.get_meta("selected_character", ""))
+	if char_id == "wumian":
+		WumianManager.activate()
+	else:
+		WumianManager.deactivate()
+
 	# 接收 BuffManager 对敌人的 Buff 伤害
 	if not BuffManager.buff_damage_to_enemy.is_connected(_on_buff_damage_to_enemy):
 		BuffManager.buff_damage_to_enemy.connect(_on_buff_damage_to_enemy)
