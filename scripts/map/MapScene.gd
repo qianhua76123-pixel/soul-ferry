@@ -323,7 +323,7 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	# Hover（仅解锁节点）
 	var hover_style: StyleBoxFlat = normal_style.duplicate()
 	hover_style.border_color = UIConstants.color_of("gold")
-	hover_style.bg_color     = Color(nc[0].r + 0.06, nc[0].g + 0.04, nc[0].b + 0.02, 0.95).clampi()
+	hover_style.bg_color     = Color(nc[0].r + 0.06, nc[0].g + 0.04, nc[0].b + 0.02, 0.95).clamp()
 	btn.add_theme_stylebox_override("hover", hover_style)
 
 	# Pressed
