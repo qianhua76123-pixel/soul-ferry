@@ -354,7 +354,11 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	# 点击逻辑
 	if is_unlocked and not visited:
 		var cap: Dictionary = nd
+		# 悬停提示
+		btn.mouse_entered.connect(func(): _show_node_tip(cap, btn.global_position))
+		btn.mouse_exited.connect(func(): _hide_node_tip())
 		btn.pressed.connect(func():
+			_hide_node_tip()
 			var tw2: Tween = btn.create_tween()
 			tw2.tween_property(btn, "scale", Vector2(0.88, 0.88), 0.07)
 			tw2.tween_property(btn, "scale", Vector2(1.0, 1.0), 0.10)
@@ -850,3 +854,68 @@ func _show_achievement_toast(achievement_id: String) -> void:
 	var tw: Tween = toast.create_tween()
 	tw.tween_property(toast, "modulate:a", 0.0, 0.6).set_delay(2.8)
 	tw.tween_callback(toast.queue_free)
+
+# ══════════════════════════════════════════════════════
+#  节点悬停提示
+# ══════════════════════════════════════════════════════
+
+var _node_tip_panel: Control = null
+
+func _show_node_tip(nd: Dictionary, btn_pos: Vector2) -> void:
+	_hide_node_tip()
+	var ntype: String = nd.get("type", "battle")
+	var tip_lines: Dictionary = {
+		"battle":       "⚔ 普通战斗\n消耗手牌击败亡魂\n胜利后获得选牌奖励",
+		"elite":        "💀 精英战斗\n更强的亡魂，需要策略\n胜利后必得一枚遗物",
+		"boss":         "☠ Boss 战\n层的终点，渡化或镇压\n将影响后续路线",
+		"event":        "📜 奇遇\n随机遭遇，选择影响命运\n可获得金币、遗物或诅咒",
+		"shop":         "🏮 幽冥集市\n消耗金币购买遗物和牌\n可移除一张牌（75金）",
+		"rest":         "🕯 古庙休息\n恢复 30% 最大HP\n也可选择升级一张牌",
+		"pre_boss_rest":"⛩ Boss 前休整\n升级一张牌 或 恢复 50% HP\n只能选一种",
+	}
+	var tip_text: String = tip_lines.get(ntype, ntype)
+
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+
+	_node_tip_panel = Panel.new()
+	_node_tip_panel.name = "NodeTip"
+	_node_tip_panel.z_index = 200
+	_node_tip_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ts: StyleBoxFlat = StyleBoxFlat.new()
+	ts.bg_color = Color(0.05, 0.04, 0.02, 0.94)
+	ts.border_color = Color(0.65, 0.50, 0.12, 0.85)
+	ts.set_border_width_all(1)
+	ts.set_corner_radius_all(5)
+	_node_tip_panel.add_theme_stylebox_override("panel", ts)
+	ui.add_child(_node_tip_panel)
+
+	var lbl: Label = Label.new()
+	lbl.text = tip_text
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lbl.offset_left = 10.0; lbl.offset_right = -10.0
+	lbl.offset_top  = 8.0;  lbl.offset_bottom = -8.0
+	lbl.add_theme_font_size_override("font_size", 11)
+	lbl.add_theme_color_override("font_color", UIConstants.color_of("text_secondary"))
+	lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_node_tip_panel.add_child(lbl)
+
+	# 位置：在按钮上方
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	var panel_w: float = 180.0
+	var panel_h: float = 80.0
+	_node_tip_panel.custom_minimum_size = Vector2(panel_w, panel_h)
+	var tx: float = clampf(btn_pos.x - panel_w * 0.5, 4.0, vp.x - panel_w - 4.0)
+	var ty: float = btn_pos.y - panel_h - 12.0
+	if ty < 4.0: ty = btn_pos.y + 44.0
+	_node_tip_panel.position = Vector2(tx, ty)
+
+	# 淡入
+	_node_tip_panel.modulate.a = 0.0
+	var tw: Tween = _node_tip_panel.create_tween()
+	tw.tween_property(_node_tip_panel, "modulate:a", 1.0, 0.15)
+
+func _hide_node_tip() -> void:
+	if _node_tip_panel and is_instance_valid(_node_tip_panel):
+		_node_tip_panel.queue_free()
+		_node_tip_panel = null

@@ -72,20 +72,19 @@ func _build_ui() -> void:
 		row.add_child(panel)
 		_card_panels.append(panel)
 
-	# ── 底部按钮行（单人 + 双人）─────────────────────
+	# ── 底部按钮行（单人主入口）─────────────────────
 	var btn_row: HBoxContainer = HBoxContainer.new()
 	btn_row.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	btn_row.offset_top    = -108
-	btn_row.offset_bottom = -44
-	btn_row.offset_left   = -240
-	btn_row.offset_right  = 240
+	btn_row.offset_top    = -90
+	btn_row.offset_bottom = -36
+	btn_row.offset_left   = -110
+	btn_row.offset_right  = 110
 	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	btn_row.add_theme_constant_override("separation", 16)
 	add_child(btn_row)
 
 	var confirm_btn: Button = Button.new()
-	confirm_btn.text = "▶ 单人启程"
-	confirm_btn.custom_minimum_size = Vector2(200, 50)
+	confirm_btn.text = "踏上渡魂之路"
+	confirm_btn.custom_minimum_size = Vector2(220, 52)
 	var btn_style: StyleBox = UIC.make_button_style("ink", "gold")
 	confirm_btn.add_theme_stylebox_override("normal", btn_style)
 	confirm_btn.add_theme_stylebox_override("hover",  UIC.make_button_style("ink", "gold"))
@@ -94,15 +93,19 @@ func _build_ui() -> void:
 	confirm_btn.pressed.connect(_on_confirm_pressed)
 	btn_row.add_child(confirm_btn)
 
-	var coop_btn: Button = Button.new()
-	coop_btn.text = "👥 双人渡魂"
-	coop_btn.custom_minimum_size = Vector2(200, 50)
-	coop_btn.add_theme_stylebox_override("normal", UIC.make_button_style("ink", "gold_dim"))
-	coop_btn.add_theme_stylebox_override("hover",  UIC.make_button_style("ink", "gold"))
-	coop_btn.add_theme_color_override("font_color", UIC.color_of("text_primary"))
-	coop_btn.add_theme_font_size_override("font_size", UIC.font_size_of("body"))
-	coop_btn.pressed.connect(_on_coop_pressed)
-	btn_row.add_child(coop_btn)
+	# 双人模式：隐藏的小字入口（右下角，不影响主界面）
+	var coop_hint: Button = Button.new()
+	coop_hint.text = "双人模式（实验性）"
+	coop_hint.flat = true
+	coop_hint.anchor_left   = 1.0; coop_hint.anchor_top    = 1.0
+	coop_hint.anchor_right  = 1.0; coop_hint.anchor_bottom = 1.0
+	coop_hint.offset_left   = -160.0; coop_hint.offset_right  = -8.0
+	coop_hint.offset_top    = -28.0;  coop_hint.offset_bottom = -4.0
+	coop_hint.layout_mode   = 1
+	coop_hint.add_theme_font_size_override("font_size", 10)
+	coop_hint.add_theme_color_override("font_color", UIC.color_of("gold_dim"))
+	coop_hint.pressed.connect(_on_coop_pressed)
+	add_child(coop_hint)
 
 	_select(0)
 

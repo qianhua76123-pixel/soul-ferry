@@ -404,17 +404,33 @@ func _on_battle_ended(result: String) -> void:
 		AchievementManager.record_zhen_ya()
 	match result:
 		"victory":
-			result_label.text = _result_panel_bbcode("镇压成功", "亡魂已被强行驱散。")
-			result_btn.text   = "继续前行"
+			result_label.text = _result_panel_bbcode(
+				"⚔  镇  压  成  功",
+				"亡魂已被强行驱散。\n\n回合：%d  ·  剩余HP：%d / %d" % [
+					state_machine.current_turn, GameState.hp, GameState.max_hp])
+			result_btn.text = "继续前行  →"
 			SoundManager.play_sfx("battle_victory")
 		"du_hua":
-			result_label.text = _result_panel_bbcode("渡化完成", "你帮他说清楚了那件事。\n他终于可以走了。")
-			result_btn.text   = "目送他离去"
+			result_label.text = _result_panel_bbcode(
+				"🕯  渡  化  完  成",
+				"你帮他说清楚了那件事。\n他终于可以走了。\n\n回合：%d  ·  剩余HP：%d / %d" % [
+					state_machine.current_turn, GameState.hp, GameState.max_hp])
+			result_btn.text = "目送他离去  →"
 			SoundManager.play_sfx("du_hua_success")
 		"defeat":
-			result_label.text = _result_panel_bbcode("你也困在这里了", "渡魂人，渡人先渡己。")
-			result_btn.text   = "重新开始"
+			result_label.text = _result_panel_bbcode(
+				"☁  魂  魄  消  散",
+				"渡魂人，渡人先渡己。\n\n坚持了 %d 回合" % state_machine.current_turn)
+			result_btn.text = "接受命运"
 			SoundManager.play_sfx("battle_defeat")
+
+	# 结果面板入场动画
+	result_panel.modulate.a = 0.0
+	result_panel.scale = Vector2(0.92, 0.92)
+	var rtw: Tween = result_panel.create_tween()
+	rtw.tween_property(result_panel, "modulate:a", 1.0, 0.30)
+	rtw.parallel().tween_property(result_panel, "scale", Vector2(1.0, 1.0), 0.25)\
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 	# 精英战胜利 → 弹出遗物选择
 	if is_elite and result in ["victory", "du_hua"]:
@@ -580,11 +596,11 @@ func _on_result_continue() -> void:
 	result_panel.visible = false
 	var result: String = _last_battle_result
 	if result == "victory" or result == "du_hua":
-		# 胜利/渡化 → 选牌奖励
 		TransitionManager.change_scene("res://scenes/CardRewardScene.tscn")
-	else:
-		# 失败 → 结局场景（魂魄消散）
+	elif result == "defeat":
 		GameState.trigger_ending("defeat")
+	else:
+		TransitionManager.change_scene("res://scenes/MapScene.tscn")
 
 var _last_battle_result: String = ""
 
@@ -646,6 +662,23 @@ func _on_hand_updated(hand: Array) -> void:
 func _on_card_clicked(card_data: Dictionary) -> void:
 	if state_machine.current_state != 2: # STATE_PLAYER_TURN
 		return
+
+	# 费用不足：抖动反馈
+	var card_cost: int = maxi(0, card_data.get("cost", 0) - EmotionManager.get_cost_reduction())
+	if DeckManager.current_cost < card_cost:
+		for card_ui in hand_container.get_children():
+			var cd2: Variant = card_ui.get("card_data")
+			if cd2 is Dictionary and cd2.get("id","") == card_data.get("id",""):
+				var orig: Vector2 = card_ui.position
+				var stw: Tween = card_ui.create_tween()
+				stw.tween_property(card_ui, "position:x", orig.x + 6, 0.05)
+				stw.tween_property(card_ui, "position:x", orig.x - 6, 0.05)
+				stw.tween_property(card_ui, "position:x", orig.x + 4, 0.04)
+				stw.tween_property(card_ui, "position:x", orig.x, 0.04)
+				break
+		SoundManager.play_sfx("card_fail")
+		return
+
 	SoundManager.play_sfx("card_play")
 	_set_player_sprite_state("attack")
 	get_tree().create_timer(0.5).timeout.connect(
@@ -656,7 +689,7 @@ func _on_card_clicked(card_data: Dictionary) -> void:
 		var cd: Variant = card_ui.get("card_data")
 		if cd is Dictionary and cd.get("id","") == card_data.get("id",""):
 			if card_ui.has_method("play_card_animation"):
-				card_ui.play_card_animation(Vector2.ZERO)  # 不需要目标坐标
+				card_ui.play_card_animation(Vector2.ZERO)
 			break
 
 	# 等出牌动画开始后再执行效果
@@ -776,11 +809,16 @@ func _result_panel_bbcode(title: String, body: String) -> String:
 	return "[center][color=#%s]%s[/color]\n\n[color=#%s]%s[/color][/center]" % [tc, title, bc, body]
 
 func _setup_result_panel_theme() -> void:
-	result_panel.add_theme_stylebox_override("panel", UIConstants.make_panel_style())
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color     = Color(0.04, 0.03, 0.02, 0.97)
+	ps.border_color = UIConstants.color_of("gold_dim")
+	ps.set_border_width_all(2)
+	ps.set_corner_radius_all(6)
+	result_panel.add_theme_stylebox_override("panel", ps)
 	result_label.add_theme_font_size_override("normal_font_size", UIConstants.font_size_of("body"))
 	result_label.add_theme_color_override("default_color", UIConstants.color_of("text_primary"))
 	result_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
-	result_btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
+	result_btn.add_theme_stylebox_override("hover",  UIConstants.make_button_style("parch", "gold"))
 	result_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 	result_btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 
