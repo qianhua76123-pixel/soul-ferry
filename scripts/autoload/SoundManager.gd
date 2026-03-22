@@ -235,12 +235,22 @@ func _on_node_added(node: Node) -> void:
 	# 只处理直接挂到 root 的顶层场景节点
 	if node.get_parent() != get_tree().root:
 		return
+	var proc: Node = get_node_or_null("/root/ProceduralAudio")
 	match node.name:
-		"MainMenu":        play_bgm("main_menu")
-		"MapScene":        play_bgm("map")
+		"MainMenu":
+			play_bgm("main_menu")
+			if proc and _current_bgm == "main_menu" and BGM_TRACKS["main_menu"] == "":
+				proc.call("start_proc_bgm", "map")
+		"MapScene":
+			play_bgm("map")
+			if proc and BGM_TRACKS["map"] == "":
+				proc.call("start_proc_bgm", "map")
 		"EventScene":      play_bgm("event")
 		"ShopScene":       play_bgm("shop")
-		"RestScene":       play_bgm("rest")
+		"RestScene":
+			play_bgm("rest")
+			if proc and BGM_TRACKS["rest"] == "":
+				proc.call("start_proc_bgm", "rest")
 		"CardRewardScene": pass   # 沿用上一首 BGM
 		"BattleScene":     pass   # 战斗 BGM 由 BattleScene 自己在 start_battle 时按层级选择
 		"EndingScene":     pass   # 结局由 EndingScene 自己选择
@@ -256,6 +266,10 @@ func play_battle_bgm(layer: int, is_boss: bool) -> void:
 			2: play_bgm("battle_2")
 			3: play_bgm("battle_3")
 			_: play_bgm("battle_1")
+	# 无文件时启动程序化战斗BGM
+	var proc: Node = get_node_or_null("/root/ProceduralAudio")
+	if proc:
+		proc.call("start_proc_bgm", "battle")
 
 # ══════════════════════════════════════════════════════
 #  调试：占位符日志（发布时可关闭）
