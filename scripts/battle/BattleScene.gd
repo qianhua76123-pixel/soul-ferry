@@ -276,6 +276,9 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 		_purif_panel.setup_conditions(enemy_data)
 	_update_hud()
 	var is_boss: bool = enemy_data.get("type", "") == "boss"
+	# Boss 模式激活背景粒子
+	if _bg_node and _bg_node.has_method("set_boss_mode"):
+		_bg_node.set_boss_mode(is_boss)
 	SoundManager.play_battle_bgm(GameState.current_layer, is_boss)
 	# 成就：Boss 战开始追踪
 	if is_boss:
@@ -285,6 +288,7 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	# Boss UI：仅 Boss 战时激活
 	if is_boss:
 		_setup_boss_ui(enemy_data)
+		_start_boss_effect(enemy_data.get("id", ""))
 
 func _on_player_turn_started(turn: int) -> void:
 	var moon_icons: Array = ["🌑","🌒","🌓","🌔","🌕","🌖","🌗","🌘"]
@@ -2174,3 +2178,165 @@ func _flash_screen_edge(color: Color) -> void:
 		tw.tween_property(bar, "modulate:a", 1.0, 0.07)
 		tw.tween_property(bar, "modulate:a", 0.0, 0.38)
 		tw.tween_callback(bar.queue_free)
+
+# ════════════════════════════════════════════════════════
+#  Boss 专属持续粒子特效
+# ════════════════════════════════════════════════════════
+
+var _boss_effect_node: Node = null
+
+func _start_boss_effect(boss_id: String) -> void:
+	_stop_boss_effect()
+	var enemy_area: Node = get_node_or_null("UI/AltarLayout/EnemyArea")
+	if not enemy_area: return
+
+	match boss_id:
+		"shuigui_wanggui": _start_wave_effect(enemy_area)
+		"hanba_jiaoge":    _start_dust_effect(enemy_area)
+		"guixiniang_sujin":_start_petal_effect(enemy_area)
+
+func _stop_boss_effect() -> void:
+	if _boss_effect_node and is_instance_valid(_boss_effect_node):
+		_boss_effect_node.queue_free()
+		_boss_effect_node = null
+
+## 水鬼王：蓝色水波涟漪
+func _start_wave_effect(parent: Node) -> void:
+	var host: Node2D = Node2D.new()
+	host.name = "WaveEffect"
+	parent.add_child(host)
+	_boss_effect_node = host
+
+	var _t: SceneTreeTimer = get_tree().create_timer(0.0)
+	# 每 0.6s 生成一圈水波
+	var repeat: Callable = func():
+		pass
+	var timer: Timer = Timer.new()
+	timer.wait_time = 0.55
+	timer.autostart = true
+	timer.timeout.connect(func():
+		if not is_instance_valid(host): return
+		var cx: float = parent.size.x * 0.5
+		var cy: float = parent.size.y * 0.55
+		for ring in 3:
+			var ring_node: Control = Control.new()
+			ring_node.position = Vector2(cx, cy)
+			ring_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			parent.add_child(ring_node)
+			var delay_t: float = float(ring) * 0.15
+			var ring_tween: Tween = ring_node.create_tween()
+			ring_tween.tween_interval(delay_t)
+			ring_tween.tween_method(func(r: float):
+				if not is_instance_valid(ring_node): return
+				ring_node.queue_redraw()
+				ring_node.set_meta("_r", r)
+				ring_node.set_meta("_a", 0.45 * (1.0 - r / 55.0))
+			, 0.0, 55.0, 0.55)
+			ring_tween.tween_callback(ring_node.queue_free)
+			# 用 draw 方式只能在 CanvasItem — 改用 ColorRect 环形近似（多圆弧）
+			# 简化：用 4 个 ColorRect 旋转模拟椭圆波
+			for seg in 8:
+				var dot2: ColorRect = ColorRect.new()
+				dot2.size = Vector2(4, 4)
+				dot2.color = Color(0.25, 0.55, 0.90, 0.0)
+				dot2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				parent.add_child(dot2)
+				var angle2: float = TAU * float(seg) / 8.0
+				var init_x: float = cx + cos(angle2) * 8.0
+				var init_y: float = cy + sin(angle2) * 4.0
+				dot2.position = Vector2(init_x, init_y)
+				var dtw2: Tween = dot2.create_tween()
+				dtw2.tween_interval(delay_t)
+				dtw2.tween_property(dot2, "position",
+					Vector2(cx + cos(angle2) * 52.0, cy + sin(angle2) * 26.0), 0.55)\
+					.set_ease(Tween.EASE_OUT)
+				dtw2.parallel().tween_property(dot2, "color:a", 0.5, 0.15)
+				dtw2.parallel().tween_property(dot2, "color:a", 0.0, 0.40).set_delay(0.15)
+				dtw2.tween_callback(dot2.queue_free)
+	)
+	host.add_child(timer)
+
+## 旱魃：橙红沙尘粒子上升
+func _start_dust_effect(parent: Node) -> void:
+	var host2: Node = Node.new()
+	host2.name = "DustEffect"
+	parent.add_child(host2)
+	_boss_effect_node = host2
+
+	var timer2: Timer = Timer.new()
+	timer2.wait_time = 0.12
+	timer2.autostart = true
+	timer2.timeout.connect(func():
+		if not is_instance_valid(host2): return
+		var dot3: ColorRect = ColorRect.new()
+		var sz: float = randf_range(2.0, 5.0)
+		dot3.size = Vector2(sz, sz)
+		dot3.color = Color(
+			randf_range(0.75, 0.95),
+			randf_range(0.35, 0.55),
+			randf_range(0.05, 0.18),
+			randf_range(0.5, 0.8))
+		dot3.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var start_x: float = randf_range(20.0, parent.size.x - 20.0)
+		dot3.position = Vector2(start_x, parent.size.y * 0.8)
+		parent.add_child(dot3)
+		var dtw3: Tween = dot3.create_tween()
+		var drift: float = randf_range(-20.0, 20.0)
+		dtw3.tween_property(dot3, "position",
+			Vector2(start_x + drift, parent.size.y * 0.2), randf_range(0.6, 1.2))\
+			.set_trans(Tween.TRANS_SINE)
+		dtw3.parallel().tween_property(dot3, "color:a", 0.0, 0.5).set_delay(0.4)
+		dtw3.tween_callback(dot3.queue_free)
+	)
+	host2.add_child(timer2)
+
+## 鬼新娘：紫红花瓣飘落 + 红绳缠绕效果
+func _start_petal_effect(parent: Node) -> void:
+	var host3: Node = Node.new()
+	host3.name = "PetalEffect"
+	parent.add_child(host3)
+	_boss_effect_node = host3
+
+	var timer3: Timer = Timer.new()
+	timer3.wait_time = 0.20
+	timer3.autostart = true
+	timer3.timeout.connect(func():
+		if not is_instance_valid(host3): return
+		# 花瓣
+		var petal: ColorRect = ColorRect.new()
+		petal.size = Vector2(randf_range(4.0, 8.0), randf_range(3.0, 6.0))
+		petal.rotation = randf_range(0.0, TAU)
+		petal.color = Color(
+			randf_range(0.70, 0.85),
+			randf_range(0.10, 0.30),
+			randf_range(0.25, 0.50),
+			randf_range(0.6, 0.9))
+		petal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var px: float = randf_range(10.0, parent.size.x - 10.0)
+		petal.position = Vector2(px, -8.0)
+		parent.add_child(petal)
+		var ptw: Tween = petal.create_tween()
+		var sway: float = randf_range(-30.0, 30.0)
+		ptw.tween_property(petal, "position",
+			Vector2(px + sway, parent.size.y + 10.0), randf_range(1.0, 2.0))\
+			.set_trans(Tween.TRANS_SINE)
+		ptw.parallel().tween_property(petal, "rotation",
+			petal.rotation + randf_range(-TAU, TAU), randf_range(1.0, 2.0))
+		ptw.parallel().tween_property(petal, "color:a", 0.0, 0.5).set_delay(0.8)
+		ptw.tween_callback(petal.queue_free)
+
+		# 偶尔出现红绳闪烁
+		if randf() > 0.7:
+			var rope: ColorRect = ColorRect.new()
+			rope.size = Vector2(1.5, randf_range(20.0, 50.0))
+			rope.color = Color(0.72, 0.08, 0.12, 0.0)
+			rope.position = Vector2(randf_range(0.0, parent.size.x), randf_range(10.0, parent.size.y - 60.0))
+			rope.rotation = randf_range(-0.3, 0.3)
+			rope.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			parent.add_child(rope)
+			var rtw2: Tween = rope.create_tween()
+			rtw2.tween_property(rope, "color:a", 0.6, 0.10)
+			rtw2.tween_property(rope, "color:a", 0.0, 0.35)
+			rtw2.tween_callback(rope.queue_free)
+	)
+	host3.add_child(timer3)

@@ -191,21 +191,25 @@ func play_sfx(sfx_name: String, pitch_scale: float = 1.0) -> void:
 	sfx_played.emit(sfx_name)
 
 	var path: String = SFX_CLIPS[sfx_name]
-	if path == "" or not ResourceLoader.exists(path, ""):
-		_log_stub("SFX", sfx_name)
-		return
+	if path != "" and ResourceLoader.exists(path, ""):
+		# 优先使用真实音频文件
+		var stream: AudioStream = load(path) as AudioStream
+		if stream:
+			var player: AudioStreamPlayer = _sfx_players[_sfx_pool_idx % SFX_POOL_SIZE]
+			_sfx_pool_idx = (_sfx_pool_idx + 1) % SFX_POOL_SIZE
+			player.stream      = stream
+			player.pitch_scale = pitch_scale
+			player.volume_db   = linear_to_db(sfx_volume)
+			player.play()
+			return
 
-	var stream: AudioStream = load(path) as AudioStream
-	if not stream:
-		return
-
-	# 轮询 SFX 池
-	var player: AudioStreamPlayer = _sfx_players[_sfx_pool_idx % SFX_POOL_SIZE]
-	_sfx_pool_idx = (_sfx_pool_idx + 1) % SFX_POOL_SIZE
-	player.stream      = stream
-	player.pitch_scale = pitch_scale
-	player.volume_db   = linear_to_db(sfx_volume)
-	player.play()
+	# 回退到程序生成音效
+	if Engine.has_singleton("ProceduralAudio") or get_tree().root.has_node("/root/ProceduralAudio"):
+		var pa: Node = get_node_or_null("/root/ProceduralAudio")
+		if pa and pa.has_method("has") and pa.call("has", sfx_name):
+			pa.call("play", sfx_name, pitch_scale, linear_to_db(sfx_volume) - (-4.0))
+			return
+	_log_stub("SFX", sfx_name)
 
 ## 静音/取消静音 BGM
 func set_bgm_muted(muted: bool) -> void:

@@ -323,11 +323,8 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 		normal_style.bg_color     = nc[0]
 		normal_style.border_color = nc[1]
 		btn.add_theme_color_override("font_color", Color(0.95, 0.90, 0.82))
-		# Boss 节点脉冲
-		if ntype == "boss":
-			var tw: Tween = btn.create_tween().set_loops()
-			tw.tween_property(btn, "modulate", Color(1.3, 0.7, 0.7), 0.7)
-			tw.tween_property(btn, "modulate", Color.WHITE, 0.7)
+		# 节点专属动画
+		_start_node_idle_animation(btn, ntype)
 	else:
 		# 未解锁：暗色 + 低透明
 		normal_style.bg_color     = Color(nc[0].r * 0.35, nc[0].g * 0.35, nc[0].b * 0.35, 0.55)
@@ -923,3 +920,62 @@ func _hide_node_tip() -> void:
 	if _node_tip_panel and is_instance_valid(_node_tip_panel):
 		_node_tip_panel.queue_free()
 		_node_tip_panel = null
+
+# ══════════════════════════════════════════════════════
+#  节点 Idle 动画
+# ══════════════════════════════════════════════════════
+
+func _start_node_idle_animation(btn: Button, ntype: String) -> void:
+	match ntype:
+		"boss":
+			# 红色心跳脉冲 + 轻微缩放
+			var tw: Tween = btn.create_tween().set_loops()
+			tw.tween_property(btn, "modulate", Color(1.35, 0.60, 0.60), 0.65)\
+				.set_ease(Tween.EASE_IN_OUT)
+			tw.tween_property(btn, "modulate", Color.WHITE, 0.65)\
+				.set_ease(Tween.EASE_IN_OUT)
+			var stw: Tween = btn.create_tween().set_loops()
+			stw.tween_property(btn, "scale", Vector2(1.06, 1.06), 0.65)\
+				.set_ease(Tween.EASE_IN_OUT)
+			stw.tween_property(btn, "scale", Vector2(1.0, 1.0), 0.65)\
+				.set_ease(Tween.EASE_IN_OUT)
+
+		"elite":
+			# 紫色冷光闪烁
+			var tw2: Tween = btn.create_tween().set_loops()
+			tw2.tween_property(btn, "modulate", Color(1.1, 0.85, 1.4), 1.1)\
+				.set_ease(Tween.EASE_IN_OUT)
+			tw2.tween_property(btn, "modulate", Color.WHITE, 1.1)\
+				.set_ease(Tween.EASE_IN_OUT)
+
+		"battle":
+			# 微小浮动（上下 2px）
+			var btw: Tween = btn.create_tween().set_loops()
+			btw.tween_property(btn, "position:y", btn.position.y - 2.0, 1.4)\
+				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+			btw.tween_property(btn, "position:y", btn.position.y + 1.0, 1.4)\
+				.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+		"event":
+			# 金色微光跳动
+			var etw: Tween = btn.create_tween().set_loops()
+			etw.tween_property(btn, "modulate", Color(1.15, 1.10, 0.85), 1.8)\
+				.set_ease(Tween.EASE_IN_OUT)
+			etw.tween_property(btn, "modulate", Color.WHITE, 1.8)\
+				.set_ease(Tween.EASE_IN_OUT)
+
+		"shop":
+			# 金黄缓慢呼吸
+			var sptw: Tween = btn.create_tween().set_loops()
+			sptw.tween_property(btn, "modulate", Color(1.2, 1.15, 0.75), 2.2)\
+				.set_ease(Tween.EASE_IN_OUT)
+			sptw.tween_property(btn, "modulate", Color.WHITE, 2.2)\
+				.set_ease(Tween.EASE_IN_OUT)
+
+		"rest", "pre_boss_rest":
+			# 青绿柔和呼吸
+			var rtw3: Tween = btn.create_tween().set_loops()
+			rtw3.tween_property(btn, "modulate", Color(0.85, 1.15, 1.05), 2.5)\
+				.set_ease(Tween.EASE_IN_OUT)
+			rtw3.tween_property(btn, "modulate", Color.WHITE, 2.5)\
+				.set_ease(Tween.EASE_IN_OUT)
