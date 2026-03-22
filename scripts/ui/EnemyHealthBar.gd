@@ -42,11 +42,11 @@ func _draw_bar(area: Control) -> void:
 
 	_draw_chamfered_rect(area, Rect2(0, 2, w, BAR_H), SLOT_COLOR, CORNER)
 
-	var ghost_w: int = int(clampf(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2))
+	var ghost_w: float = clampf(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2)
 	if ghost_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, ghost_w, BAR_H), GHOST_COLOR, CORNER * 0.5)
 
-	var fill_w: int = int(clampf(ratio, 0.0, 1.0) * (w - CORNER * 2))
+	var fill_w: float = clampf(ratio, 0.0, 1.0) * (w - CORNER * 2)
 	if fill_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, fill_w, BAR_H), fill_color, CORNER * 0.5)
 
