@@ -1,7 +1,8 @@
-extends Control
+extends CanvasLayer
 class_name TutorialOverlay
 
 ## 新手引导覆盖层
+## 改用 CanvasLayer，坐标系独立于场景树，彻底解决居中问题。
 ## 第一次进入游戏时自动触发（检查 GameState.get_meta("tutorial_done", false)）
 
 signal tutorial_finished
@@ -39,88 +40,93 @@ const PAGES: Array = [
 	},
 ]
 
+const PANEL_W: float = 700.0
+const PANEL_H: float = 430.0
+
 var _cur_page: int = 0
 var _panel: Panel = null
 var _title_lbl: Label = null
 var _content_lbl: RichTextLabel = null
 var _icon_lbl: Label = null
-var _progress_lbl: Label = null
 var _next_btn: Button = null
 var _skip_btn: Button = null
 var _dot_row: HBoxContainer = null
 
+# CanvasLayer 用于承载所有 Control 子节点
+var _root_ctrl: Control = null
+
 func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_STOP
-	# 必须同时设置全屏锚点 + grow，才能让子节点的 0.5 锚点相对于视口居中
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	grow_horizontal = Control.GROW_DIRECTION_BOTH
-	grow_vertical   = Control.GROW_DIRECTION_BOTH
-	z_index = 500
-	modulate.a = 0.0
-	_build_ui()
+	layer = 128   # 高层级，覆盖所有场景 UI
+
+	# 视口尺寸
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+
+	# 全屏 Control 作为根容器（遮罩 + 面板都挂在这里）
+	_root_ctrl = Control.new()
+	_root_ctrl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_root_ctrl.mouse_filter = Control.MOUSE_FILTER_STOP
+	_root_ctrl.modulate.a   = 0.0
+	add_child(_root_ctrl)
+
+	_build_ui(vp)
 	_show_page(0)
+
 	# 淡入
-	var tw: Tween = create_tween()
-	tw.tween_property(self, "modulate:a", 1.0, 0.3)
+	var tw: Tween = _root_ctrl.create_tween()
+	tw.tween_property(_root_ctrl, "modulate:a", 1.0, 0.3)
 
-func _build_ui() -> void:
-	# 半透明遮罩
+func _build_ui(vp: Vector2) -> void:
+	# ── 半透明全屏遮罩 ──
 	var overlay: ColorRect = ColorRect.new()
-	overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	overlay.color = Color(0, 0, 0, 0.78)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.color        = Color(0, 0, 0, 0.78)
 	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
-	add_child(overlay)
+	_root_ctrl.add_child(overlay)
 
-	# 主面板 —— 相对于整个视口居中
+	# ── 主面板：用绝对像素坐标居中，完全不依赖锚点系统 ──
 	_panel = Panel.new()
-	_panel.custom_minimum_size = Vector2(700, 430)
-	# 使用 PRESET_CENTER 锚点后，需要同时把锚点参考从"父容器"改为视口尺寸
-	# 这里直接用绝对居中：锚点全置 0.5，offset 再偏移半宽高
-	_panel.anchor_left   = 0.5
-	_panel.anchor_right  = 0.5
-	_panel.anchor_top    = 0.5
-	_panel.anchor_bottom = 0.5
-	_panel.offset_left   = -350
-	_panel.offset_right  =  350
-	_panel.offset_top    = -215
-	_panel.offset_bottom =  215
+	_panel.size     = Vector2(PANEL_W, PANEL_H)
+	_panel.position = Vector2(
+		(vp.x - PANEL_W) * 0.5,
+		(vp.y - PANEL_H) * 0.5
+	)
 	var ps: StyleBoxFlat = StyleBoxFlat.new()
 	ps.bg_color = Color(0.06, 0.04, 0.03, 0.97)
 	ps.border_width_top    = 2; ps.border_width_bottom = 2
 	ps.border_width_left   = 2; ps.border_width_right  = 2
-	ps.border_color = Color(0.78, 0.60, 0.10, 0.85)
+	ps.border_color        = Color(0.78, 0.60, 0.10, 0.85)
 	ps.set_corner_radius_all(10)
 	ps.content_margin_left   = 30; ps.content_margin_right  = 30
 	ps.content_margin_top    = 20; ps.content_margin_bottom = 20
 	_panel.add_theme_stylebox_override("panel", ps)
-	add_child(_panel)
+	_root_ctrl.add_child(_panel)
 
-	# 图标
+	# ── 图标 ──
 	_icon_lbl = Label.new()
 	_icon_lbl.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_icon_lbl.offset_top = 18; _icon_lbl.offset_bottom = 64
+	_icon_lbl.offset_top    = 18; _icon_lbl.offset_bottom = 64
 	_icon_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_icon_lbl.add_theme_font_size_override("font_size", 34)
 	_panel.add_child(_icon_lbl)
 
-	# 标题
+	# ── 标题 ──
 	_title_lbl = Label.new()
 	_title_lbl.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	_title_lbl.offset_top = 68; _title_lbl.offset_bottom = 102
+	_title_lbl.offset_top    = 68; _title_lbl.offset_bottom = 102
 	_title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title_lbl.add_theme_font_size_override("font_size", 20)
 	_title_lbl.add_theme_color_override("font_color", Color(0.78, 0.60, 0.10))
 	_panel.add_child(_title_lbl)
 
-	# 分割线
+	# ── 分割线 ──
 	var div: ColorRect = ColorRect.new()
 	div.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	div.offset_left = 30; div.offset_right = -30
-	div.offset_top = 108; div.offset_bottom = 110
+	div.offset_left = 30; div.offset_right  = -30
+	div.offset_top  = 108; div.offset_bottom = 110
 	div.color = Color(0.78, 0.60, 0.10, 0.35)
 	_panel.add_child(div)
 
-	# 内容
+	# ── 内容 ──
 	_content_lbl = RichTextLabel.new()
 	_content_lbl.bbcode_enabled = true
 	_content_lbl.set_anchors_preset(Control.PRESET_TOP_WIDE)
@@ -132,33 +138,33 @@ func _build_ui() -> void:
 	_content_lbl.add_theme_color_override("default_color", Color(0.88, 0.84, 0.76))
 	_panel.add_child(_content_lbl)
 
-	# 进度圆点行
+	# ── 进度圆点行 ──
 	_dot_row = HBoxContainer.new()
 	_dot_row.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	_dot_row.offset_top = -60; _dot_row.offset_bottom = -38
-	_dot_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	_dot_row.offset_top    = -60; _dot_row.offset_bottom = -38
+	_dot_row.alignment     = BoxContainer.ALIGNMENT_CENTER
 	_dot_row.add_theme_constant_override("separation", 8)
 	_panel.add_child(_dot_row)
 
-	# 跳过按钮
+	# ── 跳过按钮 ──
 	_skip_btn = Button.new()
 	_skip_btn.text = "跳过引导"
 	_skip_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	_skip_btn.offset_left = 16; _skip_btn.offset_right = 120
-	_skip_btn.offset_top  = -34; _skip_btn.offset_bottom = -6
+	_skip_btn.offset_left   = 16;  _skip_btn.offset_right  = 120
+	_skip_btn.offset_top    = -34; _skip_btn.offset_bottom = -6
 	_skip_btn.flat = true
 	_skip_btn.add_theme_font_size_override("font_size", 12)
-	_skip_btn.add_theme_color_override("font_color", Color(0.5,0.45,0.38))
+	_skip_btn.add_theme_color_override("font_color", Color(0.5, 0.45, 0.38))
 	_skip_btn.pressed.connect(_finish)
 	_panel.add_child(_skip_btn)
 
-	# 下一页/完成按钮
+	# ── 下一页/完成按钮 ──
 	_next_btn = Button.new()
 	_next_btn.text = "下一页  →"
 	_next_btn.custom_minimum_size = Vector2(140, 36)
 	_next_btn.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_next_btn.offset_left  = -156; _next_btn.offset_right  = -16
-	_next_btn.offset_top   = -42;  _next_btn.offset_bottom = -6
+	_next_btn.offset_left   = -156; _next_btn.offset_right  = -16
+	_next_btn.offset_top    = -42;  _next_btn.offset_bottom = -6
 	var btn_ps: StyleBoxFlat = StyleBoxFlat.new()
 	btn_ps.bg_color = Color(0.14, 0.10, 0.06, 0.95)
 	btn_ps.border_width_top    = 1; btn_ps.border_width_bottom = 1
@@ -174,8 +180,8 @@ func _build_ui() -> void:
 func _show_page(idx: int) -> void:
 	_cur_page = idx
 	var page: Dictionary = PAGES[idx]
-	_icon_lbl.text = page.get("icon", "")
-	_title_lbl.text = page.get("title", "")
+	_icon_lbl.text    = page.get("icon", "")
+	_title_lbl.text   = page.get("title", "")
 	_content_lbl.text = page.get("content", "")
 
 	# 更新进度圆点
@@ -183,20 +189,17 @@ func _show_page(idx: int) -> void:
 		child.queue_free()
 	for i: int in PAGES.size():
 		var dot: ColorRect = ColorRect.new()
-		dot.custom_minimum_size = Vector2(8, 8) if i != idx else Vector2(20, 8)
-		dot.color = Color(0.78,0.60,0.10,0.9) if i == idx else Color(0.4,0.35,0.25,0.5)
+		dot.custom_minimum_size = Vector2(20, 8) if i == idx else Vector2(8, 8)
+		dot.color = Color(0.78, 0.60, 0.10, 0.9) if i == idx else Color(0.4, 0.35, 0.25, 0.5)
 		_dot_row.add_child(dot)
 
-	if idx >= PAGES.size() - 1:
-		_next_btn.text = "确认，出发！"
-	else:
-		_next_btn.text = "下一页  →"
+	_next_btn.text = "确认，出发！" if idx >= PAGES.size() - 1 else "下一页  →"
 
 	# 内容淡入
 	_content_lbl.modulate.a = 0.0
 	_title_lbl.modulate.a   = 0.0
 	_icon_lbl.modulate.a    = 0.0
-	var tw: Tween = create_tween().set_parallel(true)
+	var tw: Tween = _root_ctrl.create_tween().set_parallel(true)
 	tw.tween_property(_content_lbl, "modulate:a", 1.0, 0.25)
 	tw.tween_property(_title_lbl,   "modulate:a", 1.0, 0.20)
 	tw.tween_property(_icon_lbl,    "modulate:a", 1.0, 0.18)
@@ -217,6 +220,6 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _finish() -> void:
 	GameState.set_meta("tutorial_done", true)
 	tutorial_finished.emit()
-	var tw: Tween = create_tween()
-	tw.tween_property(self, "modulate:a", 0.0, 0.3)
+	var tw: Tween = _root_ctrl.create_tween()
+	tw.tween_property(_root_ctrl, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(queue_free)
