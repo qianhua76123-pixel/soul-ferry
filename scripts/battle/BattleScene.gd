@@ -101,6 +101,8 @@ func _ready() -> void:
 	AchievementManager.achievement_unlocked.connect(_on_achievement_unlocked)
 	# 锁链 HUD：监听锁链层数变化
 	state_machine.chain_applied.connect(_on_chain_applied)
+	# 无为：监听持续施印
+	state_machine.wu_wei_mark_applied.connect(_on_wu_wei_mark_applied)
 
 	# ── 第二步：UI 主题 & 样式（不依赖布局尺寸）──
 	_setup_hud_theme()
@@ -870,6 +872,13 @@ func _on_chain_applied(total_chains: int) -> void:
 	_refresh_chain_label(total_chains)
 	if total_chains > 0:
 		_show_float_text("⛓×%d" % total_chains, get_viewport().get_visible_rect().size * Vector2(0.65, 0.35), Color(0.5, 0.8, 1.0), 16)
+
+func _on_wu_wei_mark_applied(emotion: String, count: int, turns_left: int) -> void:
+	## 无为·持续施印回调：播放浮字提示
+	var emotion_icons: Dictionary = {"joy": "喜", "calm": "定", "grief": "悲", "fear": "惧", "rage": "怒"}
+	var icon: String = emotion_icons.get(emotion, emotion)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_show_float_text("无为 %s印×%d (剩%d回合)" % [icon, count, turns_left], vp * Vector2(0.5, 0.4), Color(0.9, 0.85, 0.6), 15)
 
 func _setup_result_panel_theme() -> void:
 	var ps: StyleBoxFlat = StyleBoxFlat.new()
