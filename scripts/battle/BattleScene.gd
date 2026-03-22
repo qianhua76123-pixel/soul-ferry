@@ -303,6 +303,25 @@ func _spawn_special_text(msg: String, color: Color) -> void:
 	tw.parallel().tween_property(lbl, "modulate:a", 0.0, 1.5)
 	tw.tween_callback(lbl.queue_free)
 
+## 通用浮动文字（屏幕任意坐标，指定字号）
+## 用于空鸣触发、特殊事件提示等需要大字显示的场合
+func _show_float_text(msg: String, screen_pos: Vector2, color: Color, font_size: int = 20) -> void:
+	var lbl: Label = Label.new()
+	lbl.text = msg
+	lbl.add_theme_color_override("font_color", color)
+	lbl.add_theme_font_size_override("font_size", font_size)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.z_index = 160
+	var ui: Node = get_node_or_null("UI")
+	if ui: ui.add_child(lbl)
+	else:  add_child(lbl)
+	# 以 screen_pos 为中心（粗略居中，Label 尺寸未知时先偏移半个估算宽度）
+	lbl.position = screen_pos - Vector2(font_size * len(msg) * 0.3, font_size * 0.5)
+	var tw: Tween = lbl.create_tween().set_parallel(true)
+	tw.tween_property(lbl, "position:y", lbl.position.y - 80.0, 1.8).set_ease(Tween.EASE_OUT)
+	tw.tween_property(lbl, "modulate:a", 0.0, 1.8).set_ease(Tween.EASE_IN).set_delay(0.6)
+	tw.chain().tween_callback(lbl.queue_free)
+
 func _on_card_effect(_card: Dictionary, result: Dictionary) -> void:
 	# 敌人血条（新 + 旧同步）
 	enemy_hp_bar.value = state_machine.enemy_hp

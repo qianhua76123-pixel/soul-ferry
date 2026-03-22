@@ -51,7 +51,10 @@ var _dot_row: HBoxContainer = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	# 必须同时设置全屏锚点 + grow，才能让子节点的 0.5 锚点相对于视口居中
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	grow_horizontal = Control.GROW_DIRECTION_BOTH
+	grow_vertical   = Control.GROW_DIRECTION_BOTH
 	z_index = 500
 	modulate.a = 0.0
 	_build_ui()
