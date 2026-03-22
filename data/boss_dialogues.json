@@ -1,266 +1,327 @@
 {
-  "boss_dialogues": {
-    "jiang_panyu": {
-      "ruan_ruyue": {
-        "purification": {
-          "trigger_condition": "grief >= 3 and fear >= 2",
-          "lines": [
-            {"speaker": "旁白", "text": "五情祭坛上，悲印和惧印齐聚，祭坛微微震动，如同水面被石头扰动后的涟漪。", "stage": null},
-            {"speaker": "阮如月", "text": "盼鱼，我知道你认不出我，但我知道你在等谁。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……你是谁。你不是他。走开走开走开——（水涌）", "stage": null},
-            {"speaker": "阮如月", "text": "你等了七年。七年里，有多少次你以为船来了，但不是他？", "stage": null},
-            {"speaker": "江盼鱼", "text": "（停顿，水势减弱）……一百二十三次。我数过的。一百二十三次不是他的船。", "stage": null},
-            {"speaker": "阮如月", "text": "一百二十三次，你都等下去了。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……那信。他说他还活着，他说他会回来……那封信……我没收到的那封信……", "stage": null},
-            {"speaker": "阮如月", "text": "我知道那封信。有人压下了它。但那信里写了什么，你想知道吗？", "stage": null},
-            {"speaker": "旁白", "text": "长沉默。水退了半分。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……他……他写了什么。", "stage": null},
-            {"speaker": "阮如月", "text": "他写：「七月廿三，我在北边的港口见过一只和家里一模一样的旧船锚，我想你了。盼鱼，我想回家。」", "stage": null},
-            {"speaker": "旁白", "text": "水鬼的形态开始动摇，水中有光升起。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……他是真的想回来的。", "stage": null},
-            {"speaker": "阮如月", "text": "是。那封信没有你的错，也没有他的错。你可以走了，盼鱼。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……我还不放心，他一个人……", "stage": null},
-            {"speaker": "阮如月", "text": "他已经不在等你了。他先走了。他在那边等你。", "stage": null},
-            {"speaker": "旁白", "text": "渡化完成。水面恢复平静，江里有一点光向下沉去，消失在看不见的深处。", "stage": null}
-          ],
-          "completion_text": "渡化成功。江盼鱼的执念化作水中的光，消散于江底。"
-        },
-        "suppression": {
-          "lines": [
-            {"speaker": "旁白", "text": "水鬼的怒意越来越强，印记在她身上燃烧成可见的符文。", "stage": null},
-            {"speaker": "阮如月", "text": "盼鱼，你听不进去。", "stage": null},
-            {"speaker": "江盼鱼", "text": "走开！走开！你们都走开！他不来，你们算什么！", "stage": null},
-            {"speaker": "阮如月", "text": "对不起。", "stage": null},
-            {"speaker": "旁白", "text": "惧印触发，江盼鱼的攻势短暂迟滞。悲印共鸣，她的怒意中出现了裂缝，露出里面的悲。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……为什么……为什么你要打我……我只是在等……", "stage": null},
-            {"speaker": "阮如月", "text": "你等的人不在这里。你执念太深，江里的冷让你忘了。让我把那份冷打散，也许你能记起来你原来是谁。", "stage": null},
-            {"speaker": "旁白", "text": "镇压完成。江盼鱼消散，但不是渡化——她只是被压制，执念仍在，只是暂时沉入江底。阮如月站在江边，铜铃摇了一声。没有回应。", "stage": null},
-            {"speaker": "阮如月", "text": "这一次，算我欠你的。", "stage": null}
-          ],
-          "completion_text": "镇压完成。江盼鱼的执念暂时沉入江底，但未得解脱。"
-        }
+  "shuigui_wanggui": {
+    "ruan_ruyue": {
+      "purification": {
+        "trigger": {"grief": 3},
+        "phases": [
+          {
+            "speaker": "阮如月",
+            "text": "你叫望归……你在等谁回来？",
+            "emotion_change": {},
+            "pause_after": 0.6
+          },
+          {
+            "speaker": "水鬼·望归",
+            "text": "……等、等我的孩子。他说去赶集，说回来给我带糖……",
+            "emotion_change": {"grief": 1},
+            "pause_after": 0.5
+          },
+          {
+            "speaker": "阮如月",
+            "text": "他回来过。我在村子里看到他的牌位了。他等了你很多年。",
+            "emotion_change": {},
+            "pause_after": 0.8
+          },
+          {
+            "speaker": "水鬼·望归",
+            "text": "……牌位？那孩子……他……他也走了……",
+            "emotion_change": {"grief": 1},
+            "pause_after": 0.6
+          },
+          {
+            "speaker": "阮如月",
+            "text": "你们会在那边相见的。别再守着这滩水了，他在等你。",
+            "emotion_change": {},
+            "pause_after": 1.0
+          },
+          {
+            "speaker": "水鬼·望归",
+            "text": "……好……好。我不等了……",
+            "emotion_change": {},
+            "pause_after": 0.4
+          }
+        ],
+        "completion_effect": "purification_complete"
       },
-      "shen_tiejun": {
-        "purification": {
-          "trigger_condition": "calm >= 3 and grief >= 2",
-          "lines": [
-            {"speaker": "旁白", "text": "沈铁钧站在水边，水鬼在他面前不停打转，像是找不到攻击的角度。他没有动。", "stage": null},
-            {"speaker": "沈铁钧", "text": "你在等人。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……你怎么知道。", "stage": null},
-            {"speaker": "沈铁钧", "text": "我见过太多等人的。你这个等法，是死了还没等到的那种。", "stage": null},
-            {"speaker": "江盼鱼", "text": "你算什么！你懂什么！", "stage": null},
-            {"speaker": "沈铁钧", "text": "我追过案子，有一个案子，死的人死了三十年，家里人还在等当年的说法。我等了十年，没等来，自己去查了。", "stage": null},
-            {"speaker": "旁白", "text": "水势减弱了一点。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……你查出来了吗。", "stage": null},
-            {"speaker": "沈铁钧", "text": "查出来了。那个说法，最后还是给了家里人。晚了三十年，但给了。", "stage": null},
-            {"speaker": "沈铁钧", "text": "你等的人，那封信，被人压了。不是他不来，是他不知道该往哪走。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……那他……", "stage": null},
-            {"speaker": "沈铁钧", "text": "他比你先走了一步。但他走之前，写过信说想回家。那是真的。", "stage": null},
-            {"speaker": "江盼鱼", "text": "……真的。", "stage": null},
-            {"speaker": "沈铁钧", "text": "我不骗人。这辈子骗过几次人，都记着，这次不算。", "stage": null},
-            {"speaker": "旁白", "text": "渡化完成。水退，江面清。", "stage": null}
-          ],
-          "completion_text": "渡化成功。江盼鱼终于相信了那封信，随水而去。"
-        },
-        "suppression": {
-          "lines": [
-            {"speaker": "沈铁钧", "text": "你现在听不进人话。", "stage": null},
-            {"speaker": "江盼鱼", "text": "走开走开走开——", "stage": null},
-            {"speaker": "沈铁钧", "text": "好。", "stage": null},
-            {"speaker": "旁白", "text": "铁链甩出，锁链标记在水中燃烧。他没有多说话，只是一步一步稳稳向前。击败后，水势消散。江盼鱼的残影在水面上浮了一下，眼睛里是茫然而不是愤怒。", "stage": null},
-            {"speaker": "沈铁钧", "text": "下次，等你能听进去了，再说。", "stage": null}
-          ],
-          "completion_text": "镇压完成。沈铁钧没有多说，转身离开。"
-        }
+      "suppression": {
+        "phases": [
+          {
+            "speaker": "阮如月",
+            "text": "你执念太深，无法渡化。只能镇压了。",
+            "emotion_change": {},
+            "pause_after": 0.4
+          }
+        ],
+        "completion_effect": "battle_victory"
       }
     },
-    "song_lanxiu": {
-      "ruan_ruyue": {
-        "purification": {
-          "trigger_condition": "calm >= 2 and rage >= 2",
-          "lines": [
-            {"speaker": "旁白", "text": "印记在宋兰秀身上如火焰一样燃烧，定印的绿光压住了怒印的红，形成了奇异的对峙。", "stage": null},
-            {"speaker": "阮如月", "text": "宋兰秀。你叫宋兰秀。", "stage": null},
-            {"speaker": "宋兰秀", "text": "没有人相信我！没有人——", "stage": null},
-            {"speaker": "阮如月", "text": "我相信你。", "stage": null},
-            {"speaker": "旁白", "text": "周围的怒气停了一瞬。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……你说谎。所有人都说谎。", "stage": null},
-            {"speaker": "阮如月", "text": "我见过你的事。我不是那个村子的人，我没有理由骗你。你祈了七天雨，你把自己的口粮分给了邻居的孩子。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……没有人知道那件事。我没有告诉过任何人。", "stage": null},
-            {"speaker": "阮如月", "text": "但你做了。那件事是真的。", "stage": null},
-            {"speaker": "旁白", "text": "怒气开始松动，像一堵烧了六十年的墙第一次有了裂缝。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……我分了粮食……然后他们说我是旱魃……我只是想……我只是想让孩子们……", "stage": null},
-            {"speaker": "阮如月", "text": "我知道。我知道你为什么祈雨。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……为什么没有人……为什么没有一个人……", "stage": null},
-            {"speaker": "阮如月", "text": "现在有了。陈平生——那个当年会计的曾孙，他看了账目，他相信你。他跪在神像前说了「我相信你是无辜的」。", "stage": null},
-            {"speaker": "旁白", "text": "长久的沉默。怒气慢慢化作雨，细小的雨点从旱地的天空落下来。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……有人相信了。", "stage": null},
-            {"speaker": "阮如月", "text": "有人相信了。你可以走了。", "stage": null},
-            {"speaker": "旁白", "text": "渡化完成。旱地开始下雨，很小，但是下了。", "stage": null}
-          ],
-          "completion_text": "渡化成功。宋兰秀的怒火化作雨，落在了六十年的旱地上。"
-        },
-        "suppression": {
-          "lines": [
-            {"speaker": "旁白", "text": "怒气在宋兰秀身上烧得越来越猛，阮如月知道今天的话说不进去了。", "stage": null},
-            {"speaker": "阮如月", "text": "宋兰秀，你的怒是真的，你的冤也是真的。但今天我说的话你听不进去。", "stage": null},
-            {"speaker": "宋兰秀", "text": "没有人相信我！你也不信！你们都一样！", "stage": null},
-            {"speaker": "阮如月", "text": "我信。但你现在的状态，我说了你也听不见。先让你平静下来。", "stage": null},
-            {"speaker": "旁白", "text": "定印共鸣，怒印被压制，宋兰秀的攻势减弱。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……放开我……我的冤没有人知道……", "stage": null},
-            {"speaker": "阮如月", "text": "有人知道。陈平生知道。但你现在要先停下来。", "stage": null},
-            {"speaker": "旁白", "text": "镇压完成。宋兰秀的怒火被压制，留在原地，无法动弹。", "stage": null},
-            {"speaker": "阮如月", "text": "下次，我会带更多证明来。", "stage": null}
-          ],
-          "completion_text": "镇压完成。宋兰秀的怒火暂时熄灭，但冤屈未散。"
-        }
+    "shen_tiejun": {
+      "purification": {
+        "trigger": {"calm": 3, "grief": 2},
+        "phases": [
+          {
+            "speaker": "沈铁钧",
+            "text": "老鬼，你这辈子是等一个人？",
+            "emotion_change": {},
+            "pause_after": 0.5
+          },
+          {
+            "speaker": "水鬼·望归",
+            "text": "……我儿子。赶集去了……一直没回……",
+            "emotion_change": {"grief": 1},
+            "pause_after": 0.5
+          },
+          {
+            "speaker": "沈铁钧",
+            "text": "（沉默片刻）我查过村里的卷宗。你儿子三十年前因病去了。他没忘记你。",
+            "emotion_change": {},
+            "pause_after": 0.9
+          },
+          {
+            "speaker": "水鬼·望归",
+            "text": "……三十年……那孩子……唉……",
+            "emotion_change": {},
+            "pause_after": 0.7
+          },
+          {
+            "speaker": "沈铁钧",
+            "text": "去吧。阴间没有等待，只有相聚。",
+            "emotion_change": {},
+            "pause_after": 0.5
+          }
+        ],
+        "completion_effect": "purification_complete"
       },
-      "shen_tiejun": {
-        "purification": {
-          "trigger_condition": "calm >= 2 and rage >= 2",
-          "lines": [
-            {"speaker": "沈铁钧", "text": "宋兰秀。我查了当年的案子。", "stage": null},
-            {"speaker": "宋兰秀", "text": "你又是来抓我的！所有人都来抓我！", "stage": null},
-            {"speaker": "沈铁钧", "text": "我是捕快，但我来查的不是你。我查的是那批粮食。", "stage": null},
-            {"speaker": "旁白", "text": "怒气稍微凝固了。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……那批粮食……", "stage": null},
-            {"speaker": "沈铁钧", "text": "赈灾粮，被人贪了，用你做了挡箭牌。我见过账目，是铁证。", "stage": null},
-            {"speaker": "沈铁钧", "text": "这事不是你的错。那个案子，当年有人做错了，结果让你承担了。这不公平，我知道。", "stage": null},
-            {"speaker": "宋兰秀", "text": "不公平……不公平……我祈了七天……跪破了膝盖……", "stage": null},
-            {"speaker": "沈铁钧", "text": "那七天，你是真的在为那个村祈雨。我信。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……为什么……为什么只有你们信……", "stage": null},
-            {"speaker": "沈铁钧", "text": "因为其他人当时都怕了，怕说了实话会被连累。人有时候就是这样。但怕了不代表是对的。", "stage": null},
-            {"speaker": "宋兰秀", "text": "……那个案子……现在……", "stage": null},
-            {"speaker": "沈铁钧", "text": "陈平生认了。在神像前认了他曾祖父的错，要求立碑。案子，我会继续写成文字，让人知道。", "stage": null},
-            {"speaker": "旁白", "text": "渡化完成。", "stage": null}
-          ],
-          "completion_text": "渡化成功。宋兰秀的冤情终于被人看见，她的怒火熄灭，随风而散。"
-        },
-        "suppression": {
-          "lines": [
-            {"speaker": "旁白", "text": "怒火太猛，沈铁钧话说到一半就知道今天渡化不了。", "stage": null},
-            {"speaker": "沈铁钧", "text": "宋兰秀，你今天听不进去，我知道。", "stage": null},
-            {"speaker": "宋兰秀", "text": "没有人相信我！你也一样！滚！", "stage": null},
-            {"speaker": "沈铁钧", "text": "我信你。但我们先打一场。打完你冷静了，再说。", "stage": null},
-            {"speaker": "旁白", "text": "锁链标记在怒气中压下，宋兰秀的行动开始受限。", "stage": null},
-            {"speaker": "沈铁钧", "text": "下次我带账目来。", "stage": null}
-          ],
-          "completion_text": "镇压完成。沈铁钧收起铁链，没有多说。"
-        }
+      "suppression": {
+        "phases": [
+          {
+            "speaker": "沈铁钧",
+            "text": "执念不退，那就只能走了。",
+            "emotion_change": {},
+            "pause_after": 0.3
+          }
+        ],
+        "completion_effect": "battle_victory"
+      }
+    }
+  },
+
+  "hanba_jiaoge": {
+    "ruan_ruyue": {
+      "purification": {
+        "trigger": {"calm": 2, "rage": 2},
+        "phases": [
+          {
+            "speaker": "旱魃·焦骨",
+            "text": "走开！！你们这些人从来不信我！从来都是烧我、埋我——",
+            "emotion_change": {"rage": 1},
+            "pause_after": 0.4
+          },
+          {
+            "speaker": "阮如月",
+            "text": "我信你。旱灾那年，是你挡住了东边那条河。村里的老人都记得。",
+            "emotion_change": {},
+            "pause_after": 0.8
+          },
+          {
+            "speaker": "旱魃·焦骨",
+            "text": "……你说什么。",
+            "emotion_change": {},
+            "pause_after": 0.6
+          },
+          {
+            "speaker": "阮如月",
+            "text": "你当时是想救人，对吗？不是带来旱灾——是想挡住洪水。",
+            "emotion_change": {},
+            "pause_after": 0.7
+          },
+          {
+            "speaker": "旱魃·焦骨",
+            "text": "……他们烧了我……活活的……我是想救他们……",
+            "emotion_change": {"grief": 1},
+            "pause_after": 1.0
+          },
+          {
+            "speaker": "阮如月",
+            "text": "我相信你。现在你可以放下了。",
+            "emotion_change": {},
+            "pause_after": 0.5
+          }
+        ],
+        "completion_effect": "purification_complete"
+      },
+      "suppression": {
+        "phases": [
+          {
+            "speaker": "阮如月",
+            "text": "你的怒气太重，我没有办法靠近你的心。只能这样了。",
+            "emotion_change": {},
+            "pause_after": 0.4
+          }
+        ],
+        "completion_effect": "battle_victory"
       }
     },
-    "shen_sujin": {
-      "ruan_ruyue": {
-        "purification": {
-          "stages": [
-            {
-              "stage": 1,
-              "trigger_condition": "joy >= 1 and calm >= 1",
-              "lines": [
-                {"speaker": "阮如月", "text": "素锦，你知道你为什么在这里吗？", "stage": 1},
-                {"speaker": "沈素锦", "text": "我在等一个人。那个人是我的夫君。但他没有来。", "stage": 1},
-                {"speaker": "阮如月", "text": "你等了多少年？", "stage": 1},
-                {"speaker": "沈素锦", "text": "……我不记得了。很久。反正这里时间和那边不一样。", "stage": 1},
-                {"speaker": "阮如月", "text": "你不难过吗？", "stage": 1},
-                {"speaker": "沈素锦", "text": "……我不知道难过是什么感觉。我只是……空的。", "stage": 1}
-              ]
-            },
-            {
-              "stage": 2,
-              "trigger_condition": "joy >= 2 and calm >= 2",
-              "lines": [
-                {"speaker": "阮如月", "text": "素锦，你以前喜欢什么？", "stage": 2},
-                {"speaker": "沈素锦", "text": "……我不记得了。很久以前的事。", "stage": 2},
-                {"speaker": "阮如月", "text": "你喜欢过梅花。你院子里种了十七棵梅花树。", "stage": 2},
-                {"speaker": "沈素锦", "text": "……十七棵。", "stage": 2},
-                {"speaker": "阮如月", "text": "你每年冬天都数。你说，数到十七就放心了，都在。", "stage": 2},
-                {"speaker": "沈素锦", "text": "……都在。", "stage": 2}
-              ]
-            },
-            {
-              "stage": 3,
-              "trigger_condition": "joy >= 3 and calm >= 3",
-              "lines": [
-                {"speaker": "阮如月", "text": "素锦，那十七棵梅花树还在。后来的人没有砍。", "stage": 3},
-                {"speaker": "沈素锦", "text": "……还在。", "stage": 3},
-                {"speaker": "阮如月", "text": "你可以去看看，然后走。", "stage": 3},
-                {"speaker": "沈素锦", "text": "……我可以去看吗。", "stage": 3},
-                {"speaker": "阮如月", "text": "可以。", "stage": 3},
-                {"speaker": "沈素锦", "text": "……那我去看一眼。就一眼。", "stage": 3},
-                {"speaker": "旁白", "text": "渡化完成。沈素锦的形体开始淡化，像是一层薄雾慢慢散去，没有声音，没有剧烈。最后，一点白光消失在冬天的方向。", "stage": 3}
-              ]
-            }
-          ],
-          "completion_text": "渡化成功。沈素锦去看她的十七棵梅花树了。"
-        },
-        "suppression": {
-          "lines": [
-            {"speaker": "旁白", "text": "沈素锦不愤怒，不哭，只是一直在索取——她的攻击像是一种无意识的、试图填补某个空洞的动作。", "stage": null},
-            {"speaker": "阮如月", "text": "素锦……你不是要伤害我，你只是不知道怎么存在。", "stage": null},
-            {"speaker": "沈素锦", "text": "我不知道。", "stage": null},
-            {"speaker": "阮如月", "text": "我知道。但现在我们先把这里稳下来，然后我再来找你。", "stage": null},
-            {"speaker": "旁白", "text": "喜印和定印一同压制，沈素锦的索取行为开始减弱。", "stage": null},
-            {"speaker": "沈素锦", "text": "……你会再来吗。", "stage": null},
-            {"speaker": "阮如月", "text": "会。", "stage": null},
-            {"speaker": "旁白", "text": "镇压完成。沈素锦回到原来平静的状态，不动，不言。", "stage": null},
-            {"speaker": "阮如月", "text": "下次我带梅花来。", "stage": null}
-          ],
-          "completion_text": "镇压完成。沈素锦平静下来，但仍是空的。"
-        }
+    "shen_tiejun": {
+      "purification": {
+        "trigger": {"calm": 3},
+        "phases": [
+          {
+            "speaker": "沈铁钧",
+            "text": "你的案子我重新翻过了。当年的判决是错的。",
+            "emotion_change": {},
+            "pause_after": 0.6
+          },
+          {
+            "speaker": "旱魃·焦骨",
+            "text": "……错的？六十年了才来说错的？！",
+            "emotion_change": {"rage": 1},
+            "pause_after": 0.4
+          },
+          {
+            "speaker": "沈铁钧",
+            "text": "是。我没有办法替他们道歉，但这案子的黑锅，你不该背。",
+            "emotion_change": {},
+            "pause_after": 0.8
+          },
+          {
+            "speaker": "旱魃·焦骨",
+            "text": "……（很久的沉默）……六十年……",
+            "emotion_change": {},
+            "pause_after": 1.2
+          },
+          {
+            "speaker": "沈铁钧",
+            "text": "去吧。",
+            "emotion_change": {},
+            "pause_after": 0.3
+          }
+        ],
+        "completion_effect": "purification_complete"
       },
-      "shen_tiejun": {
-        "purification": {
-          "stages": [
-            {
-              "stage": 1,
-              "trigger_condition": "joy >= 1 and calm >= 1",
-              "lines": [
-                {"speaker": "沈铁钧", "text": "你不像是要打架。", "stage": 1},
-                {"speaker": "沈素锦", "text": "我不是要打架。我只是……我不知道你们来这里做什么。", "stage": 1},
-                {"speaker": "沈铁钧", "text": "我们来渡魂。渡你走。", "stage": 1},
-                {"speaker": "沈素锦", "text": "走去哪里。", "stage": 1},
-                {"speaker": "沈铁钧", "text": "该去的地方。", "stage": 1},
-                {"speaker": "沈素锦", "text": "我不知道我该去哪里。我等的人没有来，我就一直在这里。", "stage": 1}
-              ]
-            },
-            {
-              "stage": 2,
-              "trigger_condition": "joy >= 2 and calm >= 2",
-              "lines": [
-                {"speaker": "沈铁钧", "text": "那个人——你等的那个——他出事了。", "stage": 2},
-                {"speaker": "沈素锦", "text": "……我知道。", "stage": 2},
-                {"speaker": "沈铁钧", "text": "你知道？", "stage": 2},
-                {"speaker": "沈素锦", "text": "我猜到了。等了那么久没来，不是不想来，就是来不了。", "stage": 2},
-                {"speaker": "沈铁钧", "text": "……你一直知道，但还是等着。", "stage": 2},
-                {"speaker": "沈素锦", "text": "等和知道，不是矛盾的事。我不恨他，我只是……不知道等完了之后，我应该做什么。", "stage": 2}
-              ]
-            },
-            {
-              "stage": 3,
-              "trigger_condition": "joy >= 3 and calm >= 3",
-              "lines": [
-                {"speaker": "沈铁钧", "text": "等完了之后，就不用等了。", "stage": 3},
-                {"speaker": "沈素锦", "text": "……那么简单？", "stage": 3},
-                {"speaker": "沈铁钧", "text": "就这么简单。做完了一件事，那件事就结了。", "stage": 3},
-                {"speaker": "沈素锦", "text": "……我的院子里有梅花树。", "stage": 3},
-                {"speaker": "沈铁钧", "text": "还在。没人砍。", "stage": 3},
-                {"speaker": "沈素锦", "text": "……那就好。", "stage": 3},
-                {"speaker": "旁白", "text": "渡化完成。", "stage": 3}
-              ]
-            }
-          ],
-          "completion_text": "渡化成功。沈素锦去看她的十七棵梅花树了。"
-        },
-        "suppression": {
-          "lines": [
-            {"speaker": "沈铁钧", "text": "你今天听进去了多少？", "stage": null},
-            {"speaker": "沈素锦", "text": "……一些。但不够。", "stage": null},
-            {"speaker": "沈铁钧", "text": "那我们先打完。", "stage": null},
-            {"speaker": "旁白", "text": "铁链标记锁住沈素锦的索取冲动，沈铁钧每一步都稳。镇压完成后，沈素锦回到原位，眼神比之前清醒了一点点。", "stage": null},
-            {"speaker": "沈铁钧", "text": "下次你能说话的时候，我们继续。", "stage": null}
-          ],
-          "completion_text": "镇压完成。沈素锦平静下来，但仍是空的。"
-        }
+      "suppression": {
+        "phases": [
+          {
+            "speaker": "沈铁钧",
+            "text": "怒气不退，那这一关就只能硬过了。",
+            "emotion_change": {},
+            "pause_after": 0.3
+          }
+        ],
+        "completion_effect": "battle_victory"
+      }
+    }
+  },
+
+  "guixiniang_sujin": {
+    "ruan_ruyue": {
+      "purification": {
+        "trigger": {"joy": 3},
+        "phases": [
+          {
+            "speaker": "鬼新娘·素锦",
+            "text": "喜服穿好了……喜烛也点了……他怎么还不来……",
+            "emotion_change": {},
+            "pause_after": 0.7
+          },
+          {
+            "speaker": "阮如月",
+            "text": "素锦，你最喜欢的是什么颜色的花？",
+            "emotion_change": {},
+            "pause_after": 0.5
+          },
+          {
+            "speaker": "鬼新娘·素锦",
+            "text": "……什么？我……我喜欢栀子花。白色的，有香味……",
+            "emotion_change": {"joy": 1},
+            "pause_after": 0.6
+          },
+          {
+            "speaker": "阮如月",
+            "text": "你以前是个很爱笑的人，对吗？不只是为了他——是你自己就喜欢笑。",
+            "emotion_change": {},
+            "pause_after": 0.8
+          },
+          {
+            "speaker": "鬼新娘·素锦",
+            "text": "……我……我是……我以前常去河边看夕阳……那时候……",
+            "emotion_change": {"joy": 1},
+            "pause_after": 0.8
+          },
+          {
+            "speaker": "阮如月",
+            "text": "那个爱看夕阳的素锦，比喜服更美。去吧，那边的夕阳不会等人的。",
+            "emotion_change": {},
+            "pause_after": 1.0
+          },
+          {
+            "speaker": "鬼新娘·素锦",
+            "text": "……（轻声）……好。",
+            "emotion_change": {},
+            "pause_after": 0.5
+          }
+        ],
+        "completion_effect": "purification_complete"
+      },
+      "suppression": {
+        "phases": [
+          {
+            "speaker": "阮如月",
+            "text": "你的喜悦已经扭曲成了执念。我没有办法打开你的心，只能把你镇住了。",
+            "emotion_change": {},
+            "pause_after": 0.5
+          }
+        ],
+        "completion_effect": "battle_victory"
+      }
+    },
+    "shen_tiejun": {
+      "purification": {
+        "trigger": {"calm": 2, "joy": 1},
+        "phases": [
+          {
+            "speaker": "沈铁钧",
+            "text": "那个人……是你自己选的，还是家里定的？",
+            "emotion_change": {},
+            "pause_after": 0.5
+          },
+          {
+            "speaker": "鬼新娘·素锦",
+            "text": "……自己……自己喜欢的……他会吹箫……",
+            "emotion_change": {"joy": 1},
+            "pause_after": 0.6
+          },
+          {
+            "speaker": "沈铁钧",
+            "text": "喜欢就是喜欢过了。不用等他来接。",
+            "emotion_change": {},
+            "pause_after": 0.7
+          },
+          {
+            "speaker": "鬼新娘·素锦",
+            "text": "……（沉默）……我可以……不等了？",
+            "emotion_change": {},
+            "pause_after": 0.8
+          },
+          {
+            "speaker": "沈铁钧",
+            "text": "可以。这一套衣服穿得很好看。去吧。",
+            "emotion_change": {},
+            "pause_after": 0.4
+          }
+        ],
+        "completion_effect": "purification_complete"
+      },
+      "suppression": {
+        "phases": [
+          {
+            "speaker": "沈铁钧",
+            "text": "执念太深，打散了再说。",
+            "emotion_change": {},
+            "pause_after": 0.3
+          }
+        ],
+        "completion_effect": "battle_victory"
       }
     }
   }

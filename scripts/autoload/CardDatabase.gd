@@ -224,3 +224,70 @@ func _build_desc(etype: String, vs: String, bs: String,
 		"du_hua_trigger":
 			return "%s触发渡化判定" % cond
 	return card.get("description", "???")
+
+# ════════════════════════════════════════════════════════
+#  upgrade_card() — 五种升级类型完整实现
+# ════════════════════════════════════════════════════════
+func upgrade_card(card: Dictionary) -> Dictionary:
+	if card.get("upgraded", false):
+		return card   # 已升级，不重复处理
+	var c: Dictionary = card.duplicate(true)
+	var utype: String = str(c.get("upgrade_type", "power"))
+
+	match utype:
+		"power":
+			# 强化型：核心数值 ×1.5（取整），条件加成+1
+			var ev: int = int(c.get("effect_value", 0))
+			if ev > 0:
+				c["effect_value"] = int(ev * 1.5)
+			var ub: int = int(c.get("upgrade_bonus_damage", 0))
+			if ub > 0:
+				c["effect_value"] = int(c.get("effect_value", 0)) + ub
+			var cb: int = int(c.get("condition_bonus", 0))
+			if cb > 0:
+				c["condition_bonus"] = cb + 1
+
+		"cost":
+			# 费用型：费用-1（最低0）
+			var cost: int = int(c.get("cost", 1))
+			if cost > 0:
+				c["cost"] = cost - 1
+
+		"extend":
+			# 扩展型：追加新效果描述
+			var extra: String = str(c.get("upgrade_extra_effect", ""))
+			if not extra.is_empty():
+				c["description"] = str(c.get("description", "")) + "\n[升级] " + extra
+				c["desc"] = str(c.get("desc", "")) + "\n[升级] " + extra
+
+		"unlock":
+			# 解锁型：移除 condition 字段限制
+			if c.get("upgrade_remove_requirement", false):
+				c.erase("condition")
+				c["condition_bonus"] = 0
+
+		"transform":
+			# 转化型：完全替换效果描述
+			var tf: String = str(c.get("upgrade_transform_effect", ""))
+			if not tf.is_empty():
+				c["description"] = tf
+				c["desc"] = tf
+
+	# 通用标记
+	c["upgraded"]     = true
+	c["level"]        = int(c.get("level", 0)) + 1
+	c["display_name"] = str(c.get("name", "")) + " ✦"
+	c["name"]         = c["display_name"]
+
+	# 同步更新牌组中的牌
+	DeckManager.replace_card(str(card.get("id", "")), c)
+	return c
+
+func can_upgrade(card: Dictionary) -> bool:
+	## 检查是否可以升级：未升级 + 若费用型则费用>0
+	if card.get("upgraded", false):
+		return false
+	var utype: String = str(card.get("upgrade_type", "power"))
+	if utype == "cost" and int(card.get("cost", 1)) == 0:
+		return false
+	return true

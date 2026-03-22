@@ -7,6 +7,7 @@ signal dominant_changed(old_dominant: String, new_dominant: String)
 signal disorder_triggered(emotion: String)
 signal disorder_cleared(emotion: String)
 signal emotions_reset()
+signal emotion_increased(emotion: String, amount: int)   # 新增：情绪增加时通知（悲慧被动用）
 
 const EMOTIONS = ["rage", "fear", "grief", "joy", "calm"]
 const MAX_VALUE = 5
@@ -25,10 +26,13 @@ func _ready() -> void:
 func modify(emotion: String, delta: int) -> void:
 	if emotion not in values: return
 	var old_val: int = values[emotion]
-	var new_val: int = clamp(old_val + delta, MIN_VALUE, MAX_VALUE)
+	var new_val: int = clampi(old_val + delta, MIN_VALUE, MAX_VALUE)
 	if old_val == new_val: return
 	values[emotion] = new_val
 	emotion_changed.emit(emotion, old_val, new_val)
+	# 情绪增加时额外发射信号（悲慧被动/协作联动等监听）
+	if new_val > old_val:
+		emotion_increased.emit(emotion, new_val - old_val)
 	_check_disorder(emotion)
 	if emotion != "calm":
 		_update_dominant()

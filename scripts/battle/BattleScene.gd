@@ -105,6 +105,22 @@ func _ready() -> void:
 	# ── 第四步：布局微调（需要节点树已完整，延迟一帧）──
 	call_deferred("_deferred_layout_setup")
 
+	# ── 弃牌按钮 ──
+	_setup_discard_button()
+
+	# ── 碎片显示 ──
+	_setup_shard_display()
+
+	# ── 弃牌系统信号 ──
+	DiscardSystem.ruyue_seal_bonus_requested.connect(_on_ruyue_seal_bonus)
+	DiscardSystem.tiejun_rage_bonus_requested.connect(_on_tiejun_rage_bonus)
+	DiscardSystem.tiejun_chain_bonus_requested.connect(_on_tiejun_chain_bonus)
+	DiscardSystem.wumian_energy_bonus_requested.connect(_on_wumian_energy_bonus)
+	DiscardSystem.wumian_free_card_bonus_requested.connect(_on_wumian_free_card_bonus)
+
+	# ── 无名空鸣选择 ──
+	WumianManager.kongming_choice_required.connect(_on_kongming_choice_required)
+
 	# ── 第五步：启动战斗逻辑（最后执行，保证 UI 节点全部就位）──
 	var enemy_id: String = str(GameState.get_meta("pending_enemy_id", "yuan_gui"))
 	state_machine.start_battle(str(enemy_id))
@@ -1418,3 +1434,203 @@ func _play_attack_flash() -> void:
 	tw.tween_property(flash, "color:a", 0.55, 0.06)
 	tw.tween_property(flash, "color:a", 0.0,  0.18)
 	tw.tween_callback(flash.queue_free)
+
+# ════════════════════════════════════════════════════════
+#  弃牌按钮 & 碎片显示
+# ════════════════════════════════════════════════════════
+
+var _discard_btn: Button = null
+var _shard_display: ShardDisplay = null
+var _free_next_card: bool = false    # 无名空流进入段奖励：下一张牌免费
+
+func _setup_discard_button() -> void:
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+	_discard_btn = Button.new()
+	_discard_btn.name = "DiscardBtn"
+	_discard_btn.text = "弃牌"
+	_discard_btn.custom_minimum_size = Vector2(64, 28)
+	_discard_btn.add_theme_font_size_override("font_size", 12)
+	_discard_btn.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
+	_discard_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
+	_discard_btn.visible = false  # 玩家回合才显示
+	_discard_btn.pressed.connect(_on_discard_btn_pressed)
+	ui.add_child(_discard_btn)
+	# 定位到 HUD 右侧
+	var hud: Node = get_node_or_null("UI/HUD")
+	if hud:
+		_discard_btn.position = Vector2(1100.0, 8.0)
+
+func _setup_shard_display() -> void:
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+	_shard_display = ShardDisplay.new()
+	_shard_display.name = "ShardDisplay"
+	_shard_display.position = Vector2(8.0, 50.0)
+	ui.add_child(_shard_display)
+
+func _on_discard_btn_pressed() -> void:
+	# 弃牌模式：下一次点击手牌触发主动弃牌
+	if not DeckManager.can_active_discard():
+		return
+	_discard_mode = true
+	_discard_btn.text = "选择要弃掉的牌..."
+	_discard_btn.disabled = true
+
+var _discard_mode: bool = false
+
+func _handle_card_click_discard(card_data: Dictionary) -> void:
+	if not _discard_mode: return
+	_discard_mode = false
+	DeckManager.active_discard(card_data)
+	_update_discard_btn()
+
+func _update_discard_btn() -> void:
+	if not _discard_btn: return
+	var can: bool = DeckManager.can_active_discard()
+	_discard_btn.disabled = not can
+	_discard_btn.text = "弃牌 (%d)" % (DeckManager.active_discard_limit - DeckManager.active_discard_used) if can else "弃牌（已用尽）"
+
+# ════════════════════════════════════════════════════════
+#  弃牌系统角色专属回调
+# ════════════════════════════════════════════════════════
+
+func _on_ruyue_seal_bonus(emotion: String) -> void:
+	## 阮如月印散：随机对一个敌人施加对应情绪印记×1
+	state_machine._apply_mark(emotion, 1)
+
+func _on_tiejun_rage_bonus() -> void:
+	## 沈铁钧余怒：弃怒牌→锁链目标受（怒×2）伤害
+	var dmg: int = EmotionManager.values.get("rage", 0) * 2
+	if dmg > 0:
+		state_machine._deal_damage_to_enemy(dmg)
+
+func _on_tiejun_chain_bonus() -> void:
+	## 沈铁钧余怒：弃施锁牌→随机敌人施加锁链×1
+	state_machine._apply_chain(1)
+
+func _on_wumian_energy_bonus() -> void:
+	## 无名空流进入高段：+1能量
+	DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
+	_update_hud()
+
+func _on_wumian_free_card_bonus() -> void:
+	## 无名空流进入极高段：下一张牌免费
+	_free_next_card = true
+
+# ════════════════════════════════════════════════════════
+#  空鸣选择面板
+# ════════════════════════════════════════════════════════
+
+func _on_kongming_choice_required() -> void:
+	## 空鸣触发后，玩家选择：渡化进度+25% or 所有敌人25点穿甲伤害
+	var ui: Node = get_node_or_null("UI")
+	if not ui: return
+
+	var panel: Panel = Panel.new()
+	panel.name = "KongmingChoice"
+	panel.custom_minimum_size = Vector2(360, 140)
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	panel.position = Vector2((vp.x - 360) * 0.5, (vp.y - 140) * 0.5)
+	var ps: StyleBoxFlat = StyleBoxFlat.new()
+	ps.bg_color = Color(0.06, 0.04, 0.03, 0.97)
+	ps.border_width_top = 2; ps.border_width_bottom = 2
+	ps.border_width_left = 2; ps.border_width_right = 2
+	ps.border_color = Color(0.78, 0.78, 0.75, 0.9)
+	ps.set_corner_radius_all(8)
+	panel.add_theme_stylebox_override("panel", ps)
+
+	var vbox: VBoxContainer = VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_theme_constant_override("separation", 12)
+	panel.add_child(vbox)
+
+	var title: Label = Label.new()
+	title.text = "✦ 空  鸣 ✦   选择空鸣效果"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 16)
+	title.add_theme_color_override("font_color", Color(0.9, 0.9, 0.85))
+	vbox.add_child(title)
+
+	var hbox: HBoxContainer = HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	hbox.add_theme_constant_override("separation", 16)
+	vbox.add_child(hbox)
+
+	var btn_purify: Button = Button.new()
+	btn_purify.text = "渡化进度 +25%"
+	btn_purify.custom_minimum_size = Vector2(150, 40)
+	btn_purify.add_theme_font_size_override("font_size", 13)
+	btn_purify.pressed.connect(func():
+		# 渡化进度+25%（通过 BattleStateMachine 的 du_hua_progress 处理）
+		var prog_panel: Node = get_node_or_null("UI/PurificationPanel")
+		if prog_panel and prog_panel.has_method("add_progress"):
+			prog_panel.add_progress(0.25)
+		panel.queue_free()
+	)
+	hbox.add_child(btn_purify)
+
+	var btn_dmg: Button = Button.new()
+	btn_dmg.text = "25点穿甲伤害（全体）"
+	btn_dmg.custom_minimum_size = Vector2(160, 40)
+	btn_dmg.add_theme_font_size_override("font_size", 13)
+	btn_dmg.pressed.connect(func():
+		state_machine._deal_damage_to_enemy(25)
+		panel.queue_free()
+	)
+	hbox.add_child(btn_dmg)
+
+	ui.add_child(panel)
+
+# ════════════════════════════════════════════════════════
+#  Boss 渡化条件检测（每回合结束时调用）
+# ════════════════════════════════════════════════════════
+
+var _purification_dialogue_shown: bool = false
+var _purification_phase: int = 0   # 0=未开始，1=第一阶段，2=第二阶段，3=完成
+
+func _check_purification_unlock() -> void:
+	if _purification_dialogue_shown: return
+	var enemy_data: Dictionary = state_machine.enemy_data
+	if not enemy_data.get("is_boss", false): return
+	var boss_id: String = str(enemy_data.get("id", ""))
+	var char_id: String = str(GameState.get_meta("selected_character", ""))
+
+	# 检查数据库中是否有对应对话
+	if not BossDialogueDatabase.has_dialogue(boss_id, char_id, "purification"): return
+
+	var trigger: Dictionary = BossDialogueDatabase.get_trigger(boss_id, char_id, "purification")
+	for emotion: String in trigger:
+		if EmotionManager.values.get(emotion, 0) < int(trigger[emotion]):
+			return  # 条件未满足
+
+	# 所有条件满足，显示渡化按钮
+	_purification_dialogue_shown = true
+	_show_purification_option(boss_id, char_id)
+
+func _show_purification_option(boss_id: String, char_id: String) -> void:
+	var btn: Node = get_node_or_null("UI/HUD/DuHuaBtn")
+	if not btn: return
+	btn.visible = true
+	btn.text = "✨ 发起渡化"
+	btn.modulate.a = 0.0
+	var tw: Tween = btn.create_tween()
+	tw.tween_property(btn, "modulate:a", 1.0, 0.5)
+	# 覆写点击行为，进入对话流程
+	if btn.pressed.get_connections().size() > 0:
+		btn.pressed.disconnect(_on_du_hua_pressed)
+	btn.pressed.connect(func(): _start_purification_dialogue(boss_id, char_id))
+
+func _start_purification_dialogue(boss_id: String, char_id: String) -> void:
+	var phases: Array = BossDialogueDatabase.get_phases(boss_id, char_id, "purification")
+	if phases.is_empty():
+		state_machine.confirm_du_hua()
+		return
+	var dlg_ui: Node = get_node_or_null("UI/BossDialogueUI")
+	if dlg_ui and dlg_ui.has_method("start_dialogue"):
+		dlg_ui.start_dialogue(phases, func():
+			var effect: String = BossDialogueDatabase.get_completion_effect(boss_id, char_id, "purification")
+			if effect == "purification_complete":
+				state_machine.confirm_du_hua()
+		)

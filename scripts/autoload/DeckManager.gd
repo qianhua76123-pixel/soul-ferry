@@ -4,7 +4,7 @@ extends Node
 
 signal card_drawn(card: Dictionary)
 signal card_played(card: Dictionary)
-signal card_discarded(card: Dictionary)
+signal card_discarded(card: Dictionary, is_forced: bool)  # is_forced=false 主动, true 被动/强制
 signal hand_updated(hand: Array)
 signal deck_shuffled()
 signal hand_full()
@@ -99,13 +99,14 @@ func on_turn_start() -> void:
 	max_cost = BASE_COST - EmotionManager.get_cost_reduction()
 	current_cost = max_cost
 	cost_changed.emit(current_cost)
+	reset_discard_limit()
 	var draw_n: int = BASE_DRAW + EmotionManager.get_draw_bonus()
 	if EmotionManager.is_disorder("fear"): draw_n -= 1
 	draw_cards(max(1, draw_n))
 
 func on_turn_end() -> void:
 	for c in hand.duplicate():
-		discard_from_hand(c)
+		discard_from_hand(c, true)  # 回合结束自动弃牌=强制
 
 func play_card(card: Dictionary) -> bool:
 	var idx: int = -1
@@ -131,17 +132,38 @@ func play_card(card: Dictionary) -> bool:
 	hand_updated.emit(hand)
 	return true
 
-func discard_from_hand(card: Dictionary) -> void:
+## 每回合可主动弃牌次数（遗物/牌效可修改）
+var active_discard_limit: int = 1
+var active_discard_used:  int = 0
+
+func reset_discard_limit() -> void:
+	active_discard_used = 0
+
+func can_active_discard() -> bool:
+	return active_discard_used < active_discard_limit
+
+func active_discard(card: Dictionary) -> void:
+	## 主动弃牌（玩家手动点击「弃牌」按钮），每回合有次数限制
+	if not can_active_discard(): return
+	active_discard_used += 1
+	discard_from_hand(card, false)  # is_forced=false
+
+func discard_from_hand(card: Dictionary, is_forced: bool = true) -> void:
 	var idx: int = hand.find(card)
 	if idx >= 0:
 		hand.remove_at(idx)
 		discard_pile.append(card)
-		card_discarded.emit(card)
+		card_discarded.emit(card, is_forced)
 	hand_updated.emit(hand)
 
 func discard_random() -> void:
 	if hand.is_empty(): return
-	discard_from_hand(hand[randi() % len(hand)])
+	discard_from_hand(hand[randi() % len(hand)], true)  # 被动弃牌=强制
+
+func discard_hand() -> void:
+	## 整手弃牌（一念牌等）
+	for card in hand.duplicate():
+		discard_from_hand(card, true)
 
 func add_card_to_deck(card: Dictionary) -> void:
 	deck.append(card.duplicate(true))
@@ -155,3 +177,13 @@ func remove_card_from_deck(card_id: String) -> bool:
 		if discard_pile[i].get("id","") == card_id:
 			discard_pile.remove_at(i); return true
 	return false
+
+func replace_card(card_id: String, new_card: Dictionary) -> void:
+	## 用新卡数据替换牌组中第一张匹配的牌（升级/锻造后更新）
+	for arr in [deck, hand, discard_pile, exhaust_pile]:
+		for i in arr.size():
+			if arr[i].get("id", "") == card_id:
+				arr[i] = new_card.duplicate(true)
+				if arr == hand:
+					hand_updated.emit(hand)
+				return
