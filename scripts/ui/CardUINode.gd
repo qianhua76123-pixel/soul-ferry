@@ -29,6 +29,10 @@ func setup(data: Dictionary) -> void:
 	_rarity_color = _rarity_border_color(data.get("rarity", "common"))
 	queue_redraw()
 
+func get_card_data() -> Dictionary:
+	## 返回该卡牌的数据字典（供外部查询，如失控反馈）
+	return card_data
+
 func _rarity_border_color(rarity: String) -> Color:
 	match rarity:
 		"rare":
@@ -278,6 +282,10 @@ func play_draw_animation(_from_offset: Vector2) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.pressed and event.button_index == MOUSE_BUTTON_LEFT and is_playable:
+			# 失控限制即时反馈：点击即抖，不等信号
+			if not EmotionManager.can_play_card(card_data):
+				_shake_self()
+				return
 			card_clicked.emit(card_data)
 			# 点击弹跳反馈
 			var tween: Tween = create_tween()
@@ -285,3 +293,12 @@ func _gui_input(event: InputEvent) -> void:
 				.set_ease(Tween.EASE_IN)
 			tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.10) \
 				.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+func _shake_self() -> void:
+	## 原地抖动（失控限制点击反馈）
+	var tw: Tween = create_tween()
+	var orig: Vector2 = position
+	tw.tween_property(self, "position", orig + Vector2(8, 0), 0.04)
+	tw.tween_property(self, "position", orig - Vector2(8, 0), 0.04)
+	tw.tween_property(self, "position", orig + Vector2(5, 0), 0.03)
+	tw.tween_property(self, "position", orig, 0.03)

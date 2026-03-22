@@ -14,6 +14,7 @@ signal wu_wei_mark_applied(emotion: String, count: int, turns_left: int)
 signal wu_wei_ended_with_duhua()
 signal chain_applied(total_chains: int)  # 锁链施加后通知 HUD 刷新
 signal marks_changed(marks: Dictionary)  # 印记层数变化通知 UI
+signal card_blocked_by_disorder(card: Dictionary, reason: String)  # 失控限制：牌无法打出
 
 # 状态常量（替代 enum，避免外部引用问题）
 const STATE_IDLE         = 0
@@ -143,6 +144,11 @@ func _begin_player_turn() -> void:
 func play_card(card: Dictionary) -> bool:
 	if current_state != STATE_PLAYER_TURN:
 		return false
+	# ── 失控限制检查 ──────────────────────────────────
+	if not EmotionManager.can_play_card(card):
+		card_blocked_by_disorder.emit(card, _get_blocked_reason(card))
+		return false
+	# ─────────────────────────────────────────────────
 	current_state = STATE_RESOLVING
 	if not DeckManager.play_card(card):
 		current_state = STATE_PLAYER_TURN
@@ -158,6 +164,17 @@ func play_card(card: Dictionary) -> bool:
 	if enemy_hp <= 0:
 		_end_battle("victory")
 	return true
+
+func _get_blocked_reason(card: Dictionary) -> String:
+	## 根据当前失控状态返回阻止打牌的原因文字
+	var tag: String = card.get("emotion_tag", "")
+	var etype: String = card.get("effect_type", "")
+	if EmotionManager.is_disorder("rage"):
+		if tag == "calm": return "怒失控：无法打出定系牌"
+		if etype == "shield": return "怒失控：无法打出护盾牌"
+	if EmotionManager.is_disorder("grief"):
+		if etype in ["heal", "heal_all_buffs"]: return "悲失控：无法打出治疗牌"
+	return "失控限制"
 
 func end_player_turn() -> void:
 	if current_state != STATE_PLAYER_TURN:

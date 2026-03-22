@@ -106,6 +106,8 @@ func _ready() -> void:
 	state_machine.chain_applied.connect(_on_chain_applied)
 	# 无为：监听持续施印
 	state_machine.wu_wei_mark_applied.connect(_on_wu_wei_mark_applied)
+	# 失控限制：牌被阻止时抖动+浮字提示
+	state_machine.card_blocked_by_disorder.connect(_on_card_blocked_by_disorder)
 
 	# ── 第二步：UI 主题 & 样式（不依赖布局尺寸）──
 	_setup_hud_theme()
@@ -451,7 +453,7 @@ func _on_battle_started(enemy_data: Dictionary) -> void:
 	enemy_name_label.text   = "── %s ──" % enemy_data.get("name", "???")
 	RelicManager.on_battle_start(enemy_data)
 	# 新血条（主显示）
-	var enemy_max := int(enemy_data.get("hp", 100))
+	var enemy_max: int = int(enemy_data.get("hp", 100))
 	if _enemy_hbar and _enemy_hbar.has_method("set_hp"):
 		_enemy_hbar.set_hp(enemy_max, enemy_max)
 	# 旧 ProgressBar 隐藏，仅保留数据同步（给依赖它的其他代码用）
@@ -925,12 +927,38 @@ func _on_emotion_changed(emotion: String, old_val: int, new_val: int) -> void:
 func _on_disorder_triggered(emotion: String) -> void:
 	disorder_warning.text = "⚠ %s 失调！" % EmotionManager.get_emotion_name(emotion)
 	SoundManager.play_sfx("disorder_trigger")
-	var tween: Tween = create_tween()
-	tween.tween_property(self, "modulate", Color(1.0, 0.3, 0.3), 0.08)
-	tween.tween_property(self, "modulate", Color.WHITE, 0.25)
+	# 屏幕边缘闪烁：对应情绪颜色
+	var flash_colors: Dictionary = {
+		"rage":  Color(0.8, 0.1, 0.1, 0.4),
+		"fear":  Color(0.4, 0.1, 0.7, 0.4),
+		"grief": Color(0.1, 0.2, 0.7, 0.4),
+		"joy":   Color(0.8, 0.7, 0.1, 0.4),
+	}
+	_flash_screen_edge(flash_colors.get(emotion, Color(0.5, 0.5, 0.5, 0.3)))
 
 func _on_disorder_cleared(_e: String) -> void:
 	disorder_warning.text = ""
+
+func _on_card_blocked_by_disorder(card: Dictionary, reason: String) -> void:
+	## 失控限制：牌打不出去，浮字提示+卡牌抖动
+	var vp: Vector2 = get_viewport().get_visible_rect().size
+	_show_float_text("⚠ " + reason, vp * Vector2(0.5, 0.5), Color(0.9, 0.3, 0.2), 16)
+	# 找到对应 CardUINode 做抖动动画
+	for child in hand_container.get_children():
+		if child.has_method("get_card_data"):
+			var cdata: Dictionary = child.call("get_card_data")
+			if cdata.get("id", "") == card.get("id", ""):
+				_shake_node(child)
+				break
+
+func _shake_node(node: Node) -> void:
+	## 节点左右抖动动画（失控限制反馈）
+	var tw: Tween = create_tween()
+	var orig: Vector2 = node.position
+	tw.tween_property(node, "position", orig + Vector2(8, 0), 0.04)
+	tw.tween_property(node, "position", orig - Vector2(8, 0), 0.04)
+	tw.tween_property(node, "position", orig + Vector2(5, 0), 0.03)
+	tw.tween_property(node, "position", orig, 0.03)
 
 func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	# 旧 ProgressBar（已隐藏，仅保留数据）
@@ -941,7 +969,7 @@ func _on_player_hp_changed(old_hp: int, new_hp: int) -> void:
 	if _player_hbar and _player_hbar.has_method("set_hp"):
 		_player_hbar.set_hp(new_hp, GameState.max_hp)
 	# 浮字：受伤/回血
-	var diff := new_hp - old_hp
+	var diff: int = new_hp - old_hp
 	if diff < 0:
 		_spawn_player_number(-diff, "damage")
 		_set_player_sprite_state("hurt")
@@ -1000,7 +1028,7 @@ func _setup_hud_theme() -> void:
 	end_turn_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
 	end_turn_btn.add_theme_font_size_override("font_size", UIConstants.font_size_of("body"))
 	du_hua_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold"))
-	var du_hover := UIConstants.make_button_style("parch", "gold")
+	var du_hover: StyleBoxFlat = UIConstants.make_button_style("parch", "gold")
 	du_hover.bg_color = du_hover.bg_color.lightened(0.06)
 	du_hua_btn.add_theme_stylebox_override("hover", du_hover)
 	du_hua_btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
@@ -1019,7 +1047,7 @@ func _setup_hud_theme() -> void:
 		_deck_viewer.install_fixed_btn(ui_node, true)
 
 func _result_panel_bbcode(title: String, body: String) -> String:
-	var tc := UIConstants.color_of("gold").to_html(false)
+	var tc: String = UIConstants.color_of("gold").to_html(false)
 
 ## ── 锁链 HUD 辅助函数 ──────────────────────────────────
 func _refresh_chain_label(chains: int) -> void:
