@@ -1,8 +1,6 @@
 extends Node
-class_name BossDialogueDatabase
-
 ## BossDialogueDatabase.gd - Boss渡化对话数据库
-## 加载 boss_dialogues.json，提供查询接口
+## 注意：不声明 class_name，避免与脚本名冲突；通过 preload 或直接路径引用
 
 const DATA_PATH: String = "res://data/boss_dialogues.json"
 

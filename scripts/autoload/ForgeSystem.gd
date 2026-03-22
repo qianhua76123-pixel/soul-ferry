@@ -1,8 +1,7 @@
 extends Node
-class_name ForgeSystem
-
 ## ForgeSystem.gd - 锻造系统（8种锻造类型 + 图纸系统）
 ## Autoload 单例，注册名 "ForgeSystem"
+## 注意：不声明 class_name，避免与 Autoload 全局名冲突
 
 signal forge_completed(original: Dictionary, forged: Dictionary)
 signal recipe_unlocked(recipe_id: String)
