@@ -597,7 +597,7 @@ func _load_enemy(enemy_id: String) -> Dictionary:
 	var file: FileAccess = FileAccess.open("res://data/enemies.json", FileAccess.READ)
 	if not file:
 		return {}
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		file.close()
 		return {}

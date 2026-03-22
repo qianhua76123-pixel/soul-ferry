@@ -37,7 +37,7 @@ func _load_events() -> void:
 	if not file:
 		push_error("EventScene: 无法加载事件数据")
 		return
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		return
 	file.close()
@@ -76,7 +76,7 @@ func _render_event() -> void:
 	var choices: Array = _current_event.get("choices", [])
 	for i: int in len(choices):
 		var choice: Dictionary = choices[i]
-		var btn := Button.new()
+		var btn: Button = Button.new()
 		var btn_text: String = choice.get("text", "选项%d" % (i + 1))
 		if show_results:
 			# 附加真实结果预览
@@ -95,7 +95,7 @@ func _render_event() -> void:
 
 	# 年画眼激活按钮（一局一次）
 	if RelicManager.has_relic("nianhua_yan") and not RelicManager.nianhua_used_this_run and not show_results:
-		var reveal_btn := Button.new()
+		var reveal_btn: Button = Button.new()
 		reveal_btn.text = "👁 年画眼：看清真相（本局仅一次）"
 		reveal_btn.custom_minimum_size = Vector2(500, 36)
 		reveal_btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
@@ -281,7 +281,7 @@ func _setup_event_visual() -> void:
 	# 标题与正文之间加一条水墨分割线
 	var vbox: Node = get_node_or_null("UI/EventPanel/VBox")
 	if vbox:
-		var divider := WaterInkDivider.new()
+		var divider: WaterInkDivider = WaterInkDivider.new()
 		divider.custom_minimum_size = Vector2(500, 8)
 		divider.ink_color = UIConstants.color_of("gold_dim")
 		vbox.add_child(divider)

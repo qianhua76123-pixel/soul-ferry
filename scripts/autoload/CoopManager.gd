@@ -66,7 +66,7 @@ func load_coop_relics() -> void:
 	var raw_text: String = file.get_as_text()
 	file.close()
 
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	var parse_result: int = json.parse(raw_text)
 	if parse_result != OK:
 		push_error("CoopManager: 解析 coop_relics.json 失败，错误行: " + str(json.get_error_line()))

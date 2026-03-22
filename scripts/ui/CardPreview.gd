@@ -24,7 +24,7 @@ func _build() -> void:
 	_panel.custom_minimum_size = Vector2(160, 230)
 	add_child(_panel)
 
-	var style := UIConstants.make_panel_style()
+	var style: StyleBoxFlat = UIConstants.make_panel_style()
 	style.border_color = UIConstants.color_of("gold")
 	style.set_border_width_all(2)
 	_panel.add_theme_stylebox_override("panel", style)

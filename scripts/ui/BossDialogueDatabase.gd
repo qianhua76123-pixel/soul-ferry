@@ -15,7 +15,7 @@ func _load() -> void:
 	var file: FileAccess = FileAccess.open(DATA_PATH, FileAccess.READ)
 	if not file:
 		push_error("BossDialogueDatabase: 无法打开 " + DATA_PATH); return
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		push_error("BossDialogueDatabase: JSON 解析失败"); file.close(); return
 	file.close()

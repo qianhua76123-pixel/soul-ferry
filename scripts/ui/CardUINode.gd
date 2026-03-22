@@ -47,7 +47,7 @@ func set_playable(playable: bool) -> void:
 	if playable:
 		modulate = Color.WHITE
 	else:
-		var a := UIConstants.color_of("ash")
+		var a: Color = UIConstants.color_of("ash")
 		modulate = Color(a.r, a.g, a.b, 0.58)
 
 func _draw() -> void:
@@ -67,7 +67,7 @@ func _draw() -> void:
 	# 牌名
 	var name_y: float = div_y + 14.0
 	var name: String = card_data.get("name","???")
-	var tc := UIConstants.color_of("text_primary")
+	var tc: Color = UIConstants.color_of("text_primary")
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(5, name_y), name,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-10), 13, tc)
 	# 描述（去除 BBCode 标签，多行换行显示）
@@ -75,11 +75,11 @@ func _draw() -> void:
 	var desc: String = raw_desc.replace("[color=#f0c040]","").replace("[/color]","") \
 		.replace("[b]","").replace("[/b]","") \
 		.replace("[i]","").replace("[/i]","")
-	var muted := UIConstants.color_of("text_muted")
+	var muted: Color = UIConstants.color_of("text_muted")
 	draw_multiline_string(ThemeDB.fallback_font, ofs+Vector2(5, name_y+16), desc,
 		HORIZONTAL_ALIGNMENT_LEFT, int(CARD_W-10), 10, 3, muted)
 	# 费用圆（左上角）
-	var ink := UIConstants.color_of("ink")
+	var ink: Color = UIConstants.color_of("ink")
 	draw_circle(ofs+Vector2(16, 16), 13.0, Color(ink.r * 1.2, ink.g * 1.2, ink.b * 1.2))
 	draw_arc(ofs+Vector2(16, 16), 13.0, 0, TAU, 32, _rarity_color, 1.8)
 	draw_string(ThemeDB.fallback_font, ofs+Vector2(10, 21), _cost_text,
@@ -108,7 +108,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 			var a2: float = 0.15 - layer * 0.03
 			draw_circle(Vector2(cx, cy), r2, Color(0.85, 0.85, 0.83, a2))
 		draw_arc(Vector2(cx, cy - 4), size.x * 0.22, 0, TAU, 24, Color(0.9,0.9,0.88,0.4), 1.2)
-		var rng2 := RandomNumberGenerator.new()
+		var rng2: RandomNumberGenerator = RandomNumberGenerator.new()
 		rng2.seed = abs(card_data.get("id","x").hash())
 		for _p: int in 7:
 			var px2: float = pos.x + rng2.randf_range(4, size.x - 4)

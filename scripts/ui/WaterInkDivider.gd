@@ -19,7 +19,7 @@ func _notification(what: int) -> void:
 func _draw() -> void:
 	if size.x <= 8:
 		return
-	var center_y := size.y * 0.5
+	var center_y: float = size.y * 0.5
 	_draw_fade_line(center_y, 1.0, 0.60)
 	_draw_fade_line(center_y - 1.0, 0.5, 0.38)
 	_draw_fade_line(center_y + 1.0, 0.5, 0.24)
@@ -33,5 +33,5 @@ func _draw_fade_line(y: float, width: float, alpha_peak: float) -> void:
 		var mid: float = (x0 + x1) * 0.5 / size.x
 		var fade: float = 1.0 - absf(mid - 0.5) * 2.0
 		var a: float = maxf(0.0, alpha_peak * fade)
-		var c := Color(ink_color.r, ink_color.g, ink_color.b, a)
+		var c: Color = Color(ink_color.r, ink_color.g, ink_color.b, a)
 		draw_line(Vector2(x0, y), Vector2(x1, y), c, width)

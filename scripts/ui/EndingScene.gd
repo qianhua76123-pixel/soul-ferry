@@ -103,7 +103,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_bg_canvas = CanvasLayer.new()
 	_bg_canvas.name = "BgCanvas"
 	add_child(_bg_canvas)
-	var bg := ColorRect.new()
+	var bg: ColorRect = ColorRect.new()
 	bg.color = data["bg_color"]
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.size = Vector2(1152, 648)
@@ -152,7 +152,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_bg_canvas.add_child(_stat_panel)
 
 	# ── 按钮区 ──
-	var btn_row := HBoxContainer.new()
+	var btn_row: HBoxContainer = HBoxContainer.new()
 	btn_row.name = "BtnRow"
 	btn_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	btn_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
@@ -163,7 +163,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 	_btn_restart.pressed.connect(_on_restart)
 	btn_row.add_child(_btn_restart)
 
-	var spacer := Control.new()
+	var spacer: Control = Control.new()
 	spacer.custom_minimum_size = Vector2(20, 0)
 	btn_row.add_child(spacer)
 
@@ -176,7 +176,7 @@ func _build_scene(data: Dictionary, ending_type: String) -> void:
 # ══════════════════════════════════════════════════════
 func _draw_bg_art(parent: CanvasLayer, data: Dictionary, ending_type: String) -> void:
 	# 用 Node2D + _draw 绘制背景装饰
-	var art := _BgArt.new()
+	var art: _BgArt = _BgArt.new()
 	art.ending_type = ending_type
 	art.accent_color = data["color"]
 	parent.add_child(art)
@@ -185,20 +185,20 @@ func _draw_bg_art(parent: CanvasLayer, data: Dictionary, ending_type: String) ->
 #  统计面板
 # ══════════════════════════════════════════════════════
 func _build_stat_panel(title: String, color: Color, ending_type: String) -> VBoxContainer:
-	var panel := VBoxContainer.new()
+	var panel: VBoxContainer = VBoxContainer.new()
 	panel.name = "StatPanel"
 	panel.custom_minimum_size = Vector2(260, 0)
 
 	var title_lbl: Label = _make_label(title, 14, Color(color.r, color.g, color.b, 0.8))
 	panel.add_child(title_lbl)
 
-	var sep := HSeparator.new()
+	var sep: HSeparator = HSeparator.new()
 	panel.add_child(sep)
 
 	# 从 GameState 读取本局统计
 	var stats: Array = _collect_stats(ending_type)
 	for stat: Dictionary in stats:
-		var row := HBoxContainer.new()
+		var row: HBoxContainer = HBoxContainer.new()
 		var key_lbl: Label = _make_label(stat["key"], 13, Color(0.75, 0.70, 0.65))
 		key_lbl.custom_minimum_size = Vector2(140, 0)
 		row.add_child(key_lbl)
@@ -233,7 +233,7 @@ func _collect_stats(ending_type: String) -> Array:
 # ══════════════════════════════════════════════════════
 func _play_intro(data: Dictionary) -> void:
 	# 1. 黑屏渐显
-	var overlay := ColorRect.new()
+	var overlay: ColorRect = ColorRect.new()
 	overlay.name  = "FadeOverlay"
 	overlay.color = Color.BLACK
 	overlay.size  = Vector2(1152, 648)

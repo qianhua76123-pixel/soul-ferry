@@ -338,7 +338,7 @@ func _setup_particles() -> void:
 
 	# Godot 4：GPUParticles2D 使用 texture 作为粒子外形，不再有 draw_pass_1 / QuadMesh
 	# 细长竖条（接近提示词 1×4px 意象，略放大以便过滤）
-	var strip := Image.create(2, 8, false, Image.FORMAT_RGBA8)
+	var strip: Image = Image.create(2, 8, false, Image.FORMAT_RGBA8)
 	strip.fill(Color(1, 1, 1, 1))
 	ink_particles.texture = ImageTexture.create_from_image(strip)
 

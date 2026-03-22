@@ -186,7 +186,7 @@ func _apply_threat_visuals(is_threat: bool, atype: String) -> void:
 	_border_tween.tween_method(_set_edge_flash, 0.6, 1.0, 0.15)
 	_border_tween.tween_method(_set_edge_flash, 1.0, 0.6, 0.15)
 	# 群体/多段/狂暴：额外一行微提示
-	var big := atype in ["attack_all", "attack_all_triple", "rage_card_storm", "all_field_heat_dot", "summon_tide"]
+	var big: bool = atype in ["attack_all", "attack_all_triple", "rage_card_storm", "all_field_heat_dot", "summon_tide"]
 	if big and _warn_caption:
 		_warn_caption.text = "—— 杀招将启 ——"
 		_warn_caption.visible = true

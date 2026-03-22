@@ -208,7 +208,7 @@ func _render_map() -> void:
 	var layer_nodes: Array = _map_data[layer_idx]
 
 	# ── 顶部：层名 + 进度信息 ──
-	var progress_lbl := Label.new()
+	var progress_lbl: Label = Label.new()
 	var visited_count: int = 0
 	for nd: Dictionary in layer_nodes:
 		if nd.get("visited", false):
@@ -220,7 +220,7 @@ func _render_map() -> void:
 	node_container.add_child(progress_lbl)
 
 	# 分割线
-	var div_top := WaterInkDivider.new()
+	var div_top: WaterInkDivider = WaterInkDivider.new()
 	div_top.custom_minimum_size = Vector2(600, 6)
 	div_top.ink_color = UIConstants.color_of("gold_dim")
 	node_container.add_child(div_top)
@@ -234,7 +234,7 @@ func _render_map() -> void:
 	var row_size: int = 3
 	var i: int = 0
 	while i < len(layer_nodes):
-		var row := HBoxContainer.new()
+		var row: HBoxContainer = HBoxContainer.new()
 		row.alignment = BoxContainer.ALIGNMENT_CENTER
 		row.add_theme_constant_override("separation", 20)
 		row.custom_minimum_size = Vector2(0, 110)
@@ -249,7 +249,7 @@ func _render_map() -> void:
 
 		# 行间连接箭头（非最后一行）
 		if row_end < len(layer_nodes):
-			var arrow_lbl := Label.new()
+			var arrow_lbl: Label = Label.new()
 			arrow_lbl.text = "▼"
 			arrow_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			arrow_lbl.add_theme_font_size_override("font_size", 14)
@@ -260,14 +260,14 @@ func _render_map() -> void:
 		i = row_end
 
 	# 底部分割线
-	var div_bot := WaterInkDivider.new()
+	var div_bot: WaterInkDivider = WaterInkDivider.new()
 	div_bot.custom_minimum_size = Vector2(600, 6)
 	div_bot.ink_color = UIConstants.color_of("gold_dim")
 	node_container.add_child(div_bot)
 
 	# 提示文字（当所有节点完成时）
 	if next_idx == -1:
-		var done_lbl := Label.new()
+		var done_lbl: Label = Label.new()
 		done_lbl.text = "✦ 本层已完成，前往下一层 ✦"
 		done_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		done_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold"))
@@ -289,12 +289,12 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	var ntype:   String = nd.get("type", "battle")
 	var visited: bool   = nd.get("visited", false)
 
-	var container := VBoxContainer.new()
+	var container: VBoxContainer = VBoxContainer.new()
 	container.custom_minimum_size = Vector2(110, 110)
 	container.add_theme_constant_override("separation", 4)
 
 	# ── 主按钮 ──
-	var btn := Button.new()
+	var btn: Button = Button.new()
 	btn.text = NODE_ICONS.get(ntype, "◈")
 	btn.custom_minimum_size = Vector2(80, 80)
 	btn.add_theme_font_size_override("font_size", 32)
@@ -311,7 +311,7 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	}
 	var nc: Array = COLOR_MAP.get(ntype, [Color(0.12, 0.12, 0.12), Color(0.5, 0.5, 0.5)])
 
-	var normal_style := StyleBoxFlat.new()
+	var normal_style: StyleBoxFlat = StyleBoxFlat.new()
 	normal_style.set_corner_radius_all(6)
 	normal_style.set_border_width_all(2)
 
@@ -369,7 +369,7 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	container.add_child(btn)
 
 	# ── 节点名标签 ──
-	var name_lbl := Label.new()
+	var name_lbl: Label = Label.new()
 	name_lbl.text = NODE_CN.get(ntype, "???")
 	name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_lbl.add_theme_font_size_override("font_size", UIConstants.font_size_of("caption"))
@@ -433,7 +433,7 @@ func _on_node_pressed(nd: Dictionary) -> void:
 
 func _show_rest_popup(healed: int) -> void:
 	## 简单弹出提示
-	var lbl := Label.new()
+	var lbl: Label = Label.new()
 	lbl.text = "🕯 休息  ♥ +%d" % healed
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lbl.add_theme_font_size_override("font_size", UIConstants.font_size_of("heading"))
@@ -698,7 +698,7 @@ func _check_layer_done() -> void:
 func _random_enemy_for_layer(layer: int) -> String:
 	var file: FileAccess = FileAccess.open("res://data/enemies.json", FileAccess.READ)
 	if not file: return "yuan_gui"
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		file.close()
 		return "yuan_gui"

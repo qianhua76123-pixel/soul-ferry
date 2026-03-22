@@ -22,7 +22,7 @@ func _load_characters() -> void:
 			{"id":"wumian","name":"无名","description":"把自己情绪全部给出去的守护者，脸的位置是平的。","hp":60,"energy":4,"passive_desc":"空度系统 · 情绪转移"},
 		]
 		return
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		file.close()
 		return

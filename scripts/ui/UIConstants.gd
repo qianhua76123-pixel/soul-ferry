@@ -83,9 +83,9 @@ static func font_size_of(key: String, fallback: int = 12) -> int:
 	return int(FONT_SIZES.get(key, fallback))
 
 static func make_button_style(fill_key: String = "parch", border_key: String = "gold_dim") -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	var fill := color_of(fill_key)
-	var border := color_of(border_key)
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	var fill: Color = color_of(fill_key)
+	var border: Color = color_of(border_key)
 	style.bg_color = Color(fill.r, fill.g, fill.b, 0.88)
 	style.border_color = border
 	style.set_border_width_all(1)
@@ -93,8 +93,8 @@ static func make_button_style(fill_key: String = "parch", border_key: String = "
 	return style
 
 static func make_panel_style() -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	var p := color_of("parch")
+	var s: StyleBoxFlat = StyleBoxFlat.new()
+	var p: Color = color_of("parch")
 	s.bg_color = Color(p.r, p.g, p.b, 0.92)
 	s.border_color = color_of("gold_dim")
 	s.set_border_width_all(1)

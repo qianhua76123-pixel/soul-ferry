@@ -18,7 +18,7 @@ func _load_cards() -> void:
 	var file: FileAccess = FileAccess.open(CARDS_DATA_PATH, FileAccess.READ)
 	if not file:
 		push_error("CardDatabase: 无法打开 " + CARDS_DATA_PATH); return
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		push_error("CardDatabase: JSON 解析失败"); file.close(); return
 	file.close()
@@ -29,7 +29,7 @@ func _load_cards() -> void:
 	# ── 无面人牌库（wumian_cards.json）──
 	var wfile: FileAccess = FileAccess.open(WUMIAN_CARDS_DATA_PATH, FileAccess.READ)
 	if wfile:
-		var wjson := JSON.new()
+		var wjson: JSON = JSON.new()
 		if wjson.parse(wfile.get_as_text()) == OK:
 			for card in wjson.get_data().get("wumian_cards", []):
 				card["cost"] = int(card.get("cost", 1))

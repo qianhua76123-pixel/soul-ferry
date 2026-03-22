@@ -10,7 +10,7 @@ static func create_texture(state: String = "idle", char_id: String = "") -> Imag
 	var cid: String = char_id
 	if cid == "":
 		cid = str(GameState.get_meta("selected_character", "ruan_ruyue"))
-	var img := Image.create(32, 48, false, Image.FORMAT_RGBA8)
+	var img: Image = Image.create(32, 48, false, Image.FORMAT_RGBA8)
 	img.fill(Color.TRANSPARENT)
 	match cid:
 		"shen_tiejun": _draw_shen(img, state)

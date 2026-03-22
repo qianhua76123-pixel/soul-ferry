@@ -1140,7 +1140,7 @@ func _add_wenlu_btn() -> void:
 	btn.custom_minimum_size = Vector2(100, 30)
 	btn.add_theme_stylebox_override("normal", UIConstants.make_button_style("parch", "gold_dim"))
 	btn.add_theme_stylebox_override("hover", UIConstants.make_button_style("parch", "gold"))
-	var dis := UIConstants.make_button_style("parch", "ash")
+	var dis: StyleBoxFlat = UIConstants.make_button_style("parch", "ash")
 	dis.bg_color = Color(dis.bg_color.r, dis.bg_color.g, dis.bg_color.b, 0.5)
 	btn.add_theme_stylebox_override("disabled", dis)
 	btn.add_theme_color_override("font_color", UIConstants.color_of("text_primary"))
@@ -1156,9 +1156,9 @@ func _on_wenlu_pressed() -> void:
 	var preview: Array[String] = []
 	for a in acts.slice(0, mini(2, len(acts))):
 		preview.append("%s %s" % [a.get("type", "?"), str(a.get("value", ""))])
-	var line := "感知：" + " / ".join(preview)
+	var line: String = "感知：" + " / ".join(preview)
 	if _intent_display and _intent_display.has_method("show_intent_custom"):
-		var rage := int(state_machine.boss_phase) == 2
+		var rage: bool = int(state_machine.boss_phase) == 2
 		_intent_display.show_intent_custom("🕯", line, rage)
 	# 禁用按钮
 	var btn: Node = get_node_or_null("UI/HUD/WenluBtn")
@@ -1464,7 +1464,7 @@ func _setup_layout_improvements() -> void:
 	var ui: Node = get_node_or_null("UI")
 
 	# ── 地面线 ──────────────────────────────────────────
-	var ground := ColorRect.new()
+	var ground: ColorRect = ColorRect.new()
 	ground.name = "BattleGround"
 	ground.color = Color(UIC.COLORS["ding"].darkened(0.7), 0.6)
 	ground.position = Vector2(0, tray_top - 116)
@@ -1485,14 +1485,14 @@ func _setup_layout_improvements() -> void:
 	# ── 卡盘像素托盘背景（按角色不同配色）──────────────
 	if not ui.get_node_or_null("CardTray"):
 		var char_id: String = str(GameState.get_meta("selected_character", "ruan_ruyue"))
-		var tray := _build_card_tray(char_id, W, H, tray_top)
+		var tray: Control = _build_card_tray(char_id, W, H, tray_top)
 		ui.add_child(tray)
 		if hand_container:
 			hand_container.z_index = 2
 
 	# ── 水墨分割线 ──────────────────────────────────────
 	if not ui.get_node_or_null("HandAreaDivider"):
-		var strip := WaterInkDivider.new()
+		var strip: WaterInkDivider = WaterInkDivider.new()
 		strip.name = "HandAreaDivider"
 		strip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		strip.z_index = 1
@@ -1503,7 +1503,7 @@ func _setup_layout_improvements() -> void:
 
 	# ── 卡盘右上角能量面板 ──────────────────────────────
 	if not ui.get_node_or_null("CardTrayEnergy"):
-		var energy_panel := Panel.new()
+		var energy_panel: Panel = Panel.new()
 		energy_panel.name     = "CardTrayEnergy"
 		energy_panel.z_index  = 3
 		energy_panel.position = Vector2(W - 95, energy_top)
@@ -1533,7 +1533,7 @@ func _setup_layout_improvements() -> void:
 ## 根据角色生成不同风格的卡盘像素背景
 func _build_card_tray(char_id: String, W: float, H: float, tray_top: float) -> Control:
 	var tray_h: float = H - tray_top
-	var img := Image.create(int(W), int(tray_h), false, Image.FORMAT_RGBA8)
+	var img: Image = Image.create(int(W), int(tray_h), false, Image.FORMAT_RGBA8)
 	img.fill(Color.TRANSPARENT)
 
 	match char_id:
@@ -1541,8 +1541,8 @@ func _build_card_tray(char_id: String, W: float, H: float, tray_top: float) -> C
 		"wumian":       _draw_tray_wumian(img, int(W), int(tray_h))
 		_:              _draw_tray_ruan(img, int(W), int(tray_h))
 
-	var tex := ImageTexture.create_from_image(img)
-	var tray := TextureRect.new()
+	var tex: ImageTexture = ImageTexture.create_from_image(img)
+	var tray: TextureRect = TextureRect.new()
 	tray.name          = "CardTray"
 	tray.texture       = tex
 	tray.mouse_filter  = Control.MOUSE_FILTER_IGNORE
@@ -1569,7 +1569,7 @@ func _draw_tray_ruan(img: Image, W: int, H: int) -> void:
 		img.set_pixel(x, 4, Color(0.78, 0.60, 0.10, 0.5))
 		img.set_pixel(x, 6, Color(0.78, 0.60, 0.10, 0.3))
 	# 瓦片纹（每40px一组横纹，模拟庙宇砖瓦）
-	var tile_c := Color(0.72, 0.12, 0.12, 0.06)
+	var tile_c: Color = Color(0.72, 0.12, 0.12, 0.06)
 	var i: int = 0
 	while i < W:
 		for y in range(10, H):
@@ -1598,7 +1598,7 @@ func _draw_tray_shen(img: Image, W: int, H: int) -> void:
 		img.set_pixel(x, 4, Color(0.60, 0.62, 0.68, 0.45))
 		img.set_pixel(x, 6, Color(0.50, 0.52, 0.58, 0.25))
 	# 铁链纹（交替矩形）
-	var link_c := Color(0.35, 0.38, 0.50, 0.12)
+	var link_c: Color = Color(0.35, 0.38, 0.50, 0.12)
 	var j: int = 0
 	while j < W:
 		for y in range(10, H, 6):
@@ -1631,7 +1631,7 @@ func _draw_tray_wumian(img: Image, W: int, H: int) -> void:
 		img.set_pixel(x, 0, Color(0.85, 0.85, 0.83, edge_a))
 		img.set_pixel(x, 1, Color(0.75, 0.75, 0.73, edge_a * 0.6))
 	# 粒子纹（稀疏白点，模拟情绪粒子）
-	var rng := RandomNumberGenerator.new()
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 42
 	for _k in 80:
 		var px: int = rng.randi_range(0, W-1)
@@ -1684,7 +1684,7 @@ func _setup_altar_title_style() -> void:
 		dh.add_theme_color_override("font_color", UIConstants.color_of("gold"))
 
 func _insert_ink_divider_below(parent: Node, after_node: Node, width_px: int) -> void:
-	var div := WaterInkDivider.new()
+	var div: WaterInkDivider = WaterInkDivider.new()
 	div.custom_minimum_size = Vector2(width_px, 6)
 	div.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	div.ink_color = UIConstants.color_of("gold_dim")

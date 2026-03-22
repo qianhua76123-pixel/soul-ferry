@@ -88,11 +88,11 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 		bar.show_percentage = false
 		bar.custom_minimum_size = Vector2(44, 8)
 		var sty: StyleBoxFlat = StyleBoxFlat.new()
-		var track := UIConstants.color_of("text_dim")
+		var track: Color = UIConstants.color_of("text_dim")
 		sty.bg_color = Color(track.r, track.g, track.b, 0.58)
 		bar.add_theme_stylebox_override("fill", sty)
 		var sty_bg: StyleBoxFlat = StyleBoxFlat.new()
-		var ink := UIConstants.color_of("ink")
+		var ink: Color = UIConstants.color_of("ink")
 		sty_bg.bg_color = Color(ink.r, ink.g, ink.b, 0.62)
 		bar.add_theme_stylebox_override("background", sty_bg)
 		col.add_child(bar)
@@ -117,7 +117,7 @@ func update_display() -> void:
 			int(cur), int(req), " ✓" if met else ""]
 		# 进度条颜色
 		var fill_sty: StyleBoxFlat = StyleBoxFlat.new()
-		var unfilled := UIConstants.color_of("text_dim")
+		var unfilled: Color = UIConstants.color_of("text_dim")
 		fill_sty.bg_color = UIConstants.color_of("gold") if met else Color(unfilled.r, unfilled.g, unfilled.b, 0.58)
 		item["bar"].add_theme_stylebox_override("fill", fill_sty)
 		item["label"].add_theme_color_override("font_color",

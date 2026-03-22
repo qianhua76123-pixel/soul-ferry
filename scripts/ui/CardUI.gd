@@ -56,7 +56,7 @@ func set_playable(playable: bool) -> void:
 	if playable:
 		modulate = Color.WHITE
 	else:
-		var a := UIConstants.color_of("ash")
+		var a: Color = UIConstants.color_of("ash")
 		modulate = Color(a.r, a.g, a.b, 0.58)
 
 func _ready() -> void:

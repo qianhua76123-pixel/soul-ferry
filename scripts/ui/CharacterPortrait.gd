@@ -6,7 +6,7 @@ class_name CharacterPortrait
 ## create(char_id) → ImageTexture
 
 static func create(char_id: String) -> ImageTexture:
-	var img := Image.create(64, 96, false, Image.FORMAT_RGBA8)
+	var img: Image = Image.create(64, 96, false, Image.FORMAT_RGBA8)
 	img.fill(Color.TRANSPARENT)
 	match char_id:
 		"shen_tiejun": _draw_shen(img)
@@ -67,9 +67,9 @@ static func _draw_ruan(img: Image) -> void:
 		_circle(img, 32, 36, r, Color(0.72,0.20,0.08, a))
 
 	# ── 幡（左侧）──
-	var pole_c := Color(0.25,0.18,0.12,1)
-	var bann_c := Color(0.92,0.88,0.80,1)
-	var red_c  := Color(0.72,0.10,0.10,1)
+	var pole_c: Color = Color(0.25,0.18,0.12,1)
+	var bann_c: Color = Color(0.92,0.88,0.80,1)
+	var red_c: Color  = Color(0.72,0.10,0.10,1)
 	for y in range(0, 56): _px(img, 10, y, pole_c)
 	_rect(img, 6, 3, 9, 1, pole_c)      # 横木
 	_rect(img, 7, 4, 7, 20, bann_c)     # 幡面
@@ -86,18 +86,18 @@ static func _draw_ruan(img: Image) -> void:
 			_px(img, 10+dx, y, red_c if y%2==0 else bann_c)
 
 	# ── 道冠 ──
-	var crown_c := Color(0.10,0.08,0.08,1)
-	var gold_c  := Color(0.78,0.60,0.10,1)
+	var crown_c: Color = Color(0.10,0.08,0.08,1)
+	var gold_c: Color  = Color(0.78,0.60,0.10,1)
 	_rect(img, 26, 3, 12, 7, crown_c)
 	_rect(img, 24, 9, 16, 2, gold_c)    # 金色冠沿
 	_rect(img, 27, 3, 10, 1, gold_c)    # 冠顶
 	_px(img, 32, 4, gold_c); _px(img, 32, 5, gold_c); _px(img, 32, 6, gold_c)  # 中央竖饰
 
 	# ── 头部 ──
-	var skin_c  := Color(0.88,0.80,0.70,1)
-	var sknd_c  := Color(0.68,0.58,0.48,1)
-	var hair_c  := Color(0.12,0.10,0.10,1)
-	var ink_c   := Color(0.08,0.06,0.06,1)
+	var skin_c: Color  = Color(0.88,0.80,0.70,1)
+	var sknd_c: Color  = Color(0.68,0.58,0.48,1)
+	var hair_c: Color  = Color(0.12,0.10,0.10,1)
+	var ink_c: Color   = Color(0.08,0.06,0.06,1)
 	_ellipse(img, 32, 18, 7, 8, skin_c)
 	# 发鬓
 	for y in range(10, 22): _px(img, 25, y, hair_c); _px(img, 39, y, hair_c)
@@ -116,10 +116,10 @@ static func _draw_ruan(img: Image) -> void:
 	_px(img, 32, 14, Color(0.80,0.10,0.10,0.9))
 
 	# ── 道袍躯干 ──
-	var robe_c := Color(0.38,0.46,0.50,1)
-	var robe_d := Color(0.22,0.30,0.35,1)
-	var robe_l := Color(0.52,0.60,0.64,1)
-	var sash_c := Color(0.65,0.12,0.12,1)
+	var robe_c: Color = Color(0.38,0.46,0.50,1)
+	var robe_d: Color = Color(0.22,0.30,0.35,1)
+	var robe_l: Color = Color(0.52,0.60,0.64,1)
+	var sash_c: Color = Color(0.65,0.12,0.12,1)
 	# 衣领三角
 	_rect(img, 28,26, 8,3, robe_c)
 	_px(img,31,26, skin_c); _px(img,32,26, skin_c); _px(img,32,27, skin_c)
@@ -161,8 +161,8 @@ static func _draw_shen(img: Image) -> void:
 		_circle(img, 32, 40, r, Color(0.30,0.42,0.65, a))
 
 	# ── 铁链（挂在腰侧）──
-	var chain_c  := Color(0.58,0.58,0.62,1)
-	var chain_l  := Color(0.78,0.78,0.82,1)
+	var chain_c: Color  = Color(0.58,0.58,0.62,1)
+	var chain_l: Color  = Color(0.78,0.78,0.82,1)
 	var i: int = 0
 	while i < 28:
 		if i%4 < 2:
@@ -176,11 +176,11 @@ static func _draw_shen(img: Image) -> void:
 	_px(img, 47, 79, Color(0.30,0.30,0.32,1))
 
 	# ── 头部（宽脸方颌）──
-	var skin_c  := Color(0.82,0.72,0.60,1)
-	var sknd_c  := Color(0.62,0.52,0.42,1)
-	var hair_c  := Color(0.28,0.24,0.22,1)   # 灰发带白
-	var hair_l  := Color(0.52,0.48,0.46,1)
-	var ink_c   := Color(0.08,0.06,0.06,1)
+	var skin_c: Color  = Color(0.82,0.72,0.60,1)
+	var sknd_c: Color  = Color(0.62,0.52,0.42,1)
+	var hair_c: Color  = Color(0.28,0.24,0.22,1)   # 灰发带白
+	var hair_l: Color  = Color(0.52,0.48,0.46,1)
+	var ink_c: Color   = Color(0.08,0.06,0.06,1)
 	# 脸（方形，宽）
 	_rect(img, 23, 9, 18, 18, skin_c)
 	_rect(img, 22,11, 20,14, skin_c)
@@ -212,8 +212,8 @@ static func _draw_shen(img: Image) -> void:
 		_px(img, 24, y, hair_c if y%2==0 else sknd_c)
 		_px(img, 39, y, hair_c if y%2==0 else sknd_c)
 	# 官帽（捕快巾帻）
-	var hat_c := Color(0.10,0.10,0.14,1)
-	var hat_r := Color(0.30,0.35,0.55,1)   # 蓝色帽缘
+	var hat_c: Color = Color(0.10,0.10,0.14,1)
+	var hat_r: Color = Color(0.30,0.35,0.55,1)   # 蓝色帽缘
 	_rect(img, 22, 4, 20, 6, hat_c)
 	_rect(img, 20, 9, 24, 2, hat_r)
 	_rect(img, 23, 3, 18, 2, hat_c)
@@ -221,11 +221,11 @@ static func _draw_shen(img: Image) -> void:
 	_px(img, 32, 1, hat_c)
 
 	# ── 捕快深蓝服（宽肩）──
-	var coat_c := Color(0.15,0.22,0.38,1)
-	var coat_d := Color(0.08,0.12,0.22,1)
-	var coat_l := Color(0.25,0.35,0.52,1)
-	var belt_c := Color(0.42,0.28,0.10,1)
-	var badge_c:= Color(0.75,0.56,0.10,1)
+	var coat_c: Color = Color(0.15,0.22,0.38,1)
+	var coat_d: Color = Color(0.08,0.12,0.22,1)
+	var coat_l: Color = Color(0.25,0.35,0.52,1)
+	var belt_c: Color = Color(0.42,0.28,0.10,1)
+	var badge_c: Color = Color(0.75,0.56,0.10,1)
 	# 衣领
 	_rect(img, 28,28, 8,4, coat_c)
 	_px(img,31,28, skin_c); _px(img,32,28, skin_c); _px(img,32,29, skin_c)
@@ -263,12 +263,12 @@ static func _draw_wumian(img: Image) -> void:
 		_circle(img, 32, 38, r, Color(0.88,0.88,0.85, maxf(0.0, a)))
 
 	# ── 虚影（偏移，低透明度）──
-	var body_s := Color(0.72,0.72,0.70,0.22)
-	var body_m := Color(0.82,0.82,0.80,0.55)
-	var body_b := Color(0.90,0.90,0.88,1.0)
-	var edge_c := Color(0.50,0.50,0.48,1.0)
-	var lite_c := Color(0.96,0.96,0.95,1.0)
-	var face_c := Color(0.88,0.88,0.86,1.0)   # 脸面（完全平整，无特征）
+	var body_s: Color = Color(0.72,0.72,0.70,0.22)
+	var body_m: Color = Color(0.82,0.82,0.80,0.55)
+	var body_b: Color = Color(0.90,0.90,0.88,1.0)
+	var edge_c: Color = Color(0.50,0.50,0.48,1.0)
+	var lite_c: Color = Color(0.96,0.96,0.95,1.0)
+	var face_c: Color = Color(0.88,0.88,0.86,1.0)   # 脸面（完全平整，无特征）
 
 	# 最远虚影
 	for off in [[3,0],[-3,0],[0,-2]]:
@@ -298,7 +298,7 @@ static func _draw_wumian(img: Image) -> void:
 		_px(img, ex, ey, edge_c)
 
 	# ── 情绪粒子（漂浮，表现吸取/释放情绪的能力）──
-	var particles := [
+	var particles: Array = [
 		[14, 22, Color(0.55,0.35,0.75,0.8)],  # 紫（悲/惧）
 		[50, 28, Color(0.72,0.20,0.18,0.7)],  # 红（怒）
 		[18, 48, Color(0.80,0.68,0.15,0.75)], # 金（喜）

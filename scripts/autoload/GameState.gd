@@ -82,7 +82,7 @@ func load_from_file() -> bool:
 
 	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.READ)
 	if not file: return false
-	var json := JSON.new()
+	var json: JSON = JSON.new()
 	if json.parse(file.get_as_text()) != OK:
 		file.close()
 		push_error("GameState: 存档解析失败"); return false

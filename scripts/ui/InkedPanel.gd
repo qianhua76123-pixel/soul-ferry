@@ -20,20 +20,20 @@ func _notification(what: int) -> void:
 		queue_redraw()
 
 func _draw() -> void:
-	var rect := Rect2(Vector2.ZERO, size)
+	var rect: Rect2 = Rect2(Vector2.ZERO, size)
 	if rect.size.x < 4.0 or rect.size.y < 4.0:
 		return
 	_draw_inked_panel(rect, fill_color, border_color)
 	if show_top_line:
 		var c: float = minf(corner_cut, rect.size.x * 0.2)
-		var p0 := Vector2(c, 1.0)
-		var p1 := Vector2(rect.size.x - c, 1.0)
+		var p0: Vector2 = Vector2(c, 1.0)
+		var p1: Vector2 = Vector2(rect.size.x - c, 1.0)
 		draw_line(p0, p1, top_line_color, 2.0)
 
 func _draw_inked_panel(rect: Rect2, c_fill: Color, c_border: Color) -> void:
 	var c: float = minf(corner_cut, minf(rect.size.x, rect.size.y) * 0.25)
-	var p := rect
-	var points := PackedVector2Array([
+	var p: Rect2 = rect
+	var points: PackedVector2Array = PackedVector2Array([
 		Vector2(p.position.x + c, p.position.y),
 		Vector2(p.end.x - c,      p.position.y),
 		Vector2(p.end.x,          p.position.y + c),
