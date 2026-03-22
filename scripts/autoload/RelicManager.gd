@@ -540,3 +540,7 @@ func add_relic_by_id(relic_id: String) -> void:
 	if has_relic(relic_id): return
 	active_relics.append(data.duplicate())
 	relic_triggered.emit(relic_id)
+
+## 返回当前持有的遗物数组（active_relics 的公开别名）
+func get_owned_relics() -> Array:
+	return active_relics.duplicate()
