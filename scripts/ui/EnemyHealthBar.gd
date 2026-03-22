@@ -36,17 +36,17 @@ func _draw_bar(area: Control) -> void:
 	var w: float = area.size.x
 	if w <= 0.0:
 		w = 220.0
-	var ratio       = float(_cur_hp) / float(max(1, _max_hp))
-	var ghost_ratio: float = float(_ghost_hp) / float(max(1, _max_hp))
+	var ratio       = float(_cur_hp) / float(maxf(1, _max_hp))
+	var ghost_ratio: float = float(_ghost_hp) / float(maxf(1, _max_hp))
 	var fill_color  = _get_fill_color(ratio)
 
 	_draw_chamfered_rect(area, Rect2(0, 2, w, BAR_H), SLOT_COLOR, CORNER)
 
-	var ghost_w: int = clamp(ghost_ratio, 0.0, 1.0) * (w - CORNER * 2)
+	var ghost_w: int = PLACEHOLDER_CLAMPF * (w - CORNER * 2)
 	if ghost_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, ghost_w, BAR_H), GHOST_COLOR, CORNER * 0.5)
 
-	var fill_w: int = clamp(ratio, 0.0, 1.0) * (w - CORNER * 2)
+	var fill_w: int = PLACEHOLDER_CLAMPF * (w - CORNER * 2)
 	if fill_w > 0.0:
 		_draw_chamfered_rect(area, Rect2(CORNER, 2, fill_w, BAR_H), fill_color, CORNER * 0.5)
 
@@ -98,10 +98,10 @@ func set_hp(new_hp: int, max_hp: int) -> void:
 		, float(old_hp) if _ghost_hp > float(new_hp) else float(new_hp),
 		float(new_hp), 0.5).set_ease(Tween.EASE_OUT)
 
-	_ghost_hp = max(_ghost_hp, float(new_hp))
+	_ghost_hp = maxf(_ghost_hp, float(new_hp))
 	_redraw_bar()
 
-	var ratio: float = float(new_hp) / float(max(1, max_hp))
+	var ratio: float = float(new_hp) / float(maxf(1, max_hp))
 	if ratio <= 0.3:
 		_start_pulse()
 	else:

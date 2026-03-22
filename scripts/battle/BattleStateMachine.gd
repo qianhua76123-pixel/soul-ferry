@@ -204,7 +204,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 		"attack_scaling_rage":
 			# 伤害 = base_val × 当前怒值
 			var rage_val: int = EmotionManager.values.get("rage", 0)
-			var dmg_2_2_2: int = int((base_val * max(1, rage_val)) * EmotionManager.get_attack_multiplier())
+			var dmg_2_2_2: int = int((base_val * maxi(1, rage_val)) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg_2_2_2)
 			result.value = dmg_2_2_2
 
@@ -247,7 +247,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 		"heal_scale_grief":
 			# 回复 = base_val × 悲情绪值
 			var grief_val: int = EmotionManager.values.get("grief", 0)
-			var hv_2_2: int = int(base_val * max(1, grief_val) * EmotionManager.get_heal_multiplier())
+			var hv_2_2: int = int(base_val * maxi(1, grief_val) * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv_2_2)
 			result.value = hv_2_2
 
@@ -401,7 +401,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			# 喜溢：喜印×2+回血
 			var cap: int = card.get("mark_cap", 10)
 			var old_count: int = _enemy_marks.get("joy", 0)
-			var new_count: int = min(old_count * 2, cap)
+			var new_count: int = mini(old_count * 2, cap)
 			_enemy_marks["joy"] = new_count
 			var hv3: int = int(new_count * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv3)
@@ -449,7 +449,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 				total_marks += _enemy_marks.get(e, 0)
 			var min_heal: int = card.get("effect_value", 4)
 			var max_heal: int = card.get("heal_cap", 15)
-			var hv5: int = int(clamp(total_marks, min_heal, max_heal) * EmotionManager.get_heal_multiplier())
+			var hv5: int = int(PLACEHOLDER_CLAMPF * EmotionManager.get_heal_multiplier())
 			GameState.heal(hv5)
 			DeckManager.draw_cards(card.get("draw", 1))
 			result.value = hv5
@@ -640,7 +640,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 			var was_above: bool = WumianManager.emptiness > 5
 			WumianManager.modify_emptiness(5 - WumianManager.emptiness)
 			if was_above:
-				DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+				DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
 			else:
 				GameState.heal(4)
 			result.value = 5
@@ -660,7 +660,7 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"wumian_emptiness_absorb":
 			# 空收：空度-3，护盾=减少量×4
-			var reduce: int = min(3, WumianManager.emptiness)
+			var reduce: int = mini(3, WumianManager.emptiness)
 			WumianManager.modify_emptiness(-reduce)
 			var sv: int = reduce * 4
 			player_shield += sv
@@ -778,9 +778,9 @@ func _apply_card_effect(card: Dictionary) -> Dictionary:
 
 		"wumian_void_shield":
 			# 空盾：空度-2，护盾=6-当前空度（最低2，最高6）
-			var reduce2: int = min(2, WumianManager.emptiness)
+			var reduce2: int = mini(2, WumianManager.emptiness)
 			WumianManager.modify_emptiness(-reduce2)
-			var sv2: int = clamp(6 - WumianManager.emptiness, 2, 6)
+			var sv2: int = PLACEHOLDER_CLAMPF
 			player_shield += sv2
 			result.value = sv2
 
@@ -902,7 +902,7 @@ func _choose_enemy_action() -> Dictionary:
 					 "summon_tide", "rage_card_storm"]:
 				a["weight"] = int(a.get("weight", 1) * 2.5)   # 攻击性行动权重×2.5
 			elif t in ["shield", "heal"]:
-				a["weight"] = max(1, int(a.get("weight", 1) * 0.3))  # 防御性行动权重×0.3
+				a["weight"] = maxi(1, int(a.get("weight", 1) * 0.3))  # 防御性行动权重×0.3
 
 	var total: int = 0
 	for a in weighted:
@@ -934,7 +934,7 @@ func _execute_enemy_action(action: Dictionary) -> void:
 				var raw: int = int(action.get("value", 0) * mul)
 				var dmg: int = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw)
 				if player_shield > 0:
-					var blocked: int = min(player_shield, dmg)
+					var blocked: int = mini(player_shield, dmg)
 					player_shield -= blocked
 					dmg -= blocked
 				if dmg > 0:
@@ -966,7 +966,7 @@ func _execute_enemy_action(action: Dictionary) -> void:
 				var raw_2  = int(hit_val * mul)
 				var dmg_2  = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw_2)
 				if player_shield > 0:
-					var blocked_2: int = min(player_shield, dmg_2)
+					var blocked_2: int = mini(player_shield, dmg_2)
 					player_shield -= blocked_2
 					dmg_2 -= blocked_2
 				if dmg_2 > 0:
@@ -983,7 +983,7 @@ func _execute_enemy_action(action: Dictionary) -> void:
 			var total_dmg: int = int((base_dmg + hand_size * 2) * mul)
 			var dmg_2_2: int = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, total_dmg)
 			if player_shield > 0:
-				var blocked_2_2: int = min(player_shield, dmg_2_2)
+				var blocked_2_2: int = mini(player_shield, dmg_2_2)
 				player_shield -= blocked_2_2
 				dmg_2_2 -= blocked_2_2
 			if dmg_2_2 > 0:
@@ -996,14 +996,14 @@ func _execute_enemy_action(action: Dictionary) -> void:
 		"heal_self":
 			# Boss 自愈（水中沉潜等）
 			var heal_val: int = int(action.get("value", 0))
-			enemy_hp = min(enemy_hp + heal_val, enemy_max_hp)
+			enemy_hp = minf(enemy_hp + heal_val, enemy_max_hp)
 
 		"shield_self":
 			# Boss 自盾
 			var shield_val: int = int(action.get("value", 0))
 			# 府衙封条遗物：敌人防御行动时锁链+1
 			if RelicManager.has_relic("fu_ya_feng_tiao") or RelicManager.has_relic("fu_ya_feng_tiao_upgraded"):
-				enemy_chains = min(enemy_chains + 1, RelicManager.get_chain_stack_cap())
+				enemy_chains = mini(enemy_chains + 1, RelicManager.get_chain_stack_cap())
 			enemy_shield += shield_val
 
 		"apply_debuff":
@@ -1043,10 +1043,10 @@ func _deal_damage_to_enemy(amount: int) -> void:
 		amount += _armor_to_attack_bonus
 
 	if enemy_shield > 0:
-		var blocked: int = min(enemy_shield, amount)
+		var blocked: int = mini(enemy_shield, amount)
 		enemy_shield -= blocked
 		amount -= blocked
-	enemy_hp = max(0, enemy_hp - amount)
+	enemy_hp = maxf(0, enemy_hp - amount)
 
 # ── 印记系统辅助方法 ──────────────────────────────────
 
@@ -1062,7 +1062,7 @@ func _apply_mark(emotion: String, count: int) -> void:
 func _apply_chain(count: int) -> void:
 	## 对敌人施加锁链
 	var cap: int = RelicManager.get_chain_stack_cap()
-	enemy_chains = min(enemy_chains + count, cap)
+	enemy_chains = mini(enemy_chains + count, cap)
 	_total_chains_this_battle += count
 	# 千斤锁：检查总锁链阈值
 	RelicManager.on_chain_total_changed_tiejun(enemy_chains)
@@ -1096,7 +1096,7 @@ func _trigger_resonance(emotion: String) -> void:
 			var heal_v: int = int(8.0 * (1.0 + power_bonus) * EmotionManager.get_heal_multiplier())
 			GameState.heal(heal_v)
 		"calm":
-			DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+			DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
 
 	# 遗物回调
 	RelicManager.on_resonance_triggered_ruyue(emotion)

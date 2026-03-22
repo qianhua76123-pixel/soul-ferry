@@ -148,11 +148,11 @@ func _update_wuqing_jie() -> void:
 			all_positive = false; break
 	if all_positive and not _wuqing_bonus_active:
 		DeckManager.max_cost += 1
-		DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+		DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
 		_wuqing_bonus_active = true
 		relic_triggered.emit("wuqing_jie", "五情结：费用上限 +1")
 	elif not all_positive and _wuqing_bonus_active:
-		DeckManager.max_cost = max(DeckManager.BASE_COST, DeckManager.max_cost - 1)
+		DeckManager.max_cost = maxi(DeckManager.BASE_COST, DeckManager.max_cost - 1)
 		_wuqing_bonus_active = false
 
 ## 阴阳笔 — 打出定类牌时，随机为另一情绪+1（不超过3，不触发失调）
@@ -235,7 +235,7 @@ func on_seal_card_played_ruyue(emotion_tag: String) -> void:
 			relic_triggered.emit("jiu_tong_ling", "旧铜铃：喜印 → 抽%d张" % (2 if upgraded else 1))
 		"calm":
 			var bonus: int = 2 if upgraded else 1
-			DeckManager.current_cost = min(DeckManager.current_cost + bonus, DeckManager.max_cost)
+			DeckManager.current_cost = mini(DeckManager.current_cost + bonus, DeckManager.max_cost)
 			relic_triggered.emit("jiu_tong_ling", "旧铜铃：定印 → +%d费" % bonus)
 
 var next_damage_reduction: int = 0
@@ -301,7 +301,7 @@ func on_resonance_triggered_ruyue(_emotion: String) -> void:
 	if not has_relic("miaozhu_fayi"): return
 	var upgraded: bool = _is_upgraded("miaozhu_fayi")
 	if upgraded:
-		DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+		DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
 		relic_triggered.emit("miaozhu_fayi", "庙祝法衣：本回合剩余能量+1")
 	else:
 		miaozhu_fayi_next_card_discount = true
@@ -331,7 +331,7 @@ func on_resonance_triggered_canxiang(target_node) -> void:
 			GameState.heal(4)
 			relic_triggered.emit("canxiang_qi_shu", "残香第2束：回血4")
 		2:
-			DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+			DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
 			relic_triggered.emit("canxiang_qi_shu", "残香第3束：+1能量")
 		3:
 			# 对所有敌人施加随机印记×1：由 BattleStateMachine 响应信号处理
@@ -369,10 +369,10 @@ func on_resonance_mirror_to_self(emotion: String) -> void:
 	var upgraded: bool = _is_upgraded("yintang_zhusha")
 	match emotion:
 		"grief":
-			next_attack_bonus = max(next_attack_bonus, 999)  # 标记为"下次攻击翻倍"
+			next_attack_bonus = maxi(next_attack_bonus, 999)  # 标记为"下次攻击翻倍"
 			relic_triggered.emit("yintang_zhusha", "印堂朱砂：下次攻击×2")
 		"fear":
-			next_damage_reduction = max(next_damage_reduction, 9999)  # 标记为"免疫一次"
+			next_damage_reduction = maxi(next_damage_reduction, 9999)  # 标记为"免疫一次"
 			relic_triggered.emit("yintang_zhusha", "印堂朱砂：免疫下一次伤害")
 		"rage":
 			next_attack_bonus += 15
@@ -381,7 +381,7 @@ func on_resonance_mirror_to_self(emotion: String) -> void:
 			GameState.heal(8)
 			relic_triggered.emit("yintang_zhusha", "印堂朱砂：回血8")
 		"calm":
-			DeckManager.current_cost = min(DeckManager.current_cost + 1, DeckManager.max_cost)
+			DeckManager.current_cost = mini(DeckManager.current_cost + 1, DeckManager.max_cost)
 			relic_triggered.emit("yintang_zhusha", "印堂朱砂：本回合+1费")
 
 # ── 破庙门槛：战斗结束时印记转金币
@@ -390,7 +390,7 @@ func on_battle_end_ruyue(remaining_marks_total: int) -> void:
 	var upgraded: bool = _is_upgraded("pomiao_menjian")
 	var ratio: int    = 2 if upgraded else 1
 	var cap: int      = 25 if upgraded else 15
-	var gold: int     = min(remaining_marks_total * ratio, cap)
+	var gold: int     = minf(remaining_marks_total * ratio, cap)
 	if gold > 0:
 		GameState.gain_gold(gold)
 		relic_triggered.emit("pomiao_menjian", "破庙门槛：印记残留%d层→金币+%d" % [remaining_marks_total, gold])
@@ -420,7 +420,7 @@ var _nu_bao_multiplier:  float = 0.0
 
 func get_fury_burst_multiplier_bonus() -> float:
 	if not has_relic("nu_bao_jishuqi"): return 0.0
-	return min(_nu_bao_multiplier, 1.0)  # 最高+1.0（即×2.5）
+	return minf(_nu_bao_multiplier, 1.0)  # 最高+1.0（即×2.5）
 
 func consume_nuqi_hu_rage() -> int:
 	var v: int = nuqi_hu_pending_rage

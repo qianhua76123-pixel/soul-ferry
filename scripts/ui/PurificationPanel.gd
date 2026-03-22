@@ -111,7 +111,7 @@ func update_display() -> void:
 		var cur  = EmotionManager.values.get(item["emotion"], 0)
 		var req  = item["required"]
 		var met  = cur >= req
-		item["bar"].value  = min(cur, req)
+		item["bar"].value  = mini(cur, req)
 		item["label"].text = "%s %d/%d%s" % [
 			EMOTION_CN.get(item["emotion"], item["emotion"]),
 			int(cur), int(req), " ✓" if met else ""]

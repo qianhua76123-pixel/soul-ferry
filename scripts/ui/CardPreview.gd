@@ -88,8 +88,8 @@ func show_preview(card: Dictionary, anchor_pos: Vector2) -> void:
 		}.get(rarity, UIConstants.color_of("ash")))
 
 	# 定位：显示在悬停牌的上方，避免超出屏幕
-	var px: int = clamp(anchor_pos.x - 80, 4, 1050)
-	var py: int = max(anchor_pos.y - 240, 4)
+	var px: int = clampf(anchor_pos.x - 80, 4, 1050)
+	var py: int = maxf(anchor_pos.y - 240, 4)
 	position = Vector2(px, py)
 	visible  = true
 	modulate.a = 0.0

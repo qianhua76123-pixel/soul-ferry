@@ -51,7 +51,7 @@ static func _line(img: Image, x0: int, y0: int, x1: int, y1: int, c: Color) -> v
 static func _gradient_rect(img: Image, x: int, y: int, w: int, h: int,
 		c_top: Color, c_bot: Color) -> void:
 	for dy in h:
-		var t: float = float(dy)/float(max(h-1,1))
+		var t: float = float(dy)/float(maxi(h-1,1))
 		var c: Color = c_top.lerp(c_bot, t)
 		for dx in w:
 			_px(img, x+dx, y+dy, c)
@@ -260,7 +260,7 @@ static func _draw_wumian(img: Image) -> void:
 	# 中央柔光
 	for r in range(32, 6, -2):
 		var a: float = 0.025 - float(32-r)*0.0005
-		_circle(img, 32, 38, r, Color(0.88,0.88,0.85, max(0.0, a)))
+		_circle(img, 32, 38, r, Color(0.88,0.88,0.85, maxf(0.0, a)))
 
 	# ── 虚影（偏移，低透明度）──
 	var body_s := Color(0.72,0.72,0.70,0.22)

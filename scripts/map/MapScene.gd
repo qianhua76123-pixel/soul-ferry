@@ -225,7 +225,7 @@ func _render_map() -> void:
 		row.add_theme_constant_override("separation", 20)
 		row.custom_minimum_size = Vector2(0, 110)
 
-		var row_end: int = min(i + row_size, len(layer_nodes))
+		var row_end: int = mini(i + row_size, len(layer_nodes))
 		for j: int in range(i, row_end):
 			var nd: Dictionary = layer_nodes[j]
 			var is_unlocked: bool = (j == next_idx)
@@ -323,7 +323,7 @@ func _make_node_btn(nd: Dictionary, is_unlocked: bool) -> Control:
 	# Hover（仅解锁节点）
 	var hover_style: StyleBoxFlat = normal_style.duplicate()
 	hover_style.border_color = UIConstants.color_of("gold")
-	hover_style.bg_color     = Color(nc[0].r + 0.06, nc[0].g + 0.04, nc[0].b + 0.02, 0.95).clamp()
+	hover_style.bg_color     = Color(nc[0].r + 0.06, nc[0].g + 0.04, nc[0].b + 0.02, 0.95).clampi()
 	btn.add_theme_stylebox_override("hover", hover_style)
 
 	# Pressed
@@ -510,7 +510,7 @@ func _show_relic_tip(rid: String) -> void:
 	_relic_tip_lbl.text = "[color=#%s]【%s】[/color]\n[color=#%s]%s[/color]" % [gold, rname, parch, effect]
 	var mp: Vector2 = get_viewport().get_mouse_position()
 	var vp: Vector2 = get_viewport().get_visible_rect().size
-	_relic_tip.position = Vector2(clamp(mp.x-110, 4, vp.x-244), clamp(mp.y-80, 4, vp.y-100))
+	_relic_tip.position = Vector2(clampf(mp.x-110, 4, vp.x-244), clampf(mp.y-80, 4, vp.y-100))
 	_relic_tip.visible = true
 
 func _hide_relic_tip() -> void:

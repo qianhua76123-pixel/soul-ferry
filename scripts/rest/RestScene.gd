@@ -68,7 +68,7 @@ func _get_upgrade_preview(card: Dictionary) -> String:
 
 	# 费用降低（除0费外）
 	if cost >= 1:
-		lines.append("• 费用 %d → %d" % [int(cost), int(max(0, cost - 1))])
+		lines.append("• 费用 %d → %d" % [int(cost), int(maxi(0, cost - 1))])
 
 	# 效果值提升（数值类效果+20%）
 	if eval_ > 0 and etype in [

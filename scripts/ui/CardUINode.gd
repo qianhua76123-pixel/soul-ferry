@@ -25,7 +25,7 @@ func setup(data: Dictionary) -> void:
 	card_data = data
 	_emotion_color = EmotionManager.get_emotion_color(data.get("emotion_tag", "calm"))
 	var cost: int = data.get("cost", 0) - EmotionManager.get_cost_reduction()
-	_cost_text = str(max(0, cost))
+	_cost_text = str(maxi(0, cost))
 	_rarity_color = _rarity_border_color(data.get("rarity", "common"))
 	queue_redraw()
 
@@ -95,7 +95,7 @@ func _draw_placeholder(pos: Vector2, size: Vector2) -> void:
 	var cy: float = pos.y + size.y / 2.0
 	var c: Color  = _emotion_color
 	var cd: Color = Color(c.r * 0.6, c.g * 0.6, c.b * 0.6, 0.9)
-	var cl: Color = Color(min(c.r+0.3,1.0), min(c.g+0.3,1.0), min(c.b+0.3,1.0), 0.5)
+	var cl: Color = Color(minf(c.r+0.3,1.0), minf(c.g+0.3,1.0), minf(c.b+0.3,1.0), 0.5)
 
 	# 无名卡牌：虚空风格（不画情绪符号）
 	if card_data.get("character","") == "wumian":

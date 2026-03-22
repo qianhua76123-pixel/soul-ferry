@@ -167,7 +167,7 @@ static func _draw_lv_tou(img: Image) -> void:
 	var rng = _get_rng(77331)
 	for x in range(9, 23):
 		var hair_len = 28 + abs(x - 16) * 2
-		for y in range(6, min(hair_len, 46)):
+		for y in range(6, mini(hair_len, 46)):
 			if x < 11 or x > 21 or y < 10:
 				_px(img, x, y, c_hair)
 			elif y < 14:
@@ -196,7 +196,7 @@ static func _draw_shan_huo(img: Image) -> void:
 	var rng = _get_rng(55512)
 	for x in range(8, 24):
 		var h = 20 - abs(x-16)*2 + rng.randi() % 4
-		for y in range(max(4, 14-h), 38):
+		for y in range(maxi(4, 14-h), 38):
 			if y >= 14 - h:
 				_px(img, x, y, c_fire1)
 	# 内焰

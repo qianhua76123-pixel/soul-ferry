@@ -141,7 +141,7 @@ static func _ruan_hurt(img: Image) -> void:
 	for y in range(8, 48):
 		for x in range(8, 26):
 			var c: Color = img.get_pixel(x, y)
-			if c.a > 0.1: img.set_pixel(x, y, Color(min(1.0,c.r+0.15), c.g*0.88, c.b*0.88, c.a))
+			if c.a > 0.1: img.set_pixel(x, y, Color(minf(1.0,c.r+0.15), c.g*0.88, c.b*0.88, c.a))
 
 static func _ruan_dead(img: Image) -> void:
 	_line(img, 4, 20, 20, 36, RY_POLE)
@@ -268,7 +268,7 @@ static func _shen_hurt(img: Image) -> void:
 	for y in range(4, 48):
 		for x in range(7, 25):
 			var c: Color = img.get_pixel(x, y)
-			if c.a > 0.1: img.set_pixel(x, y, Color(min(1.0,c.r+0.18), c.g*0.85, c.b*0.85, c.a))
+			if c.a > 0.1: img.set_pixel(x, y, Color(minf(1.0,c.r+0.18), c.g*0.85, c.b*0.85, c.a))
 
 static func _shen_dead(img: Image) -> void:
 	# 横躺

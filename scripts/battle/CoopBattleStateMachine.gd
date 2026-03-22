@@ -148,9 +148,9 @@ func play_card_ruan(card: Dictionary) -> void:
 	if CoopManager.has_coop_relic("tie_yin_tongxin"):
 		var total_marks: int = _count_total_marks()
 		if total_marks > 15:
-			cost = max(0, cost - 1)
+			cost = maxi(0, cost - 1)
 	# 沈铁钧定共鸣后阮如月印记牌降费
-	cost = max(0, cost - CoopManager.ruan_card_cost_reduction)
+	cost = maxi(0, cost - CoopManager.ruan_card_cost_reduction)
 
 	if ruan_energy < cost:
 		push_warning("CoopBattleStateMachine: 阮如月能量不足")
@@ -351,7 +351,7 @@ func _check_coop_five_resonance() -> void:
 	# 触发协同五情共鸣
 	# 渡化进度+40%
 	shared_purification_progress += 0.40
-	shared_purification_progress  = min(shared_purification_progress, 1.0)
+	shared_purification_progress  = minf(shared_purification_progress, 1.0)
 
 	# 沈铁钧本回合所有锁链溅射比例+30%
 	shen_splash_bonus_this_turn += 0.30
@@ -459,18 +459,18 @@ func _apply_damage_to_character(character: String, damage: int) -> void:
 	match character:
 		TURN_RUAN:
 			if ruan_shield > 0:
-				var blocked: int = min(ruan_shield, actual)
+				var blocked: int = mini(ruan_shield, actual)
 				ruan_shield -= blocked
 				actual      -= blocked
 			if actual > 0:
-				ruan_hp = max(0, ruan_hp - actual)
+				ruan_hp = maxf(0, ruan_hp - actual)
 		TURN_SHEN:
 			if shen_shield > 0:
-				var blocked: int = min(shen_shield, actual)
+				var blocked: int = mini(shen_shield, actual)
 				shen_shield -= blocked
 				actual      -= blocked
 			if actual > 0:
-				shen_hp = max(0, shen_hp - actual)
+				shen_hp = maxf(0, shen_hp - actual)
 
 
 # ────────────────────────────────────────────────────────
@@ -502,10 +502,10 @@ func _trigger_resonance_effect(emotion: String) -> void:
 		"joy":
 			# 喜共鸣：回复阮如月HP
 			var heal_val: int = 8
-			ruan_hp = min(ruan_max_hp, ruan_hp + heal_val)
+			ruan_hp = minf(ruan_max_hp, ruan_hp + heal_val)
 		"calm":
 			# 定共鸣：回复能量
-			ruan_energy = min(ruan_max_energy, ruan_energy + 1)
+			ruan_energy = mini(ruan_max_energy, ruan_energy + 1)
 	# 检查五情共鸣（五种印记是否都触发过）
 	_check_five_resonance_completion()
 
@@ -543,11 +543,11 @@ func _try_give_energy_bonus(from_character: String, to_character: String) -> voi
 		TURN_RUAN:
 			if coop_ruan_gave_bonus_this_turn < MAX_BONUS:
 				coop_ruan_gave_bonus_this_turn += 1
-				shen_energy = min(shen_max_energy, shen_energy + 1)
+				shen_energy = mini(shen_max_energy, shen_energy + 1)
 		TURN_SHEN:
 			if coop_shen_gave_bonus_this_turn < MAX_BONUS:
 				coop_shen_gave_bonus_this_turn += 1
-				ruan_energy = min(ruan_max_energy, ruan_energy + 1)
+				ruan_energy = mini(ruan_max_energy, ruan_energy + 1)
 
 
 # ────────────────────────────────────────────────────────
@@ -557,10 +557,10 @@ func _try_give_energy_bonus(from_character: String, to_character: String) -> voi
 func _deal_damage_to_enemy(amount: int) -> void:
 	## 对敌人造成伤害（先扣护盾）
 	if enemy_shield > 0:
-		var blocked: int = min(enemy_shield, amount)
+		var blocked: int = mini(enemy_shield, amount)
 		enemy_shield -= blocked
 		amount       -= blocked
-	enemy_hp = max(0, enemy_hp - amount)
+	enemy_hp = maxf(0, enemy_hp - amount)
 
 
 func _choose_enemy_action() -> Dictionary:

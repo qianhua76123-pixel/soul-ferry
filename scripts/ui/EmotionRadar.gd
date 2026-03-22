@@ -129,7 +129,7 @@ func _draw() -> void:
 		var val   = EmotionManager.values.get(emotion, 0)
 		var ratio: float = float(val) / float(MAX_VAL)
 		var angle_2: float = deg_to_rad(EMOTION_ANGLES[emotion])
-		fill_pts.append(center + Vector2(cos(angle_2), sin(angle_2)) * RADIUS * max(ratio, 0.04))
+		fill_pts.append(center + Vector2(cos(angle_2), sin(angle_2)) * RADIUS * maxf(ratio, 0.04))
 	var fill_color: Color = _get_fill_color()
 	draw_colored_polygon(fill_pts, fill_color)
 	# 填充边线
@@ -152,7 +152,7 @@ func _get_pentagon(center: Vector2, r: float) -> Array:
 
 func _get_fill_color() -> Color:
 	var max_v = 0
-	for e in EMOTIONS: max_v = max(max_v, EmotionManager.values.get(e, 0))
+	for e in EMOTIONS: max_v = maxi(max_v, EmotionManager.values.get(e, 0))
 	if max_v >= MAX_VAL: return Color(0.55, 0.0,  0.0,  0.72)
 	if max_v >= 3:       return Color(0.83, 0.63, 0.09, 0.65)
 	if max_v >= 2:       return Color(0.16, 0.42, 0.62, 0.65)
@@ -170,7 +170,7 @@ func _on_emotion_changed(emotion: String, _old: int, new_val: int) -> void:
 func _update_edge_vignette(emotion: String, val: int) -> void:
 	if _edge_rects.is_empty(): return
 	var ec    = EMOTION_COLORS.get(emotion, Color.RED)
-	var alpha: float = clamp(float(val - 1) / 3.0, 0.0, 0.22)
+	var alpha: float = PLACEHOLDER_CLAMPF
 	for r in _edge_rects:
 		r.color = Color(ec.r, ec.g, ec.b, alpha)
 

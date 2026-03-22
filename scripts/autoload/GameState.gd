@@ -143,7 +143,7 @@ func load_from_file() -> bool:
 			var cid_2: String = card.get("id","")
 			if cid_2 in upgrades:
 				card["level"] = upgrades[cid_2]
-				card["cost"]  = max(0, card.get("cost",1) - upgrades[cid_2])
+				card["cost"]  = maxi(0, card.get("cost",1) - upgrades[cid_2])
 	else:
 		DeckManager.init_starter_deck()
 
@@ -182,19 +182,19 @@ func new_run() -> void:
 func take_damage(amount: int) -> void:
 	var actual: int = int(amount * EmotionManager.get_enemy_damage_multiplier())
 	var old_hp: int = hp
-	hp = max(0, hp - actual)
+	hp = maxi(0, hp - actual)
 	hp_changed.emit(old_hp, hp)
 	if hp <= 0: game_over.emit()
 
 func heal(amount: int) -> void:
 	var actual: int = int(amount * EmotionManager.get_heal_multiplier())
 	var old_hp: int = hp
-	hp = min(max_hp, hp + actual)
+	hp = minf(max_hp, hp + actual)
 	hp_changed.emit(old_hp, hp)
 
 func increase_max_hp(amount: int) -> void:
 	var old_max: int = max_hp
-	max_hp += amount; hp = min(max_hp, hp + amount)
+	max_hp += amount; hp = minf(max_hp, hp + amount)
 	max_hp_changed.emit(old_max, max_hp)
 
 func gain_gold(amount: int) -> void:

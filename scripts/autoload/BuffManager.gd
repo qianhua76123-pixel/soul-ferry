@@ -85,7 +85,7 @@ func add_buff(target: String, buff_id: String, stacks: int = 1, duration: int = 
 	if buff_id in buffs:
 		buffs[buff_id]["stacks"] += stacks
 		if duration > 0:
-			buffs[buff_id]["duration"] = max(buffs[buff_id].get("duration", 0), duration)
+			buffs[buff_id]["duration"] = maxf(buffs[buff_id].get("duration", 0), duration)
 		if buff_id == "obsession":
 			buffs[buff_id]["duration"] = buffs[buff_id]["stacks"]
 	else:
@@ -174,7 +174,7 @@ func absorb_damage(target: String, raw_damage: int) -> int:
 		return raw_damage
 	var buffs: Dictionary = _get_target_buffs(target)
 	var shield: int = buffs["shield"]["stacks"]
-	var blocked: int = min(shield, raw_damage)
+	var blocked: int = mini(shield, raw_damage)
 	buffs["shield"]["stacks"] -= blocked
 	if buffs["shield"]["stacks"] <= 0:
 		remove_buff(target, "shield")

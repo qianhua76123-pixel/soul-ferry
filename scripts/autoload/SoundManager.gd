@@ -22,13 +22,13 @@ const SFX_POOL_SIZE = 3
 # ══════════════════════════════════════════════════════
 var bgm_volume: float = 0.7:
 	set(v):
-		bgm_volume = clamp(v, 0.0, 1.0)
+		bgm_volume = clampf(v, 0.0, 1.0)
 		if _bgm_player:
 			_bgm_player.volume_db = linear_to_db(bgm_volume)
 
 var sfx_volume: float = 0.9:
 	set(v):
-		sfx_volume = clamp(v, 0.0, 1.0)
+		sfx_volume = clampf(v, 0.0, 1.0)
 		for p in _sfx_players:
 			p.volume_db = linear_to_db(sfx_volume)
 
