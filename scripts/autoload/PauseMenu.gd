@@ -163,14 +163,13 @@ func _switch_tab(tab_id: String) -> void:
 		else:
 			tb.add_theme_stylebox_override("normal", UIC.make_button_style("parch", "gold_dim"))
 			tb.remove_theme_color_override("font_color")
-	# 重建内容区
+	# 重建内容区（queue_free 是延迟的，用 call_deferred 构建避免父子竞争）
 	for ch in _page_stack.get_children():
 		ch.queue_free()
-	await get_tree().process_frame
 	match tab_id:
-		"settings":     _build_settings_page()
-		"achievements": _build_achievements_page()
-		"stats":        _build_stats_page()
+		"settings":     _build_settings_page.call_deferred()
+		"achievements": _build_achievements_page.call_deferred()
+		"stats":        _build_stats_page.call_deferred()
 
 # ── 面板居中（toggle 调用时用实际 viewport 尺寸）─────
 func _reposition_panel() -> void:
@@ -298,7 +297,6 @@ func _build_achievements_page() -> void:
 	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	summary.add_theme_font_size_override("font_size", 13)
 	summary.add_theme_color_override("font_color", UIC.color_of("gold"))
-	list.move_child(summary, 0)   # 但 summary 是 add_child 的，直接插到顶
 	list.add_child(summary)
 	list.move_child(summary, 0)
 

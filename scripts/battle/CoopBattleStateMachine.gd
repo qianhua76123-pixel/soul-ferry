@@ -1,6 +1,5 @@
-class_name CoopBattleStateMachine
 extends Node
-## 双角色协作模式状态机
+## CoopBattleStateMachine - 双角色协作模式状态机
 ## 实现「同行渡魂」双人协作战斗的核心逻辑
 ## ruan = 阮如月（印记系），shen = 沈铁钧（锁链系）
 

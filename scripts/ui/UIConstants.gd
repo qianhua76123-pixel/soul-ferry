@@ -7,7 +7,8 @@ class_name UIConstants
 const COLORS := {
 	# 基础色
 	"ink":      Color("#0d0d0d"),
-	"parch":    Color("#1a1508"),
+	"parch":     Color("#1a1508"),
+	"parch_dim": Color(0.68, 0.62, 0.52, 0.75),   # 羊皮纸浅色（副标题/提示文字）
 	"gold":     Color("#c8a96e"),
 	"gold_dim": Color("#6b5a30"),
 	"ash":      Color("#9a9080"),
