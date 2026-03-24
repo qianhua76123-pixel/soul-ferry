@@ -10,8 +10,8 @@ signal game_saved()
 signal game_loaded()
 signal game_over()
 
-const STARTING_HP     = 80
-const STARTING_MAX_HP = 80
+const STARTING_HP     = 75  # 默认值（实际由角色数据决定，见 new_run()）
+const STARTING_MAX_HP = 75
 const STARTING_GOLD   = 100
 const SAVE_PATH       = "user://save.json"
 
@@ -162,12 +162,18 @@ func delete_save() -> void:
 # ════════════════════════════════════════════
 
 func new_run() -> void:
-	hp = STARTING_HP; max_hp = STARTING_MAX_HP; gold = STARTING_GOLD
+	# 从角色数据读取初始HP（按角色区分）
+	var char_id: String = str(get_meta("selected_character", "ruan_ruyue"))
+	var char_hp: int = _get_character_hp(char_id)
+	hp = char_hp; max_hp = char_hp; gold = STARTING_GOLD
 	current_layer = 1; current_node = 0
 	visited_nodes = []; relics = []; choice_history = []
 	du_hua_count = 0; zhen_ya_count = 0; route_tendency = ""
 	if has_meta("pending_enemy_id"): remove_meta("pending_enemy_id")
 	if has_meta("map_data"):         remove_meta("map_data")
+	if has_meta("lingering_emotion"): remove_meta("lingering_emotion")
+	if has_meta("lingering_value"):   remove_meta("lingering_value")
+	if has_meta("lingering_type"):    remove_meta("lingering_type")
 	EmotionManager.reset_all()
 	if Engine.has_singleton("RelicManager"):
 		RelicManager.active_relics         = []
@@ -178,6 +184,21 @@ func new_run() -> void:
 	add_relic("tong_jing_sui")
 	# add_relic("wenlu_xiang")  # 问路香已删除（功能下线）
 	add_relic("duhun_ce")
+
+## 从 characters.json 读取角色初始HP
+func _get_character_hp(char_id: String) -> int:
+	var file: FileAccess = FileAccess.open("res://data/characters.json", FileAccess.READ)
+	if not file:
+		return STARTING_HP
+	var json: JSON = JSON.new()
+	if json.parse(file.get_as_text()) != OK:
+		file.close()
+		return STARTING_HP
+	file.close()
+	for char_data in json.get_data().get("characters", []):
+		if char_data.get("id", "") == char_id:
+			return int(char_data.get("hp", STARTING_HP))
+	return STARTING_HP
 
 func take_damage(amount: int) -> void:
 	var actual: int = int(amount * EmotionManager.get_enemy_damage_multiplier())

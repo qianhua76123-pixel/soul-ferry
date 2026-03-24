@@ -5,23 +5,26 @@
       "name": "孤魂游灵",
       "type": "normal",
       "layer": 1,
-      "hp": 30,
+      "hp": 45,
+      "dominant_emotion": "fear",
+      "obsession_init": 0,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "fear",
-          "value": 1
+          "value": 2
         }
       ],
       "actions": [
         {
           "type": "attack",
-          "value": 6,
+          "value": 10,
           "weight": 60
         },
         {
           "type": "emotion_push",
           "emotion": "fear",
-          "value": 1,
+          "value": 2,
           "weight": 40
         }
       ],
@@ -39,11 +42,14 @@
       "name": "怨鬼",
       "type": "normal",
       "layer": 1,
-      "hp": 40,
+      "hp": 60,
+      "dominant_emotion": "grief",
+      "obsession_init": 0,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "grief",
-          "value": 1
+          "value": 2
         },
         {
           "emotion": "rage",
@@ -53,7 +59,7 @@
       "actions": [
         {
           "type": "attack",
-          "value": 10,
+          "value": 13,
           "weight": 50
         },
         {
@@ -83,23 +89,26 @@
       "name": "摄魅眼",
       "type": "normal",
       "layer": 2,
-      "hp": 45,
+      "hp": 75,
+      "dominant_emotion": "fear",
+      "obsession_init": 0,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "fear",
-          "value": 2
+          "value": 3
         }
       ],
       "actions": [
         {
           "type": "attack",
-          "value": 8,
+          "value": 16,
           "weight": 40
         },
         {
           "type": "emotion_push",
           "emotion": "fear",
-          "value": 2,
+          "value": 3,
           "weight": 40
         },
         {
@@ -122,17 +131,20 @@
       "name": "缕头鬼",
       "type": "normal",
       "layer": 2,
-      "hp": 55,
+      "hp": 85,
+      "dominant_emotion": "grief",
+      "obsession_init": 0,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "grief",
-          "value": 1
+          "value": 2
         }
       ],
       "actions": [
         {
           "type": "attack",
-          "value": 12,
+          "value": 18,
           "weight": 50
         },
         {
@@ -163,23 +175,26 @@
       "name": "闪火鬼",
       "type": "normal",
       "layer": 3,
-      "hp": 50,
+      "hp": 90,
+      "dominant_emotion": "rage",
+      "obsession_init": 0,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "rage",
-          "value": 2
+          "value": 3
         }
       ],
       "actions": [
         {
           "type": "attack",
-          "value": 15,
+          "value": 20,
           "weight": 60
         },
         {
           "type": "emotion_push",
           "emotion": "rage",
-          "value": 2,
+          "value": 3,
           "weight": 40
         }
       ],
@@ -197,7 +212,10 @@
       "name": "水鬼·望归",
       "type": "boss",
       "layer": 1,
-      "hp": 80,
+      "hp": 100,
+      "dominant_emotion": "grief",
+      "obsession_init": 1,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "grief",
@@ -231,6 +249,13 @@
           "weight": 10
         }
       ],
+      "boss_phase_2_hp_threshold": 0.5,
+      "phase_2_actions": [
+        {"type":"attack","value":14,"weight":40,"description":"七年长哭（+悲3）","side_effect":{"emotion_push":"grief","value":3}},
+        {"type":"summon_tide","value":8,"hits":3,"weight":25,"description":"召唤潮汐"},
+        {"type":"special_drown_memory","weight":20,"description":"溺水记忆（手牌情绪最多的系全变无效牌1回合）"},
+        {"type":"shield_self_and_suppress_duhua","value":25,"suppress":20,"weight":15,"description":"护盾+渡化频率-20"}
+      ],
       "du_hua_condition": {
         "type": "card_play",
         "card_id": "yin_du",
@@ -249,7 +274,10 @@
       "name": "旱魃·焦骨",
       "type": "boss",
       "layer": 2,
-      "hp": 100,
+      "hp": 130,
+      "dominant_emotion": "rage",
+      "obsession_init": 1,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "rage",
@@ -284,6 +312,13 @@
           "weight": 20
         }
       ],
+      "boss_phase_2_hp_threshold": 0.5,
+      "phase_2_actions": [
+        {"type":"attack_armor_piercing","value":25,"side_effect":{"emotion_push":"rage","value":3},"weight":35,"description":"烈火审判（穿甲25+玩家怒+3）"},
+        {"type":"apply_debuff","value":"jiao_gu","weight":25,"description":"焦骨蔓延（2回合内每打牌受1DOT）"},
+        {"type":"remove_shield_and_heal","value":10,"weight":20,"description":"旱地长叹（清除玩家护盾+自回血10）"},
+        {"type":"shield_self_double","value":20,"weight":20,"description":"执念加冕（自盾20+2回合减伤50%）"}
+      ],
       "du_hua_condition": {
         "type": "dialogue_choice",
         "dialogue_id": "believe_you",
@@ -302,7 +337,10 @@
       "name": "鬼新娘·素锦",
       "type": "boss",
       "layer": 3,
-      "hp": 120,
+      "hp": 150,
+      "dominant_emotion": "joy",
+      "obsession_init": 1,
+      "purification_window_gain": 20,
       "emotion_pressure": [
         {
           "emotion": "grief",
@@ -337,6 +375,12 @@
           "weight": 20
         }
       ],
+      "boss_phase_2_hp_threshold": 0.4,
+      "phase_2_actions": [
+        {"type":"attack","value":5,"extra_per_hand":2,"weight":50,"description":"狂暴连击（5+手牌数×2）"},
+        {"type":"drain_all_emotions","value":2,"weight":30,"description":"情感真空强化（所有情绪-2）"},
+        {"type":"attack_armor_piercing","value":25,"side_effect":{"disable_joy_cards":true},"weight":20,"description":"彻底崩溃（穿甲25+喜系牌失效）"}
+      ],
       "du_hua_condition": {
         "type": "consecutive_joy_cards",
         "count": 3,
@@ -349,15 +393,17 @@
       "du_hua_fail_text": "爱？那是什么……我的人生里从来没有……",
       "backstory": "被父母为了彩礼嫁给已死陌生人做冥婚新娘。从未爱过也从未被爱过，甚至不知道爱是什么感觉。执念不是悲，是「空白」。",
       "description": "穿着嫁衣的新娘，眼中没有任何情绪——甚至连悲伤都没有"
-    }
-    ,
+    },
     {
       "id": "jiang_panyu",
       "name": "江盼鱼",
       "type": "boss",
       "is_boss": true,
       "chapter": 1,
-      "hp": 120,
+      "hp": 160,
+      "dominant_emotion": "grief",
+      "obsession_init": 1,
+      "purification_window_gain": 20,
       "emotion_affinity": ["grief","fear"],
       "du_hua_condition": {
         "type": "emotion_threshold",
@@ -371,6 +417,12 @@
         {"type":"apply_debuff","value":"grief_aura","weight":25,"description":"七年等候（玩家悲+1）"}
       ],
       "boss_phase_2_hp_threshold": 0.5,
+      "phase_2_actions": [
+        {"type":"attack","value":14,"weight":40,"description":"七年长哭（+悲3）","side_effect":{"emotion_push":"grief","value":3}},
+        {"type":"summon_tide","value":8,"hits":3,"weight":25,"description":"召唤潮汐"},
+        {"type":"special_drown_memory","weight":20,"description":"溺水记忆（手牌情绪最多的系全变无效牌1回合）"},
+        {"type":"shield_self_and_suppress_duhua","value":25,"suppress":20,"weight":15,"description":"护盾+渡化频率-20"}
+      ],
       "phase_2_action_bonus": {"all_damage":1.5},
       "loot": {"gold":[30,50],"relic_chance":0.8}
     },
@@ -380,7 +432,10 @@
       "type": "boss",
       "is_boss": true,
       "chapter": 2,
-      "hp": 150,
+      "hp": 190,
+      "dominant_emotion": "rage",
+      "obsession_init": 1,
+      "purification_window_gain": 20,
       "emotion_affinity": ["rage","calm"],
       "du_hua_condition": {
         "type": "emotion_threshold",
@@ -394,6 +449,12 @@
         {"type":"shield_self","value":12,"weight":25,"description":"六十年执念（自盾）"}
       ],
       "boss_phase_2_hp_threshold": 0.5,
+      "phase_2_actions": [
+        {"type":"attack_armor_piercing","value":25,"side_effect":{"emotion_push":"rage","value":3},"weight":35,"description":"烈火审判（穿甲25+玩家怒+3）"},
+        {"type":"apply_debuff","value":"jiao_gu","weight":25,"description":"焦骨蔓延（2回合内每打牌受1DOT）"},
+        {"type":"remove_shield_and_heal","value":10,"weight":20,"description":"旱地长叹（清除玩家护盾+自回血10）"},
+        {"type":"shield_self_double","value":20,"weight":20,"description":"执念加冕（自盾20+2回合减伤50%）"}
+      ],
       "phase_2_action_bonus": {"all_damage":1.6,"shield_on_action":5},
       "loot": {"gold":[40,65],"relic_chance":0.85}
     },
@@ -403,7 +464,10 @@
       "type": "boss",
       "is_boss": true,
       "chapter": 3,
-      "hp": 180,
+      "hp": 220,
+      "dominant_emotion": "joy",
+      "obsession_init": 1,
+      "purification_window_gain": 20,
       "emotion_affinity": ["joy","calm"],
       "du_hua_condition": {
         "type": "multi_stage",
@@ -422,6 +486,11 @@
         {"type":"apply_debuff","value":"joy_drain","weight":25,"description":"索取喜意（玩家喜-1）"}
       ],
       "boss_phase_2_hp_threshold": 0.4,
+      "phase_2_actions": [
+        {"type":"attack","value":5,"extra_per_hand":2,"weight":50,"description":"狂暴连击（5+手牌数×2）"},
+        {"type":"drain_all_emotions","value":2,"weight":30,"description":"情感真空强化（所有情绪-2）"},
+        {"type":"attack_armor_piercing","value":25,"side_effect":{"disable_joy_cards":true},"weight":20,"description":"彻底崩溃（穿甲25+喜系牌失效）"}
+      ],
       "phase_2_action_bonus": {"all_damage":1.4,"drain_emotion_count":2},
       "loot": {"gold":[50,80],"relic_chance":1.0}
     }

@@ -12,7 +12,7 @@ extends Node2D
 @onready var deck_container: GridContainer = $UI/DeckPanel/DeckGrid
 @onready var deck_panel:     Panel         = $UI/DeckPanel
 
-const HEAL_AMOUNT_PERCENT = 0.30
+const HEAL_AMOUNT_PERCENT = 0.20
 
 var _upgrade_mode: bool = false
 var _remove_mode:  bool = false
@@ -213,7 +213,7 @@ func _update_status() -> void:
 	# 根据已选行动更新状态文字
 	var opts: Array[String] = []
 	if not _healed:
-		opts.append("• 回复HP：恢复最大HP的30%%（%d点）" % int(GameState.max_hp * 0.3))
+		opts.append("• 回复HP：恢复最大HP的20%%（%d点）" % int(GameState.max_hp * 0.2))
 	else:
 		opts.append("✓ 已回复HP")
 	if not _upgraded:

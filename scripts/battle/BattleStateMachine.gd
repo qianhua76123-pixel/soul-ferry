@@ -16,6 +16,25 @@ signal chain_applied(total_chains: int)  # 锁链施加后通知 HUD 刷新
 signal marks_changed(marks: Dictionary)  # 印记层数变化通知 UI
 signal card_blocked_by_disorder(card: Dictionary, reason: String)  # 失控限制：牌无法打出
 
+# ── 渡化窗口系统变量 ──────────────────────────────────
+var du_hua_frequency: int = 0          # 渡化频率（0-100）
+var du_hua_interrupts: int = 0         # 本场渡化中断次数
+var du_hua_stage: int = 0              # 渡化阶段（0/1/2/完成）
+var du_hua_window_open: bool = false   # 渡化窗口是否开放
+var du_hua_emotion_sync_count: int = 0 # 本场情绪同步完成次数（用于quality判断）
+var _stage_turn_counter: int = 0       # 阶段内回合计数（阶段1→2有3回合时间窗口）
+var purification_quality: String = ""  # "minimal"/"stable"/"perfect"
+
+# ── 执念计数器 ──────────────────────────────────────
+var enemy_obsession: int = 0           # 执念层数（0-5）
+var _obsession_burst_active: bool = false  # 执念爆发：本回合敌人行动效果×2
+
+# ── 渡化出牌统计 ──────────────────────────────────────
+var _cards_played_this_turn_by_emotion: Dictionary = {}  # 本回合各情绪出牌计数
+
+# ── 护盾保留标记 ──────────────────────────────────────
+var _shield_no_expire_flag: bool = false  # true时本回合末护盾不减半
+
 # 状态常量（替代 enum，避免外部引用问题）
 const STATE_IDLE         = 0
 const STATE_BATTLE_START = 1
@@ -84,9 +103,32 @@ func start_battle(enemy_id: String) -> void:
 	joy_cards_played_this_turn = 0
 	du_hua_triggered = false
 
+	# 重置渡化窗口系统
+	du_hua_frequency = 0
+	du_hua_interrupts = 0
+	du_hua_stage = 0
+	du_hua_window_open = false
+	du_hua_emotion_sync_count = 0
+	_stage_turn_counter = 0
+	purification_quality = ""
+
+	# 重置执念计数器
+	enemy_obsession = enemy_data.get("obsession_init", 0)
+	_obsession_burst_active = false
+
+	# 重置出牌统计
+	_cards_played_this_turn_by_emotion = {}
+	_shield_no_expire_flag = false
+
 	# ── 重置所有 Autoload 系统 ──────────────────────────
 	# 情绪全部归零
 	EmotionManager.reset_all()
+	# 应用情绪余韵（上一场战斗的跨战斗情绪延续）
+	var lingering: String = str(GameState.get_meta("lingering_emotion", ""))
+	if lingering != "":
+		EmotionManager.modify(lingering, int(GameState.get_meta("lingering_value", 0)))
+		GameState.remove_meta("lingering_emotion")
+		GameState.remove_meta("lingering_value")
 	# 牌堆归位（手牌/弃牌堆→抽牌堆，重新洗牌）
 	DeckManager.on_battle_start()
 	# 清空所有 Buff
@@ -128,7 +170,11 @@ func _load_enemy(enemy_id: String) -> Dictionary:
 func _begin_player_turn() -> void:
 	current_turn += 1
 	joy_cards_played_this_turn = 0
+	_cards_played_this_turn_by_emotion = {}  # 重置本回合各情绪出牌计数
+	_obsession_burst_active = false           # 重置执念爆发标记
 	current_state = STATE_PLAYER_TURN
+	# 执念计数器：每回合开始+1
+	_on_turn_start_obsession()
 	# Buff 系统：回合开始处理
 	BuffManager.process_turn_start(BuffManager.TARGET_PLAYER)
 	DeckManager.on_turn_start()
@@ -159,6 +205,13 @@ func play_card(card: Dictionary) -> bool:
 		joy_cards_played_this_turn += 1
 	else:
 		joy_cards_played_this_turn = 0
+	# 统计本回合各情绪出牌数
+	var ctag: String = card.get("emotion_tag", "")
+	if ctag != "":
+		_cards_played_this_turn_by_emotion[ctag] = _cards_played_this_turn_by_emotion.get(ctag, 0) + 1
+	# 渡化类牌：降低执念
+	if card.get("effect_type", "") in ["du_hua_progress", "du_hua_trigger", "heal_and_purify_and_mark", "wumian_ferry_token"]:
+		_on_purification_card_played()
 	_check_du_hua(card)
 	current_state = STATE_PLAYER_TURN
 	if enemy_hp <= 0:
@@ -169,11 +222,14 @@ func _get_blocked_reason(card: Dictionary) -> String:
 	## 根据当前失控状态返回阻止打牌的原因文字
 	var tag: String = card.get("emotion_tag", "")
 	var etype: String = card.get("effect_type", "")
+	var cost: int = card.get("cost", 1)
 	if EmotionManager.is_disorder("rage"):
 		if tag == "calm": return "怒失控：无法打出定系牌"
 		if etype == "shield": return "怒失控：无法打出护盾牌"
 	if EmotionManager.is_disorder("grief"):
 		if etype in ["heal", "heal_all_buffs"]: return "悲失控：无法打出治疗牌"
+	if EmotionManager.is_deep_disorder("fear"):
+		if cost == 0: return "惧深度失调：无法打出费用0的牌"
 	return "失控限制"
 
 func end_player_turn() -> void:
@@ -191,6 +247,18 @@ func end_player_turn() -> void:
 	if enemy_chains > 0:
 		enemy_chains = maxi(0, enemy_chains - 1)
 		chain_applied.emit(enemy_chains)
+	# 渡化频率衰减（每回合末-15，最低0）
+	du_hua_frequency = maxi(0, du_hua_frequency - 15)
+	du_hua_window_open = du_hua_frequency >= 60
+	# 渡化阶段计时器（阶段1→2时间窗口）
+	if du_hua_stage == 1:
+		_stage_turn_counter += 1
+		if _stage_turn_counter > 3:
+			_handle_du_hua_interrupt()
+	# 护盾减半处理（替代原来的清零）
+	if not _shield_no_expire_flag:
+		player_shield = player_shield / 2  # 向下取整（GDScript 整数除法）
+	_shield_no_expire_flag = false
 	_begin_enemy_turn()
 
 ## Boss 当前阶段（1=正常, 2=愤怒），由 BossUI.boss_phase_changed 信号更新
@@ -902,30 +970,108 @@ func _check_condition(card: Dictionary) -> bool:
 	return false
 
 func _check_du_hua(played_card: Dictionary) -> void:
+	## 渡化三阶段系统
 	if du_hua_triggered: return
-	var cond: Variant = enemy_data.get("du_hua_condition", null)
-	if not cond: return
-	var emotion_req: Dictionary = cond.get("emotion_requirement", {})
-	for emotion in emotion_req:
-		if EmotionManager.values.get(emotion, 0) < emotion_req[emotion]:
-			return
-	# 情绪条件已满足，按 type 进一步检查
-	match cond.get("type", ""):
-		"emotion_threshold":
-			# 纯情绪阈值型：情绪条件满足即触发
-			_trigger_du_hua()
-		"card_play":
-			if played_card.get("id", "") == cond.get("card_id", ""):
-				_trigger_du_hua()
-		"consecutive_joy_cards":
-			if joy_cards_played_this_turn >= cond.get("count", 3):
+
+	match du_hua_stage:
+		0:
+			# 阶段0→1：窗口开放 + 情绪共振 + 本回合打出3张对应情绪牌
+			if not du_hua_window_open: return
+			var enemy_dom: String = str(enemy_data.get("dominant_emotion", ""))
+			var player_dom: String = EmotionManager.dominant_emotion
+			if enemy_dom == "" or player_dom != enemy_dom: return
+			var cards_for_dom: int = _cards_played_this_turn_by_emotion.get(player_dom, 0)
+			if cards_for_dom >= 3:
+				du_hua_stage = 1
+				_stage_turn_counter = 0
+				du_hua_emotion_sync_count += 1
+				var desc: String = str(enemy_data.get("du_hua_condition", {}).get("description", "情绪共振——渡化第一阶段达成"))
+				du_hua_available.emit(desc)
+		1:
+			# 阶段1→2：3回合时间窗口内再次情绪共振
+			var enemy_dom2: String = str(enemy_data.get("dominant_emotion", ""))
+			var player_dom2: String = EmotionManager.dominant_emotion
+			if enemy_dom2 == "" or player_dom2 != enemy_dom2: return
+			var cards_for_dom2: int = _cards_played_this_turn_by_emotion.get(player_dom2, 0)
+			if cards_for_dom2 >= 2:  # 第二阶段条件略低
+				du_hua_stage = 2
+				_stage_turn_counter = 0
+				du_hua_emotion_sync_count += 1
+		2:
+			# 阶段2→完成：HP ≥ 50%（可触发渡化）
+			var hp_ratio: float = float(GameState.hp) / float(GameState.max_hp)
+			if hp_ratio >= 0.5:
 				_trigger_du_hua()
 		_:
-			# 未知类型：情绪条件满足即触发（宽容处理）
-			_trigger_du_hua()
+			# 保留旧逻辑兜底（兼容老式 du_hua_condition）
+			var cond: Variant = enemy_data.get("du_hua_condition", null)
+			if not cond: return
+			var emotion_req: Dictionary = cond.get("emotion_requirement", {})
+			for emotion in emotion_req:
+				if EmotionManager.values.get(emotion, 0) < emotion_req[emotion]:
+					return
+			match cond.get("type", ""):
+				"emotion_threshold":
+					_trigger_du_hua()
+				"card_play":
+					if played_card.get("id", "") == cond.get("card_id", ""):
+						_trigger_du_hua()
+				"consecutive_joy_cards":
+					if joy_cards_played_this_turn >= cond.get("count", 3):
+						_trigger_du_hua()
+				_:
+					_trigger_du_hua()
+
+func _handle_du_hua_interrupt() -> void:
+	## 渡化中断惩罚系统
+	du_hua_stage = 0
+	_stage_turn_counter = 0
+	du_hua_interrupts += 1
+	match du_hua_interrupts:
+		1:
+			# 第1次：敌人攻击+3持续2回合
+			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "attack_bonus_3", 3, 2)
+		2:
+			# 第2次：敌人回血15%，频率积累速率减半
+			var heal_15: int = int(enemy_max_hp * 0.15)
+			enemy_hp = mini(int(enemy_hp) + heal_15, enemy_max_hp)
+			# 频率减半标记（通过减少频率模拟）
+			du_hua_frequency = du_hua_frequency / 2
+			du_hua_window_open = du_hua_frequency >= 60
+		3:
+			# 第3次：渡化永久关闭
+			du_hua_triggered = true  # 复用标记阻止再次触发
+			du_hua_stage = -1        # 特殊标记：永久关闭
+
+## 渡化频率增加（敌人情绪施压后调用）
+func _on_enemy_emotion_push_action() -> void:
+	var gain: int = enemy_data.get("purification_window_gain", 20)
+	du_hua_frequency = mini(du_hua_frequency + gain, 100)
+	du_hua_window_open = du_hua_frequency >= 60
+
+## 执念计数器：每回合开始+1，达5时爆发
+func _on_turn_start_obsession() -> void:
+	enemy_obsession = mini(enemy_obsession + 1, 5)
+	if enemy_obsession >= 5:
+		_obsession_burst_active = true
+		enemy_obsession -= 3
+
+## 玩家打出渡化类牌时降低执念
+func _on_purification_card_played() -> void:
+	enemy_obsession = maxi(0, enemy_obsession - 1)
+
+## 计算渡化品质
+func _calculate_purification_quality() -> String:
+	if du_hua_interrupts == 0 and du_hua_emotion_sync_count >= 3:
+		return "perfect"
+	elif du_hua_interrupts <= 1 and du_hua_emotion_sync_count >= 2:
+		return "stable"
+	else:
+		return "minimal"
 
 func _trigger_du_hua() -> void:
 	du_hua_triggered = true
+	purification_quality = _calculate_purification_quality()
 	var desc: String = str(enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足"))
 	du_hua_available.emit(desc)
 
@@ -939,29 +1085,35 @@ func _choose_enemy_action() -> Dictionary:
 	var actions: Array = enemy_data.get("actions", [])
 	if actions.is_empty(): return {}
 
-	# 愤怒阶段（Boss HP≤50%）：提升攻击/dot权重，降低辅助权重
-	var weighted: Array = actions.duplicate(true)
-	if boss_phase == 2:
+	# Boss Phase 2：若存在 phase_2_actions，完全替换行动池
+	if boss_phase == 2 and enemy_data.has("phase_2_actions"):
+		var phase2_pool: Array = enemy_data.get("phase_2_actions", [])
+		if not phase2_pool.is_empty():
+			actions = phase2_pool
+	elif boss_phase == 2:
+		# 无 phase_2_actions 时使用原有权重调整逻辑
+		var weighted: Array = actions.duplicate(true)
 		for a in weighted:
 			var t: String = a.get("type", "")
 			if t in ["attack", "attack_all", "dot_fire", "dot", "all_field_heat_dot",
 					 "summon_tide", "rage_card_storm"]:
-				a["weight"] = int(a.get("weight", 1) * 2.5)   # 攻击性行动权重×2.5
+				a["weight"] = int(a.get("weight", 1) * 2.5)
 			elif t in ["shield", "heal"]:
-				a["weight"] = maxi(1, int(a.get("weight", 1) * 0.3))  # 防御性行动权重×0.3
+				a["weight"] = maxi(1, int(a.get("weight", 1) * 0.3))
+		actions = weighted
 
 	var total: int = 0
-	for a in weighted:
+	for a in actions:
 		total += int(a.get("weight", 1))
 	if total <= 0:
-		return weighted[0]
+		return actions[0]
 	var roll: int = randi() % total
 	var cum: int = 0
-	for a in weighted:
+	for a in actions:
 		cum += int(a.get("weight", 1))
 		if roll < cum:
 			return a
-	return weighted[0]
+	return actions[0]
 
 func _execute_enemy_action(action: Dictionary) -> void:
 	if action.is_empty(): return
@@ -970,9 +1122,12 @@ func _execute_enemy_action(action: Dictionary) -> void:
 		next_intent.erase("skip_next")
 		return
 	var mul: float = EmotionManager.get_enemy_damage_multiplier()
-	# 愤怒阶段：敌人伤害额外×1.3
-	if boss_phase == 2:
+	# 愤怒阶段：敌人伤害额外×1.3（仅在无 phase_2_actions 时）
+	if boss_phase == 2 and not enemy_data.has("phase_2_actions"):
 		mul *= 1.3
+	# 执念爆发：本回合敌人行动效果×2
+	if _obsession_burst_active:
+		mul *= 2.0
 	# 锁链削弱：每层锁链降低10%攻击力，最高降低50%
 	if enemy_chains > 0:
 		var chain_penalty: float = minf(float(enemy_chains) * 0.1, 0.5)
@@ -993,9 +1148,16 @@ func _execute_enemy_action(action: Dictionary) -> void:
 					dmg -= blocked
 				if dmg > 0:
 					GameState.take_damage(dmg)
+			# 处理 side_effect（Phase2行动的附加效果）
+			var side: Dictionary = action.get("side_effect", {})
+			if side.has("emotion_push"):
+				EmotionManager.modify(str(side["emotion_push"]), int(side.get("value", 1)))
+				_on_enemy_emotion_push_action()
 
 		"emotion_push":
 			EmotionManager.modify(action.get("emotion", ""), action.get("value", 1))
+			# 情绪施压类行动：增加渡化频率
+			_on_enemy_emotion_push_action()
 
 		"dot", "dot_fire", "all_field_heat_dot":
 			BuffManager.parse_dot_action(action)
@@ -1060,19 +1222,6 @@ func _execute_enemy_action(action: Dictionary) -> void:
 				enemy_chains = mini(enemy_chains + 1, RelicManager.get_chain_stack_cap())
 			enemy_shield += shield_val
 
-		"apply_debuff":
-			# Boss 施加 debuff（情绪光环等）
-			var debuff_type: String = str(action.get("value", ""))
-			match debuff_type:
-				"grief_aura":
-					EmotionManager.modify("grief", 1)
-				"rage_aura":
-					EmotionManager.modify("rage", 1)
-				"joy_drain":
-					EmotionManager.modify("joy", -1)
-				_:
-					pass
-
 		"drain_emotion":
 			# Boss 吸取情绪（沈素锦：情感真空）
 			var drain_count: int = action.get("drain_emotion_count", 1)
@@ -1081,6 +1230,86 @@ func _execute_enemy_action(action: Dictionary) -> void:
 				var rand_emo: String = emotions[randi() % emotions.size()]
 				if EmotionManager.values.get(rand_emo, 0) > 0:
 					EmotionManager.modify(rand_emo, -int(action.get("value", 1)))
+
+		# ── Phase2 新增行动类型 ──────────────────────────────────
+
+		"attack_armor_piercing":
+			# 穿甲攻击（绕过护盾直接造成伤害）
+			if _dodge_charges > 0:
+				_dodge_charges -= 1
+			else:
+				var raw_ap: int = int(action.get("value", 0) * mul)
+				var dmg_ap: int = BuffManager.absorb_damage(BuffManager.TARGET_PLAYER, raw_ap)
+				# 穿甲：不扣护盾
+				if dmg_ap > 0:
+					GameState.take_damage(dmg_ap)
+			# 处理 side_effect
+			var se: Dictionary = action.get("side_effect", {})
+			if se.has("emotion_push"):
+				EmotionManager.modify(str(se["emotion_push"]), int(se.get("value", 1)))
+				_on_enemy_emotion_push_action()
+
+		"special_drown_memory":
+			# 溺水记忆：手牌中情绪最多系变无效（由BattleScene响应，这里只记录状态）
+			# 找出手牌中最多的情绪系
+			var emotion_counts_h: Dictionary = {}
+			for c: Dictionary in DeckManager.hand:
+				var etag: String = c.get("emotion_tag", "")
+				if etag != "":
+					emotion_counts_h[etag] = emotion_counts_h.get(etag, 0) + 1
+			var top_etag: String = ""
+			var top_ecount: int = 0
+			for etag: String in emotion_counts_h:
+				if emotion_counts_h[etag] > top_ecount:
+					top_ecount = emotion_counts_h[etag]
+					top_etag = etag
+			if top_etag != "":
+				# 通过 meta 传递给 BattleScene 处理
+				enemy_data["_drown_memory_tag"] = top_etag
+
+		"shield_self_and_suppress_duhua":
+			# 护盾+渡化频率-20
+			var shield_val_s: int = int(action.get("value", 0))
+			enemy_shield += shield_val_s
+			var suppress: int = action.get("suppress", 20)
+			du_hua_frequency = maxi(0, du_hua_frequency - suppress)
+			du_hua_window_open = du_hua_frequency >= 60
+
+		"apply_debuff":
+			# Boss 施加 debuff（Phase2 扩展：支持新 debuff 类型）
+			var debuff_type_2: String = str(action.get("value", ""))
+			match debuff_type_2:
+				"grief_aura":
+					EmotionManager.modify("grief", 1)
+					_on_enemy_emotion_push_action()
+				"rage_aura":
+					EmotionManager.modify("rage", 1)
+					_on_enemy_emotion_push_action()
+				"joy_drain":
+					EmotionManager.modify("joy", -1)
+				"jiao_gu":
+					# 焦骨蔓延：2回合内每打牌受1DOT，通过 BuffManager 处理
+					BuffManager.add_buff(BuffManager.TARGET_PLAYER, "jiao_gu_dot", 1, 2)
+				_:
+					pass
+
+		"remove_shield_and_heal":
+			# 旱地长叹：清除玩家护盾+自回血
+			player_shield = 0
+			var heal_a: int = int(action.get("value", 0))
+			enemy_hp = mini(int(enemy_hp) + heal_a, enemy_max_hp)
+
+		"shield_self_double":
+			# 执念加冕：自盾+2回合减伤50%
+			var ssd_val: int = int(action.get("value", 0))
+			enemy_shield += ssd_val
+			BuffManager.add_buff(BuffManager.TARGET_ENEMY, "damage_reduce_50", 1, 2)
+
+		"drain_all_emotions":
+			# 情感真空强化：所有情绪-2
+			var drain_v: int = int(action.get("value", 2))
+			for emo: String in EmotionManager.EMOTIONS:
+				EmotionManager.modify(emo, -drain_v)
 
 func _deal_damage_to_enemy(amount: int) -> void:
 	# 五彩香灰：多印记类型加伤
@@ -1205,4 +1434,10 @@ func _end_battle(result: String) -> void:
 	current_state = STATE_BATTLE_END
 	if result == "victory":
 		GameState.record_zhen_ya(enemy_data.get("id", ""))
+	# 情绪余韵：战斗结束时记录主导情绪（供下一场战斗开始时使用）
+	var dominant: String = EmotionManager.dominant_emotion
+	if EmotionManager.values.get(dominant, 0) >= 3:
+		GameState.set_meta("lingering_emotion", dominant)
+		GameState.set_meta("lingering_value", 1)
+		GameState.set_meta("lingering_type", result)  # "du_hua" or "victory"
 	battle_ended.emit(result)
