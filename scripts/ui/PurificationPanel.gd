@@ -15,6 +15,9 @@ var _cond_items:  Array = []   # [{emotion, required, bar, label}]
 var _pulse_tween: Tween = null
 var _ready_state: bool  = false
 
+# 当 du_hua_available 被调用时（状态机已确认），直接解锁按钮
+var _state_machine_confirmed: bool = false
+
 func _ready() -> void:
 	custom_minimum_size = Vector2(240, 80)
 	add_theme_constant_override("separation", 4)
@@ -50,6 +53,7 @@ func _build() -> void:
 
 func setup_conditions(enemy_data: Dictionary) -> void:
 	## 根据敌人数据初始化渡化条件显示
+	_state_machine_confirmed = false
 	# 清空旧条件
 	for child in _cond_row.get_children(): child.queue_free()
 	_cond_items.clear()
@@ -68,8 +72,8 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 		return
 
 	# 逐个情绪条件构建进度条
-	for emotion in emotion_req:
-		var required: int = emotion_req[emotion]
+	for emotion: String in emotion_req:
+		var required: int = int(emotion_req[emotion])
 		var col: VBoxContainer = VBoxContainer.new()
 		col.add_theme_constant_override("separation", 2)
 		col.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -78,7 +82,7 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 		var lbl: Label = Label.new()
 		lbl.add_theme_font_size_override("font_size", 11)
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.text = "%s 0/%d" % [EMOTION_CN.get(emotion, emotion), int(required)]
+		lbl.text = "%s 0/%d" % [EMOTION_CN.get(emotion, emotion), required]
 		col.add_child(lbl)
 
 		var bar: ProgressBar = ProgressBar.new()
@@ -106,15 +110,19 @@ func setup_conditions(enemy_data: Dictionary) -> void:
 
 func update_display() -> void:
 	## 刷新所有条件进度，检查是否全部满足
-	var all_met: bool = true
-	for item in _cond_items:
-		var cur  = EmotionManager.values.get(item["emotion"], 0)
-		var req  = item["required"]
-		var met  = cur >= req
+	if _state_machine_confirmed:
+		# 状态机已确认触发，保持激活状态不再重新计算
+		return
+
+	var all_met: bool = _cond_items.is_empty()  # 无条件项时视为满足
+	for item: Dictionary in _cond_items:
+		var cur: int  = EmotionManager.values.get(item["emotion"], 0)
+		var req: int  = item["required"]
+		var met: bool = cur >= req
 		item["bar"].value  = mini(cur, req)
 		item["label"].text = "%s %d/%d%s" % [
 			EMOTION_CN.get(item["emotion"], item["emotion"]),
-			int(cur), int(req), " ✓" if met else ""]
+			cur, req, " ✓" if met else ""]
 		# 进度条颜色
 		var fill_sty: StyleBoxFlat = StyleBoxFlat.new()
 		var unfilled: Color = UIConstants.color_of("text_dim")
@@ -150,6 +158,26 @@ func _play_pulse() -> void:
 func _on_emotion_changed(_emotion: String, _old: int, _new: int) -> void:
 	update_display()
 
-## 渡化条件已由状态机触发——更新按钮为激活状态
+## 状态机已确认条件满足——强制激活按钮，忽略后续情绪变化
 func on_du_hua_available(_desc: String) -> void:
+	_state_machine_confirmed = true
 	_set_ready(true)
+
+## 渡化完成后重置（供下一场战斗）
+func reset() -> void:
+	_state_machine_confirmed = false
+	_ready_state = false
+	_purify_btn.text     = "条件未满足"
+	_purify_btn.disabled = true
+	_title_lbl.add_theme_color_override("font_color", UIConstants.color_of("gold_dim"))
+	if _pulse_tween:
+		_pulse_tween.kill()
+	modulate.a = 1.0
+
+## 增加渡化进度（空鸣/渡化之道选项调用）
+func add_progress(_amount: float) -> void:
+	## PurificationPanel 不直接管理数值进度，
+	## 进度改变通知由状态机通过 du_hua_available 处理。
+	## 此函数保留兼容接口，供 BattleScene 的空鸣面板调用。
+	pass
+

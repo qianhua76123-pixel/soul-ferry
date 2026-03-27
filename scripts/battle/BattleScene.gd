@@ -494,6 +494,8 @@ func _on_player_turn_started(turn: int) -> void:
 	SoundManager.play_sfx("card_draw")
 	if _boss_ui:
 		_boss_ui.on_turn_start(state_machine.enemy_hp, turn)
+	# Boss 渡化对话检查（每回合开始时）
+	_check_purification_unlock()
 
 func _on_enemy_turn_started() -> void:
 	end_turn_btn.disabled = true
@@ -781,6 +783,8 @@ func _on_du_hua_available(desc: String) -> void:
 	du_hua_hint_label.text = "💡 " + desc
 	if _purif_panel and _purif_panel.has_method("on_du_hua_available"):
 		_purif_panel.on_du_hua_available(desc)
+	# 渡化按钮计时器重置（用于超时中断）
+	state_machine._stage_turn_counter = 0
 
 func _on_end_turn_pressed() -> void:
 	end_turn_btn.disabled = true
@@ -1717,10 +1721,10 @@ func _setup_purification_panel() -> void:
 	_purif_panel = PurificationPanelClass.new()
 	_purif_panel.name = "PurificationPanel"
 	altar_center.add_child(_purif_panel)
-	# 渡化按钮点击 → 触发状态机
+	# 渡化按钮点击 → 无论当前 du_hua_triggered 状态如何都尝试确认
+	# （状态机内部会做最终校验）
 	_purif_panel.purify_requested.connect(func():
-		if state_machine.du_hua_triggered:
-			state_machine.confirm_du_hua()
+		state_machine.confirm_du_hua()
 	)
 
 func _play_attack_flash() -> void:
@@ -2063,6 +2067,7 @@ var _purification_dialogue_shown: bool = false
 var _purification_phase: int = 0   # 0=未开始，1=第一阶段，2=第二阶段，3=完成
 
 func _check_purification_unlock() -> void:
+	## Boss 渡化对话触发检查（普通渡化由 PurificationPanel 实时检测）
 	if _purification_dialogue_shown: return
 	var enemy_data: Dictionary = state_machine.enemy_data
 	if not enemy_data.get("is_boss", false): return
@@ -2072,12 +2077,10 @@ func _check_purification_unlock() -> void:
 	# 检查数据库中是否有对应对话
 	if not BossDialogueDatabase.has_dialogue(boss_id, char_id, "purification"): return
 
-	var trigger: Dictionary = BossDialogueDatabase.get_trigger(boss_id, char_id, "purification")
-	for emotion: String in trigger:
-		if EmotionManager.values.get(emotion, 0) < int(trigger[emotion]):
-			return  # 条件未满足
+	# Boss 渡化通过状态机 du_hua_triggered 驱动
+	if not state_machine.du_hua_triggered: return
 
-	# 所有条件满足，显示渡化按钮
+	# 所有条件满足，显示渡化对话
 	_purification_dialogue_shown = true
 	_show_purification_option(boss_id, char_id)
 

@@ -103,7 +103,7 @@ func start_battle(enemy_id: String) -> void:
 	joy_cards_played_this_turn = 0
 	du_hua_triggered = false
 
-	# 重置渡化窗口系统
+	# 重置渡化系统
 	du_hua_frequency = 0
 	du_hua_interrupts = 0
 	du_hua_stage = 0
@@ -111,6 +111,7 @@ func start_battle(enemy_id: String) -> void:
 	du_hua_emotion_sync_count = 0
 	_stage_turn_counter = 0
 	purification_quality = ""
+	du_hua_triggered = false
 
 	# 重置执念计数器
 	enemy_obsession = enemy_data.get("obsession_init", 0)
@@ -247,13 +248,13 @@ func end_player_turn() -> void:
 	if enemy_chains > 0:
 		enemy_chains = maxi(0, enemy_chains - 1)
 		chain_applied.emit(enemy_chains)
-	# 渡化频率衰减（每回合末-15，最低0）
-	du_hua_frequency = maxi(0, du_hua_frequency - 15)
-	du_hua_window_open = du_hua_frequency >= 60
-	# 渡化阶段计时器（阶段1→2时间窗口）
-	if du_hua_stage == 1:
+	# 渡化频率自然衰减（每回合末-10，最低0）
+	du_hua_frequency = maxi(0, du_hua_frequency - 10)
+
+	# 渡化超时中断：条件已触发但玩家超过5回合没有确认渡化
+	if du_hua_triggered and du_hua_stage != -1:
 		_stage_turn_counter += 1
-		if _stage_turn_counter > 3:
+		if _stage_turn_counter > 5:
 			_handle_du_hua_interrupt()
 	# 护盾减半处理（替代原来的清零）
 	if not _shield_no_expire_flag:
@@ -970,61 +971,55 @@ func _check_condition(card: Dictionary) -> bool:
 	return false
 
 func _check_du_hua(played_card: Dictionary) -> void:
-	## 渡化三阶段系统
+	## 渡化条件检查 — 以 du_hua_condition 为主要门槛，frequency 决定品质
 	if du_hua_triggered: return
+	if du_hua_stage == -1: return   # 永久关闭（第3次中断惩罚）
 
-	match du_hua_stage:
-		0:
-			# 阶段0→1：窗口开放 + 情绪共振 + 本回合打出3张对应情绪牌
-			if not du_hua_window_open: return
-			var enemy_dom: String = str(enemy_data.get("dominant_emotion", ""))
-			var player_dom: String = EmotionManager.dominant_emotion
-			if enemy_dom == "" or player_dom != enemy_dom: return
-			var cards_for_dom: int = _cards_played_this_turn_by_emotion.get(player_dom, 0)
-			if cards_for_dom >= 3:
-				du_hua_stage = 1
-				_stage_turn_counter = 0
-				du_hua_emotion_sync_count += 1
-				var desc: String = str(enemy_data.get("du_hua_condition", {}).get("description", "情绪共振——渡化第一阶段达成"))
-				du_hua_available.emit(desc)
-		1:
-			# 阶段1→2：3回合时间窗口内再次情绪共振
-			var enemy_dom2: String = str(enemy_data.get("dominant_emotion", ""))
-			var player_dom2: String = EmotionManager.dominant_emotion
-			if enemy_dom2 == "" or player_dom2 != enemy_dom2: return
-			var cards_for_dom2: int = _cards_played_this_turn_by_emotion.get(player_dom2, 0)
-			if cards_for_dom2 >= 2:  # 第二阶段条件略低
-				du_hua_stage = 2
-				_stage_turn_counter = 0
-				du_hua_emotion_sync_count += 1
-		2:
-			# 阶段2→完成：HP ≥ 50%（可触发渡化）
-			var hp_ratio: float = float(GameState.hp) / float(GameState.max_hp)
-			if hp_ratio >= 0.5:
-				_trigger_du_hua()
+	var cond: Variant = enemy_data.get("du_hua_condition", null)
+	if not cond: return
+
+	var ctype: String = str(cond.get("type", "emotion_threshold"))
+	var emotion_req: Dictionary = cond.get("emotion_requirement", {})
+
+	# ── Step 1：检查情绪门槛（所有类型共享）─────────────────
+	for emotion: String in emotion_req:
+		if EmotionManager.values.get(emotion, 0) < int(emotion_req[emotion]):
+			return   # 任一情绪未达标，直接退出
+
+	# ── Step 2：按条件类型做附加检查 ─────────────────────────
+	match ctype:
+		"emotion_threshold":
+			pass   # 情绪门槛已在 Step 1 完成，直接触发
+
+		"card_play":
+			if played_card.get("id", "") != str(cond.get("card_id", "")):
+				return
+
+		"consecutive_joy_cards":
+			if joy_cards_played_this_turn < int(cond.get("count", 3)):
+				return
+
+		"emotion_and_low_hp":
+			# 情绪达标 + 玩家 HP ≤ 50%
+			var hp_ratio: float = float(GameState.hp) / float(maxi(1, GameState.max_hp))
+			if hp_ratio > 0.5: return
+
 		_:
-			# 保留旧逻辑兜底（兼容老式 du_hua_condition）
-			var cond: Variant = enemy_data.get("du_hua_condition", null)
-			if not cond: return
-			var emotion_req: Dictionary = cond.get("emotion_requirement", {})
-			for emotion in emotion_req:
-				if EmotionManager.values.get(emotion, 0) < emotion_req[emotion]:
-					return
-			match cond.get("type", ""):
-				"emotion_threshold":
-					_trigger_du_hua()
-				"card_play":
-					if played_card.get("id", "") == cond.get("card_id", ""):
-						_trigger_du_hua()
-				"consecutive_joy_cards":
-					if joy_cards_played_this_turn >= cond.get("count", 3):
-						_trigger_du_hua()
-				_:
-					_trigger_du_hua()
+			pass   # 未知类型：情绪门槛满足即触发
+
+	# ── Step 3：记录情绪同步品质（frequency 越高品质越好）────
+	du_hua_emotion_sync_count += 1
+	# frequency 基于情绪共振程度动态计算品质
+	var enemy_dom: String = str(enemy_data.get("dominant_emotion", ""))
+	var player_dom: String = EmotionManager.dominant_emotion
+	if enemy_dom != "" and player_dom == enemy_dom:
+		du_hua_frequency = mini(du_hua_frequency + 30, 100)
+
+	_trigger_du_hua()
 
 func _handle_du_hua_interrupt() -> void:
-	## 渡化中断惩罚系统
-	du_hua_stage = 0
+	## 渡化中断惩罚系统（回合超时 or 条件丢失触发）
+	du_hua_triggered = false  # 允许重新触发
 	_stage_turn_counter = 0
 	du_hua_interrupts += 1
 	match du_hua_interrupts:
@@ -1035,19 +1030,15 @@ func _handle_du_hua_interrupt() -> void:
 			# 第2次：敌人回血15%，频率积累速率减半
 			var heal_15: int = int(enemy_max_hp * 0.15)
 			enemy_hp = mini(int(enemy_hp) + heal_15, enemy_max_hp)
-			# 频率减半标记（通过减少频率模拟）
 			du_hua_frequency = du_hua_frequency / 2
-			du_hua_window_open = du_hua_frequency >= 60
 		3:
 			# 第3次：渡化永久关闭
-			du_hua_triggered = true  # 复用标记阻止再次触发
-			du_hua_stage = -1        # 特殊标记：永久关闭
+			du_hua_stage = -1   # 特殊标记：永久关闭
 
 ## 渡化频率增加（敌人情绪施压后调用）
 func _on_enemy_emotion_push_action() -> void:
 	var gain: int = enemy_data.get("purification_window_gain", 20)
 	du_hua_frequency = mini(du_hua_frequency + gain, 100)
-	du_hua_window_open = du_hua_frequency >= 60
 
 ## 执念计数器：每回合开始+1，达5时爆发
 func _on_turn_start_obsession() -> void:
@@ -1070,9 +1061,11 @@ func _calculate_purification_quality() -> String:
 		return "minimal"
 
 func _trigger_du_hua() -> void:
+	if du_hua_triggered: return   # 防重入
 	du_hua_triggered = true
 	purification_quality = _calculate_purification_quality()
-	var desc: String = str(enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足"))
+	var desc: String = str(
+		enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足"))
 	du_hua_available.emit(desc)
 
 func confirm_du_hua() -> void:
