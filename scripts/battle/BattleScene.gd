@@ -108,6 +108,8 @@ func _ready() -> void:
 	state_machine.wu_wei_mark_applied.connect(_on_wu_wei_mark_applied)
 	# 失控限制：牌被阻止时抖动+浮字提示
 	state_machine.card_blocked_by_disorder.connect(_on_card_blocked_by_disorder)
+	# 渡化频率/中断/阶段状态变化
+	state_machine.du_hua_state_updated.connect(_on_du_hua_state_updated)
 
 	# ── 第二步：UI 主题 & 样式（不依赖布局尺寸）──
 	_setup_hud_theme()
@@ -785,6 +787,11 @@ func _on_du_hua_available(desc: String) -> void:
 		_purif_panel.on_du_hua_available(desc)
 	# 渡化按钮计时器重置（用于超时中断）
 	state_machine._stage_turn_counter = 0
+
+func _on_du_hua_state_updated(frequency: int, interrupts: int, stage: int) -> void:
+	## 渡化频率/中断/阶段变化时，转发给 PurificationPanel 更新 UI
+	if _purif_panel and _purif_panel.has_method("on_du_hua_state_updated"):
+		_purif_panel.on_du_hua_state_updated(frequency, interrupts, stage)
 
 func _on_end_turn_pressed() -> void:
 	end_turn_btn.disabled = true
