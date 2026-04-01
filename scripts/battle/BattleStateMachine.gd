@@ -15,6 +15,7 @@ signal wu_wei_ended_with_duhua()
 signal chain_applied(total_chains: int)  # 锁链施加后通知 HUD 刷新
 signal marks_changed(marks: Dictionary)  # 印记层数变化通知 UI
 signal card_blocked_by_disorder(card: Dictionary, reason: String)  # 失控限制：牌无法打出
+signal du_hua_state_updated(frequency: int, interrupts: int, stage: int)  # 渡化频率/中断/阶段状态变化
 
 # ── 渡化窗口系统变量 ──────────────────────────────────
 var du_hua_frequency: int = 0          # 渡化频率（0-100）
@@ -75,6 +76,7 @@ var _wu_wei_marks_per_turn: Dictionary = {}
 # ── 沈铁钧新增 ──────────────────────────────────
 var enemy_chains: int = 0           # 锁链层数（主目标）
 var _total_chains_this_battle: int = 0  # 千斤锁检测
+var _skip_next_action: bool = false  # 锁链镇压/fear共鸣：标记跳过敌人下一次行动
 
 var joy_cards_played_this_turn: int = 0
 var du_hua_triggered: bool = false
@@ -92,6 +94,7 @@ func start_battle(enemy_id: String) -> void:
 	player_armor  = 0
 	enemy_chains  = 0
 	_total_chains_this_battle = 0
+	_skip_next_action = false  # 重置锁链跳过标记
 	_damage_taken_this_turn = 0
 	_reflect_charges = 0
 	_reflect_ratio   = 0.0
@@ -250,6 +253,7 @@ func end_player_turn() -> void:
 		chain_applied.emit(enemy_chains)
 	# 渡化频率自然衰减（每回合末-10，最低0）
 	du_hua_frequency = maxi(0, du_hua_frequency - 10)
+	du_hua_state_updated.emit(du_hua_frequency, du_hua_interrupts, du_hua_stage)
 
 	# 渡化超时中断：条件已触发但玩家超过5回合没有确认渡化
 	if du_hua_triggered and du_hua_stage != -1:
@@ -1034,11 +1038,13 @@ func _handle_du_hua_interrupt() -> void:
 		3:
 			# 第3次：渡化永久关闭
 			du_hua_stage = -1   # 特殊标记：永久关闭
+	du_hua_state_updated.emit(du_hua_frequency, du_hua_interrupts, du_hua_stage)
 
 ## 渡化频率增加（敌人情绪施压后调用）
 func _on_enemy_emotion_push_action() -> void:
 	var gain: int = enemy_data.get("purification_window_gain", 20)
 	du_hua_frequency = mini(du_hua_frequency + gain, 100)
+	du_hua_state_updated.emit(du_hua_frequency, du_hua_interrupts, du_hua_stage)
 
 ## 执念计数器：每回合开始+1，达5时爆发
 func _on_turn_start_obsession() -> void:
@@ -1067,6 +1073,7 @@ func _trigger_du_hua() -> void:
 	var desc: String = str(
 		enemy_data.get("du_hua_condition", {}).get("description", "渡化条件已满足"))
 	du_hua_available.emit(desc)
+	du_hua_state_updated.emit(du_hua_frequency, du_hua_interrupts, du_hua_stage)
 
 func confirm_du_hua() -> void:
 	if not du_hua_triggered: return
@@ -1110,9 +1117,9 @@ func _choose_enemy_action() -> Dictionary:
 
 func _execute_enemy_action(action: Dictionary) -> void:
 	if action.is_empty(): return
-	# 锁链≥5层：跳过本次行动（镇压效果）
-	if next_intent.get("skip_next", false):
-		next_intent.erase("skip_next")
+	# 锁链镇压/fear共鸣：跳过本次行动（使用独立标记，避免与 next_intent 混淆）
+	if _skip_next_action:
+		_skip_next_action = false
 		return
 	var mul: float = EmotionManager.get_enemy_damage_multiplier()
 	# 愤怒阶段：敌人伤害额外×1.3（仅在无 phase_2_actions 时）
@@ -1361,7 +1368,7 @@ func _apply_chain(count: int) -> void:
 	RelicManager.on_chain_total_changed_tiejun(enemy_chains)
 	# 锁链≥5层：下回合敌人跳过行动（镇压效果，类似 fear 共鸣）
 	if enemy_chains >= 5:
-		next_intent["skip_next"] = true
+		_skip_next_action = true
 	# 通知 BattleScene 刷新锁链 HUD
 	chain_applied.emit(enemy_chains)
 
@@ -1385,8 +1392,8 @@ func _trigger_resonance(emotion: String) -> void:
 			var dmg: int = int(8.0 * (1.0 + power_bonus) * EmotionManager.get_attack_multiplier())
 			_deal_damage_to_enemy(dmg)
 		"fear":
-			# 跳过敌人下一次行动：设标记
-			next_intent["skip_next"] = true
+			# 跳过敌人下一次行动：设独立标记（避免与 next_intent 混淆）
+			_skip_next_action = true
 		"rage":
 			var pen_dmg: int = int(15.0 * (1.0 + power_bonus))
 			_deal_damage_to_enemy(pen_dmg)  # 穿甲伤害

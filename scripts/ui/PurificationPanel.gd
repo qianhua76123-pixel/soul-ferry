@@ -15,6 +15,10 @@ var _cond_items:  Array = []   # [{emotion, required, bar, label}]
 var _pulse_tween: Tween = null
 var _ready_state: bool  = false
 
+# 渡化频率进度条和状态标签
+var _freq_bar: ProgressBar = null
+var _state_lbl: Label = null
+
 # 当 du_hua_available 被调用时（状态机已确认），直接解锁按钮
 var _state_machine_confirmed: bool = false
 
@@ -38,6 +42,41 @@ func _build() -> void:
 	_cond_row.add_theme_constant_override("separation", 8)
 	_cond_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(_cond_row)
+
+	# 渡化频率进度条 + 状态标签
+	var freq_row: VBoxContainer = VBoxContainer.new()
+	freq_row.add_theme_constant_override("separation", 2)
+	add_child(freq_row)
+
+	var freq_title: Label = Label.new()
+	freq_title.text = "共鸣频率"
+	freq_title.add_theme_font_size_override("font_size", 10)
+	freq_title.add_theme_color_override("font_color", UIConstants.color_of("text_dim"))
+	freq_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	freq_row.add_child(freq_title)
+
+	_freq_bar = ProgressBar.new()
+	_freq_bar.min_value = 0
+	_freq_bar.max_value = 100
+	_freq_bar.value = 0
+	_freq_bar.show_percentage = false
+	_freq_bar.custom_minimum_size = Vector2(200, 6)
+	var freq_fill: StyleBoxFlat = StyleBoxFlat.new()
+	freq_fill.bg_color = Color(0.8, 0.65, 0.2, 0.9)
+	freq_fill.set_corner_radius_all(3)
+	_freq_bar.add_theme_stylebox_override("fill", freq_fill)
+	var freq_bg: StyleBoxFlat = StyleBoxFlat.new()
+	freq_bg.bg_color = Color(0.15, 0.15, 0.15, 0.8)
+	freq_bg.set_corner_radius_all(3)
+	_freq_bar.add_theme_stylebox_override("background", freq_bg)
+	freq_row.add_child(_freq_bar)
+
+	_state_lbl = Label.new()
+	_state_lbl.text = ""
+	_state_lbl.add_theme_font_size_override("font_size", 10)
+	_state_lbl.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
+	_state_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	freq_row.add_child(_state_lbl)
 
 	# 渡化按钮
 	_purify_btn = Button.new()
@@ -162,6 +201,45 @@ func _on_emotion_changed(_emotion: String, _old: int, _new: int) -> void:
 func on_du_hua_available(_desc: String) -> void:
 	_state_machine_confirmed = true
 	_set_ready(true)
+
+## 渡化频率/中断/阶段状态更新——刷新进度条和状态标签
+func on_du_hua_state_updated(frequency: int, interrupts: int, stage: int) -> void:
+	if not _freq_bar or not _state_lbl:
+		return
+	_freq_bar.value = frequency
+	# 颜色：频率越高越金黄
+	var freq_fill_sty: StyleBoxFlat = StyleBoxFlat.new()
+	if frequency >= 60:
+		freq_fill_sty.bg_color = Color(0.95, 0.8, 0.2, 0.95)
+	elif frequency >= 30:
+		freq_fill_sty.bg_color = Color(0.7, 0.55, 0.2, 0.85)
+	else:
+		freq_fill_sty.bg_color = Color(0.45, 0.35, 0.2, 0.75)
+	freq_fill_sty.set_corner_radius_all(3)
+	_freq_bar.add_theme_stylebox_override("fill", freq_fill_sty)
+	# 状态标签
+	var quality_hint: String = ""
+	if frequency >= 60:
+		quality_hint = " → 完美"
+	elif frequency >= 30:
+		quality_hint = " → 稳定"
+	else:
+		quality_hint = " → 微弱"
+	var interrupt_text: String = ""
+	if interrupts == 1:
+		interrupt_text = " ⚠︎中断×1"
+	elif interrupts == 2:
+		interrupt_text = " ⚠︎中断×2"
+	elif stage == -1:
+		interrupt_text = " ✗渡化封闭"
+	_state_lbl.text = "频率%d%s%s" % [frequency, quality_hint, interrupt_text]
+	# 渡化永久封闭时变红
+	if stage == -1:
+		_state_lbl.add_theme_color_override("font_color", Color(0.9, 0.3, 0.3))
+	elif interrupts > 0:
+		_state_lbl.add_theme_color_override("font_color", Color(0.9, 0.65, 0.2))
+	else:
+		_state_lbl.add_theme_color_override("font_color", UIConstants.color_of("text_muted"))
 
 ## 渡化完成后重置（供下一场战斗）
 func reset() -> void:
