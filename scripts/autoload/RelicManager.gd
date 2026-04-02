@@ -72,6 +72,7 @@ func on_battle_start(enemy_data: Dictionary) -> void:
 # 回合开始时由 BattleScene 调用
 func on_turn_start() -> void:
 	_sixiang_triggered_this_turn = false
+	_wuqing_bonus_active = false  # DeckManager 每回合重置 max_cost，五情结需重新计算
 	_effect_qingming_pai_on_turn_start()
 	_effect_hun_bo_lu_on_turn_start()
 	_update_wuqing_jie()   # 回合开始也检查一次五情结

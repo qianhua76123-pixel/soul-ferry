@@ -262,7 +262,7 @@ func _on_marks_changed(marks: Dictionary) -> void:
 		"fear":  Color(0.7, 0.45, 0.8),
 		"rage":  Color(0.9, 0.35, 0.2),
 	}
-	var resonance_threshold: int = 3  # 默认共鸣阈值
+	var resonance_threshold: int = 3  # 默认共鸣阈值（下方循环内会被覆盖）
 	for emo in emotions:
 		var lbl: Node = _mark_panel.get_node_or_null("Mark_%s" % emo)
 		if not lbl: continue
@@ -272,7 +272,8 @@ func _on_marks_changed(marks: Dictionary) -> void:
 		else:
 			lbl.visible = true
 			lbl.set("text", "%s×%d" % [icons[emo], count])
-			# 达到共鸣阈值时高亮，否则中等亮度
+			# 从 RelicManager 读取阈值（观音泥/观尘之镜等遗物可降至 2）
+			resonance_threshold = RelicManager.get_resonance_threshold_override(emo)
 			if count >= resonance_threshold:
 				lbl.add_theme_color_override("font_color", colors[emo])
 			else:
